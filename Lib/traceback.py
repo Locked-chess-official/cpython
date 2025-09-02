@@ -1108,9 +1108,18 @@ class TracebackException:
             if suggestion:
                 self._str += f". Did you mean: '{suggestion}'?"
         elif exc_type and issubclass(exc_type, ModuleNotFoundError) and \
-                sys.flags.no_site and \
-                getattr(exc_value, "name", None) not in sys.stdlib_module_names:
-            self._str += (". Site initialization is disabled, did you forget to "
+                getattr(exc_value, "name", None) and \
+                "None in sys.modules" not in exc_value.msg:
+            wrong_name = getattr(exc_value, "name", None)
+            parent, _, child = wrong_name.rpartition('.')
+            top = wrong_name.partition('.')[0]
+            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name)
+            if suggestion == child:
+                self._str += ", but it appear in the final result from '__find__'. Is your code wrong?"
+            elif suggestion:
+                self._str += f". Did you mean: '{suggestion}'?"
+            if sys.flags.no_site and not parent and top not in sys.stdlib_module_names:
+                self._str += (". Site initialization is disabled, did you forget to "
                 + "add the site-packages directory to sys.path?")
         elif exc_type and issubclass(exc_type, (NameError, AttributeError)) and \
                 getattr(exc_value, "name", None) is not None:
@@ -1652,6 +1661,8 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
         except Exception:
             return None
     elif isinstance(exc_value, ImportError):
+        if isinstance(exc_value, ModuleNotFoundError):
+            return _handle_module(exc_value)
         try:
             mod = __import__(exc_value.name)
             try:
@@ -1689,6 +1700,9 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
             if has_wrong_name:
                 return f"self.{wrong_name}"
 
+    return _calculate_closed_name(wrong_name, d, exc_value)
+
+def _calculate_closed_name(wrong_name, d, exc_value=None):
     try:
         import _suggestions
     except ImportError:
@@ -1730,6 +1744,105 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
                 return nested_suggestion
 
     return suggestion
+
+def _handle_module(exc_value):
+    import _imp
+    import os
+    
+    def scan_dir(path):
+        """
+        Return all of the packages in the path without import
+        contains：
+          - .py file
+          - directory with "__init__.py"
+          - the .pyd/so file that has right ABI
+        """
+        if not os.path.isdir(path):
+            return []
+
+        suffixes = _imp.extension_suffixes()
+        result = []
+
+        for name in os.listdir(path):
+            full_path = os.path.join(path, name)
+
+            # .py file
+            if name.endswith(".py") and os.path.isfile(full_path):
+                modname = name[:-3]
+                if modname.isidentifier():
+                    result.append(modname)
+
+            # directory with "__init__.py"
+            elif os.path.isdir(full_path):
+                init_file = os.path.join(full_path, "__init__.py")
+                if os.path.isfile(init_file) and name.isidentifier():
+                    result.append(name)
+
+            # the .pyd/so file that has right ABI
+            elif os.path.isfile(full_path):
+                for suf in suffixes:
+                    if name.endswith(suf):
+                        modname = name[:-len(suf)]
+                        if modname.isidentifier():
+                            result.append(modname)
+                        break
+
+        return sorted(result)
+
+    def find_in_path(name):
+        if not name:
+            return []
+        if name in sys.modules:
+            if not hasattr(sys.modules[name], '__path__'):
+                return []
+            return sum([scan_dir(i) for i in sys.modules[name].__path__], [])
+            
+        name_list = name.split(".")
+        for i in sys.path:
+            list_d = scan_dir(i)
+            if name_list[0] in list_d:
+                break
+        else:
+            return []
+        path = i
+        for j in name_list:
+            path = os.path.join(path, j)
+        if not os.path.isdir(path):
+            return []
+        if not os.path.exists(os.path.join(path, "__init__.py")):
+            return []
+        return scan_dir(path)
+    
+    if not isinstance(exc_value, ModuleNotFoundError):
+        return    
+    all_result = []
+    parent, _, child = exc_value.name.rpartition('.')
+    if len(child) > _MAX_STRING_SIZE:
+        return
+    suggest_list = []
+    for i in sys.meta_path:
+        func = getattr(i, '__find__', None)
+        if callable(func):
+            try:
+                list_d = func(parent)
+                if list_d:
+                    suggest_list.append(list_d)
+            except:
+                pass
+    if not parent:
+        for paths in sys.path:
+            suggestion_d = scan_dir(paths)
+            if suggestion_d:
+                suggest_list.append(suggestion_d)
+    else:
+        suggest_list.append(find_in_path(parent))
+    for i in suggest_list:
+        if child in i:
+            return child
+        result = _calculate_closed_name(child, i)
+        if result:
+            all_result.append(result)
+    return _calculate_closed_name(child, sorted(all_result))
 
 
 def _levenshtein_distance(a, b, max_cost):
