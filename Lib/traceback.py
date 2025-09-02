@@ -1119,7 +1119,9 @@ class TracebackException:
             elif suggestion:
                 self._str += f". Did you mean: '{suggestion}'?"
             if sys.flags.no_site and not parent and top not in sys.stdlib_module_names:
-                self._str += (". Site initialization is disabled, did you forget to "
+                if not self._str.endswith("?"):
+                    self._str += "."
+                self._str += (" Site initialization is disabled, did you forget to "
                 + "add the site-packages directory to sys.path?")
         elif exc_type and issubclass(exc_type, (NameError, AttributeError)) and \
                 getattr(exc_value, "name", None) is not None:
