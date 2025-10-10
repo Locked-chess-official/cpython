@@ -215,4 +215,3 @@ def find_in_path(name, mod="normal"):
     if not os.path.exists(os.path.join(path, "__init__.py")):
         return []
     return scan_dir(path, **kwargs)
-
