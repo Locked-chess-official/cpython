@@ -1147,7 +1147,7 @@ class TracebackException:
         except Exception as e:
             self.__notes__ = [
                 f'Ignored error getting __notes__: {_safe_string(e, '__notes__', repr)}']
-            
+
         if lookup_lines:
             self._load_lines()
         self.__suppress_context__ = \

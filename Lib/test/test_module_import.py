@@ -1,7 +1,5 @@
-from importlib import scan_dir, find_in_path
 import sys, importlib.abc, importlib.util, unittest, traceback
 import test
-from test import support
 import os
 data_dir = os.path.join(os.path.dirname(test.__file__), "wrongmodule_data")
 
@@ -151,7 +149,7 @@ class ExceptionTest(unittest.TestCase):
         sys.meta_path.append(WrongHook2())
 
         try:
-            import abs
+            exec("import abs")
         except ModuleNotFoundError:
             msg = traceback.format_exc()
             self.assertIn("Exception ignored in 'WrongHook1.__find__'", msg)
@@ -181,7 +179,7 @@ class ExceptionTest(unittest.TestCase):
         sys.meta_path.append(WrongHook3())
         sys.meta_path.append(WrongHook4())
         try:
-            import abs
+            exec("import abs")
         except ModuleNotFoundError:
             msg = traceback.format_exc()
             self.assertIn("Exception ignored in 'WrongHook3.__find__'", msg)
@@ -203,4 +201,3 @@ class ExceptionTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
