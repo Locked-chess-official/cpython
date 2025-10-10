@@ -1073,11 +1073,6 @@ class TracebackException:
         # Capture now to permit freeing resources: only complication is in the
         # unofficial API _format_final_exc_line
         self._str = _safe_string(exc_value, 'exception')
-        try:
-            self.__notes__ = getattr(exc_value, '__notes__', None)
-        except Exception as e:
-            self.__notes__ = [
-                f'Ignored error getting __notes__: {_safe_string(e, '__notes__', repr)}']
 
         self._is_syntax_error = False
         self._have_exc_type = exc_type is not None
@@ -1108,10 +1103,31 @@ class TracebackException:
             if suggestion:
                 self._str += f". Did you mean: '{suggestion}'?"
         elif exc_type and issubclass(exc_type, ModuleNotFoundError) and \
-                sys.flags.no_site and \
-                getattr(exc_value, "name", None) not in sys.stdlib_module_names:
-            self._str += (". Site initialization is disabled, did you forget to "
-                + "add the site-packages directory to sys.path?")
+                getattr(exc_value, "name", None) and \
+                "None in sys.modules" not in self._str and \
+                "is not a package" not in self._str:
+            wrong_name = getattr(exc_value, "name", None)
+            parent, _, child = wrong_name.rpartition('.')
+            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name)
+            if suggestion == child:
+                wrong_hook = _find_wrong_hook(wrong_name)
+                if wrong_hook is not None:
+                    if isinstance(wrong_hook, type):
+                        wrong_hook_name = wrong_hook.__name__
+                    else:
+                        wrong_hook_name = type(wrong_hook).__name__
+                    self._str += (f", but it appear in the final result from '{wrong_hook_name}.__find__'. "
+                                  f"Is the code in '{wrong_hook_name}.__find__' or '{wrong_hook_name}.find_spec' wrong "
+                                  "or is the wrong in the environment?")
+            elif suggestion:
+                self._str += f". Did you mean: '{suggestion}'?"
+            top = wrong_name.partition('.')[0]
+            if sys.flags.no_site and not parent and top not in sys.stdlib_module_names:
+                if not self._str.endswith('?'):
+                    self._str += "."
+                self._str += (" Site initialization is disabled, did you forget to "
+                             + "add the site-packages directory to sys.path?")
+
         elif exc_type and issubclass(exc_type, (NameError, AttributeError)) and \
                 getattr(exc_value, "name", None) is not None:
             wrong_name = getattr(exc_value, "name", None)
@@ -1125,6 +1141,13 @@ class TracebackException:
                         self._str += f" Or did you forget to import '{wrong_name}'?"
                     else:
                         self._str += f". Did you forget to import '{wrong_name}'?"
+
+        try:
+            self.__notes__ = getattr(exc_value, '__notes__', None)
+        except Exception as e:
+            self.__notes__ = [
+                f'Ignored error getting __notes__: {_safe_string(e, '__notes__', repr)}']
+            
         if lookup_lines:
             self._load_lines()
         self.__suppress_context__ = \
@@ -1652,6 +1675,8 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
         except Exception:
             return None
     elif isinstance(exc_value, ImportError):
+        if isinstance(exc_value, ModuleNotFoundError):
+            return _handle_module(exc_value)
         try:
             mod = __import__(exc_value.name)
             try:
@@ -1689,6 +1714,17 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
             if has_wrong_name:
                 return f"self.{wrong_name}"
 
+    suggestion = _calculate_closed_name(wrong_name, d)
+    # If no direct attribute match found, check for nested attributes
+    if not suggestion and isinstance(exc_value, AttributeError):
+        with suppress(Exception):
+            nested_suggestion = _check_for_nested_attribute(exc_value.obj, wrong_name, d)
+            if nested_suggestion:
+                return nested_suggestion
+
+    return suggestion
+
+def _calculate_closed_name(wrong_name, d):
     try:
         import _suggestions
     except ImportError:
@@ -1722,15 +1758,128 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
             suggestion = possible_name
             best_distance = current_distance
 
-    # If no direct attribute match found, check for nested attributes
-    if not suggestion and isinstance(exc_value, AttributeError):
-        with suppress(Exception):
-            nested_suggestion = _check_for_nested_attribute(exc_value.obj, wrong_name, d)
-            if nested_suggestion:
-                return nested_suggestion
-
     return suggestion
 
+def _handle_module(exc_value):
+    if not isinstance(exc_value, ModuleNotFoundError):
+        return None
+    return _suggestion_for_module(exc_value.name, original_exc_value=exc_value)
+
+def _import_error_set(err, result=None, _seen=None):
+    if not isinstance(result, set):
+        result = set()
+    if not isinstance(_seen, set):
+        _seen = set()
+    if not err or id(err) in _seen:
+        return result
+    _seen.add(id(err))
+    if isinstance(err, ImportError):
+        result.add(id(err))
+    if isinstance(err, BaseExceptionGroup):
+        for e in err.exceptions:
+            _import_error_set(e, result, _seen)
+    if err.__cause__ is not None:
+        _import_error_set(err.__cause__, result, _seen)
+    if err.__context__ is not None:
+        _import_error_set(err.__context__, result, _seen)
+    return result
+
+def _remove_exc(exc, target_exc, _seen=None):
+    if _seen is None:
+        _seen = set()
+    if id(exc) in _seen:
+        return
+    _seen.add(id(exc))
+    if exc.__cause__:
+        if exc.__cause__ is target_exc:
+            exc.__cause__ = None
+        else:
+            _remove_exc(exc.__cause__, target_exc, _seen)
+    if exc.__context__:
+        if exc.__context__ is target_exc:
+            exc.__context__ = None
+        else:
+            _remove_exc(exc.__context__, target_exc, _seen)
+
+def _suggestion_for_module(name, mod="normal", original_exc_value=None):
+    from importlib import scan_dir, find_in_path
+    kwargs = {}
+    if mod == "all":
+        kwargs = {"namespace_package": True}
+    elif mod == "run_module":
+        kwargs = {"need_main_py": True}
+
+    all_result = []
+    parent, _, child = name.rpartition('.')
+    if len(child) > _MAX_STRING_SIZE:
+        return None
+    suggest_list = []
+    for i in sys.meta_path:
+        if isinstance(i, type):
+            iname = i.__name__
+            imodule = i.__module__
+        else:
+            iname = type(i).__name__
+            imodule = type(i).__module__
+        try:
+            func = getattr(i, '__find__', None)
+            if callable(func):
+                list_d = func(parent)
+                if child in list_d:
+                    if original_exc_value:
+                        original_exc_value.add_note(
+                                 f"The child name found in '{iname}.__find__' "
+                                 "but it cannot imported by it. "
+                                 "Please check it. \n"
+                                 f"{iname!r} is in module {imodule!r}")
+                    return child
+                if list_d:
+                    suggest_list.append(list_d)
+        except:
+            if original_exc_value:
+                try:
+                    new_type, new_value, new_tb = sys.exc_info()
+                    _remove_exc(new_value, original_exc_value)
+                    import_error_set = _import_error_set(new_value)
+                    if import_error_set: # Don't import any modules in the method 'find'
+                        original_exc_value.add_note(f"\nImportError found in '{iname}.__find__' module {imodule!r}:")
+                        tb_msg = "".join(format_tb(new_tb))
+                        while tb_msg.endswith("\n") or tb_msg.endswith(" "):
+                            tb_msg = tb_msg[:-1]
+                        original_exc_value.add_note(tb_msg)
+                        original_exc_value.add_note("Don't import any modules in the method '__find__'")
+                        continue
+                    tb_exception = TracebackException(new_type, new_value, new_tb)
+                    original_exc_value.add_note(f"\nException ignored in '{iname}.__find__' module {imodule!r}:\n"  # Change to warning
+                             + "".join(tb_exception.format()))
+                except:
+                    original_exc_value.add_note("\n<handle error failed in '{iname}.__find__' module {imodule!r}>\n")
+
+    if not parent:
+        for paths in sys.path:
+            suggest_list.append(scan_dir(paths, **kwargs))
+    else:
+        suggest_list.append(find_in_path(parent, mod=mod))
+    for i in suggest_list:
+        if child in i:
+            return child
+        result = _calculate_closed_name(child, i)
+        if result:
+            all_result.append(result)
+    return _calculate_closed_name(child, sorted(all_result))
+
+def _find_wrong_hook(name):
+    parent, _, child = name.rpartition('.')
+    for i in sys.meta_path:
+        try:
+            func = getattr(i, '__find__', None)
+            if callable(func):
+                list_d = func(parent)
+                if child in list_d:
+                    return i
+        except:
+            pass
+    return None
 
 def _levenshtein_distance(a, b, max_cost):
     # A Python implementation of Python/suggestions.c:levenshtein_distance.

@@ -1022,6 +1022,13 @@ class BuiltinImporter:
 
     load_module = classmethod(_load_module_shim)
 
+    @staticmethod
+    def __find__(name=None):
+        if not name:
+            return sorted(sys.builtin_module_names)
+        else:
+            return []
+
 
 class FrozenImporter:
 
@@ -1304,6 +1311,7 @@ def _sanity_check(name, package, level):
 
 
 _ERR_MSG_PREFIX = 'No module named '
+_CHILD_ERR_MSG = 'module {!r} has no child module {!r}'
 
 def _find_and_load_unlocked(name, import_):
     path = None
@@ -1315,7 +1323,7 @@ def _find_and_load_unlocked(name, import_):
         getattr(sys, "meta_path", None),
         getattr(sys, "path_hooks", None)
     )
-    parent = name.rpartition('.')[0]
+    parent, _, child = name.rpartition('.')
     parent_spec = None
     if parent:
         if parent not in sys.modules:
@@ -1328,7 +1336,7 @@ def _find_and_load_unlocked(name, import_):
         try:
             path = parent_module.__path__
         except AttributeError:
-            msg = f'{_ERR_MSG_PREFIX}{name!r}; {parent!r} is not a package'
+            msg = _CHILD_ERR_MSG.format(parent, child) + f'; {parent!r} is not a package'
             raise ModuleNotFoundError(msg, name=name) from None
         parent_spec = parent_module.__spec__
         if getattr(parent_spec, '_initializing', False):
@@ -1337,10 +1345,13 @@ def _find_and_load_unlocked(name, import_):
         module = sys.modules.get(name)
         if module is not None:
             return module
-        child = name.rpartition('.')[2]
     spec = _find_spec(name, path)
     if spec is None:
-        raise ModuleNotFoundError(f'{_ERR_MSG_PREFIX}{name!r}', name=name)
+        if not parent:
+            msg = f'{_ERR_MSG_PREFIX}{name!r}'
+        else:
+            msg = _CHILD_ERR_MSG.format(parent, child)
+        raise ModuleNotFoundError(msg, name=name)
     else:
         if parent_spec:
             # Temporarily add child we are currently importing to parent's

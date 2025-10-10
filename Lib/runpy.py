@@ -101,6 +101,17 @@ def _run_module_code(code, init_globals=None,
     # may be cleared when the temporary module goes away
     return mod_globals.copy()
 
+def get_message_lines(typ, exc, tb):
+    """Return line composing the exception message."""
+    import traceback
+    if typ in (AttributeError, NameError):
+        tb_exception = traceback.TracebackException(
+            typ, exc, tb, capture_locals=False
+        )
+        return list(tb_exception.format_exception_only())
+    else:
+        return traceback.format_exception_only(typ, exc)
+
 # Helper to get the full name, spec and code for a module
 def _get_module_details(mod_name, error=ImportError):
     if mod_name.startswith("."):
@@ -115,16 +126,16 @@ def _get_module_details(mod_name, error=ImportError):
             # error be raised by find_spec() below and then be caught. But do
             # not allow other errors to be caught.
             if e.name is None or (e.name != pkg_name and
-                    not pkg_name.startswith(e.name + ".")):
+                                  not pkg_name.startswith(e.name + ".")):
                 raise
         # Warn if the module has already been imported under its normal name
         existing = sys.modules.get(mod_name)
         if existing is not None and not hasattr(existing, "__path__"):
             from warnings import warn
             msg = "{mod_name!r} found in sys.modules after import of " \
-                "package {pkg_name!r}, but prior to execution of " \
-                "{mod_name!r}; this may result in unpredictable " \
-                "behaviour".format(mod_name=mod_name, pkg_name=pkg_name)
+                  "package {pkg_name!r}, but prior to execution of " \
+                  "{mod_name!r}; this may result in unpredictable " \
+                  "behaviour".format(mod_name=mod_name, pkg_name=pkg_name)
             warn(RuntimeWarning(msg))
 
     try:
@@ -133,13 +144,26 @@ def _get_module_details(mod_name, error=ImportError):
         # This hack fixes an impedance mismatch between pkgutil and
         # importlib, where the latter raises other errors for cases where
         # pkgutil previously raised ImportError
-        msg = "Error while finding module specification for {!r} ({}: {})"
+        msg = "Error while finding module specification for {!r} ({})"
+        typ, val, tb = sys.exc_info()
+        message = "\n".join(get_message_lines(typ, val, tb))
+        while message.endswith("\n") or message.endswith(" "):
+            message = message[:-1]
         if mod_name.endswith(".py"):
             msg += (f". Try using '{mod_name[:-3]}' instead of "
                     f"'{mod_name}' as the module name.")
-        raise error(msg.format(mod_name, type(ex).__name__, ex)) from ex
+        raise error(msg.format(mod_name, message)) from ex
     if spec is None:
-        raise error("No module named %s" % mod_name)
+        parent, _, child = mod_name.rpartition(".")
+        if not parent:
+            msg = "No module named %r" % mod_name
+        else:
+            msg = "module %r has no child module %r" % (parent, child)
+        from traceback import _suggestion_for_module
+        suggestion = _suggestion_for_module(name=mod_name, mod="run_module")
+        if suggestion:
+            msg += ". Did you mean: %r?" % suggestion
+        raise error(msg)
     if spec.submodule_search_locations is not None:
         if mod_name == "__main__" or mod_name.endswith(".__main__"):
             raise error("Cannot use package as __main__ module")
@@ -150,11 +174,11 @@ def _get_module_details(mod_name, error=ImportError):
             if mod_name not in sys.modules:
                 raise  # No module loaded; being a package is irrelevant
             raise error(("%s; %r is a package and cannot " +
-                               "be directly executed") %(e, mod_name))
+                         "be directly executed") % (e, mod_name))
     loader = spec.loader
     if loader is None:
         raise error("%r is a namespace package and cannot be executed"
-                                                                 % mod_name)
+                    % mod_name)
     try:
         code = loader.get_code(mod_name)
     except ImportError as e:
