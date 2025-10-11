@@ -1,7 +1,19 @@
 import sys, importlib.abc, importlib.util, unittest, traceback
 import test
 import os
+from test import support
 data_dir = os.path.join(os.path.dirname(test.__file__), "wrongmodule_data")
+
+from contextlib import contextmanager
+
+@contextmanager
+def DirsOnSysPath(*paths):
+    abs_paths = [os.fspath(p) for p in paths if p is not None]
+    sys.path[:0] = abs_paths
+    try:
+        yield
+    finally:
+        del sys.path[:len(abs_paths)]
 
 
 MODULE_TREE = {
@@ -94,8 +106,7 @@ class ExceptionTest(unittest.TestCase):
                 self.check_message(i[0], i[1], i[2])
 
     def test_wrong_module_exception(self):
-        sys.path.append(data_dir)
-        try:
+        with DirsOnSysPath(data_dir):
             import_error_tuple = (
                 ("import wrong_module", ModuleNotFoundError,
                  "module 'wrong_module' has no child module 'wrong_module'"),
@@ -105,12 +116,9 @@ class ExceptionTest(unittest.TestCase):
             for i in import_error_tuple:
                 if i:
                     self.check_message(i[0], i[1], i[2])
-        finally:
-            sys.path = sys.path[:-1]
 
     def test_custom_module_hook(self):
-        sys.meta_path.append(DictFinder("mymodule", MODULE_TREE))
-        try:
+        with support.swap_attr(sys, "meta_path", [DictFinder("mymodule", MODULE_TREE)]):
             import_error_tuple = (
                 ("import module", ModuleNotFoundError, f"No module named 'module'. Did you mean: 'mymodule'"),
                 ("import mymodule.a", ModuleNotFoundError, "module 'mymodule' has no child module 'a', "
@@ -126,8 +134,6 @@ class ExceptionTest(unittest.TestCase):
             for i in import_error_tuple:
                 if i:
                     self.check_message(i[0], i[1], i[2])
-        finally:
-            sys.meta_path = sys.meta_path[:-1]
 
     def test_wrong_find(self):
         class WrongHook1:
@@ -145,20 +151,16 @@ class ExceptionTest(unittest.TestCase):
                 msg = "this is not ImportError"
                 raise ImportError(msg)
 
-        sys.meta_path.append(WrongHook1())
-        sys.meta_path.append(WrongHook2())
-
-        try:
-            exec("import abs")
-        except ModuleNotFoundError:
-            msg = traceback.format_exc()
-            self.assertIn("Exception ignored in 'WrongHook1.__find__'", msg)
-            self.assertIn("ImportError found in 'WrongHook2.__find__'", msg)
-            self.assertNotIn("this is not ImportError", msg)
-        except:
-            pass
-        finally:
-            sys.meta_path = sys.meta_path[:-2]
+        with support.swap_attr(sys, "meta_path", sys.meta_path + [WrongHook1(), WrongHook2()]):
+            try:
+                exec("import abs")
+            except ModuleNotFoundError:
+                msg = traceback.format_exc()
+                self.assertIn("Exception ignored in 'WrongHook1.__find__'", msg)
+                self.assertIn("ImportError found in 'WrongHook2.__find__'", msg)
+                self.assertNotIn("this is not ImportError", msg)
+            except:
+                pass
 
     def test_BaseExceptionGroup_ignored(self):
         class WrongHook3:
@@ -176,19 +178,16 @@ class ExceptionTest(unittest.TestCase):
                 msg = "this is not ImportError"
                 raise ExceptionGroup("", [ValueError(), ImportError(msg)])
 
-        sys.meta_path.append(WrongHook3())
-        sys.meta_path.append(WrongHook4())
-        try:
-            exec("import abs")
-        except ModuleNotFoundError:
-            msg = traceback.format_exc()
-            self.assertIn("Exception ignored in 'WrongHook3.__find__'", msg)
-            self.assertIn("ImportError found in 'WrongHook4.__find__'", msg)
-            self.assertNotIn("this is not ImportError", msg)
-        except:
-            pass
-        finally:
-            sys.meta_path = sys.meta_path[:-2]
+        with support.swap_attr(sys, "meta_path", sys.meta_path + [WrongHook3(), WrongHook4()]):
+            try:
+                exec("import abs")
+            except ModuleNotFoundError:
+                msg = traceback.format_exc()
+                self.assertIn("Exception ignored in 'WrongHook3.__find__'", msg)
+                self.assertIn("ImportError found in 'WrongHook4.__find__'", msg)
+                self.assertNotIn("this is not ImportError", msg)
+            except:
+                pass
 
     def check_message(self, code, exc_type, exc_msg):
         try:
