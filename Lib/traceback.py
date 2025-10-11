@@ -1652,6 +1652,41 @@ def _check_for_nested_attribute(obj, wrong_name, attrs):
     return None
 
 
+def _traceback_to_tuples(tb):
+    extracted = extract_tb(tb)
+    return tuple((f.filename, f.lineno, f.name, f.line) for f in extracted)
+
+
+def _avoid_multianalyze_decorate(func):
+    import threading
+    _analysis_local = threading.local()  # threading safety
+    
+    def wrapper(exc_value, tb, wrong_name):
+        if not hasattr(_analysis_local, 'tb_set'):
+            _analysis_local.tb_set = set()
+        if not hasattr(_analysis_local, 'times'):
+            _analysis_local.times = 0
+        tuple_tb = _traceback_to_tuples(tb)
+        if tuple_tb in _analysis_local.tb_set:
+            return
+        _analysis_local.tb_set.add(tuple_tb)
+        _analysis_local.times += 1
+        try:
+            return func(exc_value, tb, wrong_name)
+        except:
+            new_type = sys.exc_info()[0]
+            if new_type is AssertionError:
+                raise
+            exc_value.add_note("<suggestion given failed>")
+        finally:
+            _analysis_local.times -= 1
+            if _analysis_local.times == 0:
+                _analysis_local.tb_set.clear()
+            
+    return wrapper
+
+
+@_avoid_multianalyze_decorate
 def _compute_suggestion_error(exc_value, tb, wrong_name):
     if wrong_name is None or not isinstance(wrong_name, str):
         return None
@@ -1803,6 +1838,8 @@ def _remove_exc(exc, target_exc, _seen=None):
 
 def _suggestion_for_module(name, mod="normal", original_exc_value=None):
     from importlib import scan_dir, find_in_path
+    import _frozen_importlib_external
+    PathFinder = _frozen_importlib_external.PathFinder
     kwargs = {}
     if mod == "all":
         kwargs = {"namespace_package": True}
@@ -1850,16 +1887,19 @@ def _suggestion_for_module(name, mod="normal", original_exc_value=None):
                         original_exc_value.add_note("Don't import any modules in the method '__find__'")
                         continue
                     tb_exception = TracebackException(new_type, new_value, new_tb)
+                    new_exc_msg = "".join(tb_exception.format())
+                    while new_exc_msg.endswith("\n") or new_exc_msg.endswith(" "):
+                        new_exc_msg = new_exc_msg[:-1]
                     original_exc_value.add_note(f"\nException ignored in '{iname}.__find__' module {imodule!r}:\n"  # Change to warning
-                             + "".join(tb_exception.format()))
+                             + new_exc_msg)
                 except:
                     original_exc_value.add_note("\n<handle error failed in '{iname}.__find__' module {imodule!r}>\n")
-
-    if not parent:
-        for paths in sys.path:
-            suggest_list.append(scan_dir(paths, **kwargs))
-    else:
-        suggest_list.append(find_in_path(parent, mod=mod))
+    if PathFinder in sys.meta_path:
+        if not parent:
+            for paths in sys.path:
+                suggest_list.append(scan_dir(paths, **kwargs))
+        else:
+            suggest_list.append(find_in_path(parent, mod=mod))
     for i in suggest_list:
         if child in i:
             return child
