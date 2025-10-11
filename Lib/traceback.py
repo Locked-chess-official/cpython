@@ -1660,7 +1660,7 @@ def _traceback_to_tuples(tb):
 def _avoid_multianalyze_decorate(func):
     import threading
     _analysis_local = threading.local()  # threading safety
-    
+
     def wrapper(exc_value, tb, wrong_name):
         if not hasattr(_analysis_local, 'tb_set'):
             _analysis_local.tb_set = set()
@@ -1682,7 +1682,7 @@ def _avoid_multianalyze_decorate(func):
             _analysis_local.times -= 1
             if _analysis_local.times == 0:
                 _analysis_local.tb_set.clear()
-            
+
     return wrapper
 
 
