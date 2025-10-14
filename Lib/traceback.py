@@ -1817,7 +1817,7 @@ def _compute_suggestion_error(exc_value, tb, wrong_name, exception_target=None):
     elif isinstance(exc_value, ImportError):
         if isinstance(exc_value, ModuleNotFoundError):
             return _handle_module(exc_value, exception_target)
-        try:            
+        try:
             mod = __import__(exc_value.name)
             try:
                 d = dir(mod)
@@ -1894,7 +1894,7 @@ def _compute_suggestion_error(exc_value, tb, wrong_name, exception_target=None):
             nested_suggestion = _check_for_nested_attribute(exc_value.obj, wrong_name, d)
             if nested_suggestion:
                 return nested_suggestion
-            
+
     return suggestion
 
 
