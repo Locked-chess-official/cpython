@@ -1758,6 +1758,22 @@ def _check_for_nested_attribute(obj, wrong_name, attrs):
     return None
 
 
+def _handle_special(exc_tb, head_message, tail_message, exception_target):
+    assert "Traceback (most recent call last):" not in head_message + "\n" + tail_message
+    if not isinstance(exception_target, list):
+        return
+    frames = [
+        fs for fs in traceback.extract_tb(exc_tb)
+        if "idlelib" not in fs.filename and "friendly_module_not_found_error" not in fs.filename
+    ]
+    tb_msg = "".join(traceback.format_list(frames))
+    while tb_msg.endswith("\n") or tb_msg.endswith(" "):
+        tb_msg = tb_msg[:-1]
+    exception_target.append("\n" + head_message)
+    exception_target.append(tb_msg)
+    exception_target.append(tail_message)
+
+
 def _compute_suggestion_error(exc_value, tb, wrong_name, exception_target=None):
     if wrong_name is None or not isinstance(wrong_name, str):
         return None
