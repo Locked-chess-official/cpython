@@ -11,6 +11,10 @@ import keyword
 import tokenize
 import io
 import _colorize
+import threading
+import types
+from importlib import scan_dir, find_in_path
+
 
 from contextlib import suppress
 
@@ -198,11 +202,73 @@ def _format_final_exc_line(etype, value, *, insert_final_newline=True, colorize=
     return line
 
 
-def _safe_string(value, what, func=str):
+def _remove_exception(exc_value, other_exc_value, _seen=None):
+    if _seen is None:
+        _seen = set()
+    if id(exc_value) not in _seen:
+        _seen.add(id(exc_value))
+        if exc_value.__cause__:
+            if exc_value.__cause__ is other_exc_value:
+                exc_value.__cause__ = None
+            else:
+                _remove_exception(exc_value.__cause__, other_exc_value, _seen)
+        if exc_value.__context__:
+            if exc_value.__context__ is other_exc_value:
+                exc_value.__context__ = None
+            else:
+                _remove_exception(
+                    exc_value.__context__, other_exc_value, _seen
+                )
+
+
+def _traceback_to_tuples(tb):
+    extracted = extract_tb(tb)
+    return tuple(
+        (f.filename, f.lineno, getattr(f, "name", None), f.line)
+        for f in extracted
+    )  # handle SyntaxError
+
+
+def _safe_string(value, what, func=str,
+        exception_target=None, exception_exclude=None):
     try:
         return func(value)
     except:
-        return f'<{what} {func.__name__}() failed>'
+        if isinstance(exception_target, list):
+            typ, val, tb = sys.exc_info()
+            _add_exception_note(typ, val, tb, f"{what} {func.__name__}()",
+                               exception_target, exception_exclude)
+        return f"<{what} {func.__name__}() failed>"
+
+
+_ADD_EXC_NOTE_LIMIT = 10
+
+
+def _add_exception_note(exc_type, exc_value, exc_tb, where,
+        exception_target, exception_exclude=None, _seen=threading.local()):
+    if not hasattr(_seen, "_seen"):
+        _seen._seen = set()
+    if not hasattr(_seen, "times"):
+        _seen.times = 0
+    if not isinstance(exception_target, list):
+        return
+    _seen.times += 1
+    tb_tuple = _traceback_to_tuples(exc_tb)
+    if tb_tuple not in _seen._seen and _seen.times <= _ADD_EXC_NOTE_LIMIT:
+        _seen._seen.add(tb_tuple)
+        if exception_exclude:
+            _remove_exception(exc_value, exception_exclude)
+        msg = "".join(TracebackException(exc_type, exc_value, exc_tb).format())
+        while msg.endswith("\n") or msg.endswith(" "):
+            msg = msg[:-1]
+        exception_target.append(
+            f"\nException ignored in {where}:"
+        )
+        exception_target.append(msg)
+    _seen.times -= 1
+    if _seen.times <= 0:
+        _seen.times = 0
+        _seen._seen.clear()
 
 # --
 
@@ -1008,6 +1074,20 @@ class _ExceptionPrintContext:
                 yield textwrap.indent(text, indent_str, lambda line: True)
 
 
+def _find_wrong_hook(name):
+    parent, _, child = name.rpartition('.')
+    for i in sys.meta_path:
+        try:
+            func = getattr(i, '__find__', None)
+            if callable(func):
+                list_d = func(parent)
+                if child in list_d:
+                    return i
+        except:
+            pass
+    return None
+
+
 class TracebackException:
     """An exception ready for rendering.
 
@@ -1072,7 +1152,13 @@ class TracebackException:
 
         # Capture now to permit freeing resources: only complication is in the
         # unofficial API _format_final_exc_line
-        self._str = _safe_string(exc_value, 'exception')
+        exception_target = []
+        self._str = _safe_string(
+            exc_value,
+            "exception",
+            exception_target=exception_target,
+            exception_exclude=exc_value,
+        )
 
         self._is_syntax_error = False
         self._have_exc_type = exc_type is not None
@@ -1099,16 +1185,17 @@ class TracebackException:
         elif exc_type and issubclass(exc_type, ImportError) and \
                 getattr(exc_value, "name_from", None) is not None:
             wrong_name = getattr(exc_value, "name_from", None)
-            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name)
+            suggestion = _compute_suggestion_error(exc_value,
+                                                   exc_traceback,
+                                                   wrong_name,
+                                                   exception_target)
             if suggestion:
                 self._str += f". Did you mean: '{suggestion}'?"
         elif exc_type and issubclass(exc_type, ModuleNotFoundError) and \
-                getattr(exc_value, "name", None) and \
-                "None in sys.modules" not in self._str and \
-                "is not a package" not in self._str:
+                getattr(exc_value, "name", None):
             wrong_name = getattr(exc_value, "name", None)
             parent, _, child = wrong_name.rpartition('.')
-            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name)
+            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name, exception_target)
             if suggestion == child:
                 wrong_hook = _find_wrong_hook(wrong_name)
                 if wrong_hook is not None:
@@ -1127,11 +1214,13 @@ class TracebackException:
                     self._str += "."
                 self._str += (" Site initialization is disabled, did you forget to "
                              + "add the site-packages directory to sys.path?")
-
         elif exc_type and issubclass(exc_type, (NameError, AttributeError)) and \
                 getattr(exc_value, "name", None) is not None:
             wrong_name = getattr(exc_value, "name", None)
-            suggestion = _compute_suggestion_error(exc_value, exc_traceback, wrong_name)
+            suggestion = _compute_suggestion_error(exc_value,
+                                                   exc_traceback,
+                                                   wrong_name,
+                                                   exception_target)
             if suggestion:
                 self._str += f". Did you mean: '{suggestion}'?"
             if issubclass(exc_type, NameError):
@@ -1141,13 +1230,33 @@ class TracebackException:
                         self._str += f" Or did you forget to import '{wrong_name}'?"
                     else:
                         self._str += f". Did you forget to import '{wrong_name}'?"
-
         try:
-            self.__notes__ = getattr(exc_value, '__notes__', None)
+            original__notes__ = getattr(exc_value, "__notes__", None)
         except Exception as e:
-            self.__notes__ = [
-                f'Ignored error getting __notes__: {_safe_string(e, '__notes__', repr)}']
-
+            original__notes__ = [
+                f"Ignored error getting __notes__: {_safe_string(e, '__notes__', repr, exception_target, exc_value)}"
+            ]
+        if original__notes__ is not None and not isinstance(
+            original__notes__, list):
+            original__notes__ = [
+                _safe_string(
+                    original__notes__,
+                    "__notes__",
+                    repr,
+                    exception_target,
+                    exc_value,
+                )
+            ]
+        final_string_list = []
+        if original__notes__:
+            for i in original__notes__:
+                final_string_list.append(
+                    _safe_string(
+                        i, "note", str, exception_target, exc_value
+                    )
+                )
+        self.__notes__ = final_string_list
+        self.exception_target = exception_target
         if lookup_lines:
             self._load_lines()
         self.__suppress_context__ = \
@@ -1276,6 +1385,7 @@ class TracebackException:
         well, recursively, with indentation relative to their nesting depth.
         """
         colorize = kwargs.get("colorize", False)
+        exception_target = kwargs.get("exception_target", True)
 
         indent = 3 * _depth * ' '
         if not self._have_exc_type:
@@ -1298,15 +1408,11 @@ class TracebackException:
         else:
             yield from [indent + l for l in self._format_syntax_error(stype, colorize=colorize)]
 
-        if (
-            isinstance(self.__notes__, collections.abc.Sequence)
-            and not isinstance(self.__notes__, (str, bytes))
-        ):
-            for note in self.__notes__:
-                note = _safe_string(note, 'note')
+        for note in self.__notes__:
+            yield from [indent + l + '\n' for l in note.split('\n')]
+        if exception_target:
+            for note in self.exception_target:
                 yield from [indent + l + '\n' for l in note.split('\n')]
-        elif self.__notes__ is not None:
-            yield indent + "{}\n".format(_safe_string(self.__notes__, '__notes__', func=repr))
 
         if self.exceptions and show_group:
             for ex in self.exceptions:
@@ -1652,42 +1758,7 @@ def _check_for_nested_attribute(obj, wrong_name, attrs):
     return None
 
 
-def _traceback_to_tuples(tb):
-    extracted = extract_tb(tb)
-    return tuple((f.filename, f.lineno, f.name, f.line) for f in extracted)
-
-
-def _avoid_multianalyze_decorate(func):
-    import threading
-    _analysis_local = threading.local()  # threading safety
-
-    def wrapper(exc_value, tb, wrong_name):
-        if not hasattr(_analysis_local, 'tb_set'):
-            _analysis_local.tb_set = set()
-        if not hasattr(_analysis_local, 'times'):
-            _analysis_local.times = 0
-        tuple_tb = _traceback_to_tuples(tb)
-        if tuple_tb in _analysis_local.tb_set:
-            return
-        _analysis_local.tb_set.add(tuple_tb)
-        _analysis_local.times += 1
-        try:
-            return func(exc_value, tb, wrong_name)
-        except:
-            new_type = sys.exc_info()[0]
-            if new_type is AssertionError:
-                raise
-            exc_value.add_note("<suggestion given failed>")
-        finally:
-            _analysis_local.times -= 1
-            if _analysis_local.times == 0:
-                _analysis_local.tb_set.clear()
-
-    return wrapper
-
-
-@_avoid_multianalyze_decorate
-def _compute_suggestion_error(exc_value, tb, wrong_name):
+def _compute_suggestion_error(exc_value, tb, wrong_name, exception_target=None):
     if wrong_name is None or not isinstance(wrong_name, str):
         return None
     if isinstance(exc_value, AttributeError):
@@ -1695,9 +1766,40 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
         try:
             try:
                 d = dir(obj)
-            except TypeError:  # Attributes are unsortable, e.g. int and str
-                d = list(obj.__class__.__dict__.keys()) + list(obj.__dict__.keys())
-            d = sorted([x for x in d if isinstance(x, str)])
+            except BaseException as e:  # Attributes are unsortable, e.g. int and str
+                try:
+                    d = obj.__dir__() if not isinstance(obj, type) else type(obj).__dir__(obj)
+                except:
+                    new_type, new_value, new_tb = sys.exc_info()
+                    _add_exception_note(new_type, new_value, new_tb, "calling obj.__dir__",
+                                        exception_target, e)
+                    d = list(obj.__class__.__dict__.keys())
+                    if isinstance(getattr(obj, "__dict__", None), (dict, types.MappingProxyType)):
+                        d += list(obj.__dict__.keys())
+                    if isinstance(getattr(obj, "__slots__", None), collections.abc.Sequence) \
+                        and not isinstance(getattr(obj, "__slots__", None), (str, bytes)):
+                        d += list(obj.__slots__)
+                else:
+                    if isinstance(exception_target, list):
+                        exception_target.append(
+                            f"\nWrong value returnd from '{type(obj).__name__}.__dir__'")
+                        exception_target.append(
+                            "Please ensure that what is returned is sequence of strings")
+                    if isinstance(obj, type):
+                        d += list(obj.__class__.__dict__.keys())
+                        if isinstance(getattr(obj, "__dict__", None), types.MappingProxyType):
+                            d += list(obj.__dict__.keys())
+                        if isinstance(getattr(obj, "__slots__", None), collections.abc.Sequence) \
+                            and not isinstance(getattr(obj, "__slots__", None), (str, bytes)):
+                            d += list(obj.__slots__)
+            if not isinstance(d, collections.abc.Sequence) or isinstance(d, (str, bytes)):
+                return None
+            d = sorted(set(x for x in d if isinstance(x, str)))
+            if wrong_name in d:
+                if isinstance(exception_target, list):
+                    exception_target.append(f"\n{wrong_name} found in the list of attribute of the obj but cannot get. Please"
+                                            f" check the code in the class {type(obj).__name__}")
+                return None # the code of the object is wrong. Don't give the wrong suggestion from the wrong code
             hide_underscored = (wrong_name[:1] != '_')
             if hide_underscored and tb is not None:
                 while tb.tb_next is not None:
@@ -1708,20 +1810,57 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
             if hide_underscored:
                 d = [x for x in d if x[:1] != '_']
         except Exception:
+            new_type, new_value, new_tb = sys.exc_info()
+            _add_exception_note(new_type, new_value, new_tb, "finding attribute in object",
+                                exception_target, evc_value)
             return None
     elif isinstance(exc_value, ImportError):
         if isinstance(exc_value, ModuleNotFoundError):
-            return _handle_module(exc_value)
-        try:
+            return _handle_module(exc_value, exception_target)
+        try:            
             mod = __import__(exc_value.name)
             try:
                 d = dir(mod)
-            except TypeError:  # Attributes are unsortable, e.g. int and str
-                d = list(mod.__dict__.keys())
-            d = sorted([x for x in d if isinstance(x, str)])
+            except Exception as e:  # Attributes are unsortable, e.g. int and str
+                try:
+                    d = mod.__dir__() if not isinstance(mod, type) else type(mod).__dir__(obj)
+                except:
+                    new_type, new_value, new_tb = sys.exc_info()
+                    _add_exception_note(new_type, new_value, new_tb, "calling obj.__dir__",
+                                        exception_target, e)
+                    d = list(mod.__class__.__dict__.keys())
+                    if isinstance(getattr(obj, "__dict__", None), dict):
+                        d += list(mod.__dict__.keys())
+                    if isinstance(getattr(obj, "__slots__", None), collections.abc.Sequence) \
+                        and not isinstance(getattr(obj, "__slots__", None), (str, bytes)):
+                        d += list(mod.__slots__)
+                else:
+                    if isinstance(exception_target, list):
+                        exception_target.append(
+                            f"\nWrong value returnd from '{exc_value.name}.__dir__'")
+                        exception_target.append(
+                            "Please ensure that what is returned is sequence of strings")
+                    if isinstance(mod, type):
+                        d += list(mod.__class__.__dict__.keys())
+                        if isinstance(getattr(mod, "__dict__", None), types.MappingProxyType):
+                            d += list(mod.__dict__.keys())
+                        if isinstance(getattr(mod, "__slots__", None), collections.abc.Sequence) \
+                            and not isinstance(getattr(mod, "__slots__", None), (str, bytes)):
+                            d += list(mod.__slots__)
+            if not isinstance(d, collections.abc.Sequence) or isinstance(d, (str, bytes)):
+                return None
+            d = sorted(set(x for x in d if isinstance(x, str)))
+            if wrong_name in d:
+                if isinstance(exception_target, list):
+                    exception_target.append(f"\n{wrong_name} found in the list of attribute of the module but cannot be imported."
+                                            f" Please check the code in the module {exc_value.name}")
+                return None
             if wrong_name[:1] != '_':
                 d = [x for x in d if x[:1] != '_']
         except Exception:
+            new_type, new_value, new_tb = sys.exc_info()
+            _add_exception_note(new_type, new_value, new_tb, f"finding attribute in module {exc_value.name}",
+                                exception_target, exc_value)
             return None
     else:
         assert isinstance(exc_value, NameError)
@@ -1732,9 +1871,9 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
             tb = tb.tb_next
         frame = tb.tb_frame
         d = (
-            list(frame.f_locals)
-            + list(frame.f_globals)
-            + list(frame.f_builtins)
+                list(frame.f_locals)
+                + list(frame.f_globals)
+                + list(frame.f_builtins)
         )
         d = [x for x in d if isinstance(x, str)]
 
@@ -1750,94 +1889,24 @@ def _compute_suggestion_error(exc_value, tb, wrong_name):
                 return f"self.{wrong_name}"
 
     suggestion = _calculate_closed_name(wrong_name, d)
-    # If no direct attribute match found, check for nested attributes
     if not suggestion and isinstance(exc_value, AttributeError):
         with suppress(Exception):
             nested_suggestion = _check_for_nested_attribute(exc_value.obj, wrong_name, d)
             if nested_suggestion:
                 return nested_suggestion
-
+            
     return suggestion
 
-def _calculate_closed_name(wrong_name, d):
-    try:
-        import _suggestions
-    except ImportError:
-        pass
-    else:
-        suggestion = _suggestions._generate_suggestions(d, wrong_name)
-        if suggestion:
-            return suggestion
 
-    # Compute closest match
-
-    if len(d) > _MAX_CANDIDATE_ITEMS:
-        return None
-    wrong_name_len = len(wrong_name)
-    if wrong_name_len > _MAX_STRING_SIZE:
-        return None
-    best_distance = wrong_name_len
-    suggestion = None
-    for possible_name in d:
-        if possible_name == wrong_name:
-            # A missing attribute is "found". Don't suggest it (see GH-88821).
-            continue
-        # No more than 1/3 of the involved characters should need changed.
-        max_distance = (len(possible_name) + wrong_name_len + 3) * _MOVE_COST // 6
-        # Don't take matches we've already beaten.
-        max_distance = min(max_distance, best_distance - 1)
-        current_distance = _levenshtein_distance(wrong_name, possible_name, max_distance)
-        if current_distance > max_distance:
-            continue
-        if not suggestion or current_distance < best_distance:
-            suggestion = possible_name
-            best_distance = current_distance
-
-    return suggestion
-
-def _handle_module(exc_value):
+def _handle_module(exc_value, exception_target=None):
     if not isinstance(exc_value, ModuleNotFoundError):
         return None
-    return _suggestion_for_module(exc_value.name, original_exc_value=exc_value)
+    return _suggestion_for_module(exc_value.name,
+                                  exception_target=exception_target,
+                                  original_exc_value=exc_value)
 
-def _import_error_set(err, result=None, _seen=None):
-    if not isinstance(result, set):
-        result = set()
-    if not isinstance(_seen, set):
-        _seen = set()
-    if not err or id(err) in _seen:
-        return result
-    _seen.add(id(err))
-    if isinstance(err, ImportError):
-        result.add(id(err))
-    if isinstance(err, BaseExceptionGroup):
-        for e in err.exceptions:
-            _import_error_set(e, result, _seen)
-    if err.__cause__ is not None:
-        _import_error_set(err.__cause__, result, _seen)
-    if err.__context__ is not None:
-        _import_error_set(err.__context__, result, _seen)
-    return result
 
-def _remove_exc(exc, target_exc, _seen=None):
-    if _seen is None:
-        _seen = set()
-    if id(exc) in _seen:
-        return
-    _seen.add(id(exc))
-    if exc.__cause__:
-        if exc.__cause__ is target_exc:
-            exc.__cause__ = None
-        else:
-            _remove_exc(exc.__cause__, target_exc, _seen)
-    if exc.__context__:
-        if exc.__context__ is target_exc:
-            exc.__context__ = None
-        else:
-            _remove_exc(exc.__context__, target_exc, _seen)
-
-def _suggestion_for_module(name, mod="normal", original_exc_value=None):
-    from importlib import scan_dir, find_in_path
+def _suggestion_for_module(name, mod="normal", exception_target=None, original_exc_value=None):
     import _frozen_importlib_external
     PathFinder = _frozen_importlib_external.PathFinder
     kwargs = {}
@@ -1863,37 +1932,26 @@ def _suggestion_for_module(name, mod="normal", original_exc_value=None):
             if callable(func):
                 list_d = func(parent)
                 if child in list_d:
-                    if original_exc_value:
-                        original_exc_value.add_note(
-                                 f"The child name found in '{iname}.__find__' "
-                                 "but it cannot imported by it. "
-                                 "Please check it. \n"
-                                 f"{iname!r} is in module {imodule!r}")
+                    if isinstance(exception_target, list):
+                        exception_target.append(
+                            f"The child name found in '{iname}.__find__' "
+                            "but it cannot imported by it. "
+                            "Please check it. \n"
+                            f"{iname!r} is in module {imodule!r}")
                     return child
                 if list_d:
                     suggest_list.append(list_d)
         except:
-            if original_exc_value:
-                try:
-                    new_type, new_value, new_tb = sys.exc_info()
-                    _remove_exc(new_value, original_exc_value)
-                    import_error_set = _import_error_set(new_value)
-                    if import_error_set: # Don't import any modules in the method 'find'
-                        original_exc_value.add_note(f"\nImportError found in '{iname}.__find__' module {imodule!r}:")
-                        tb_msg = "".join(format_tb(new_tb))
-                        while tb_msg.endswith("\n") or tb_msg.endswith(" "):
-                            tb_msg = tb_msg[:-1]
-                        original_exc_value.add_note(tb_msg)
-                        original_exc_value.add_note("Don't import any modules in the method '__find__'")
-                        continue
-                    tb_exception = TracebackException(new_type, new_value, new_tb)
-                    new_exc_msg = "".join(tb_exception.format())
-                    while new_exc_msg.endswith("\n") or new_exc_msg.endswith(" "):
-                        new_exc_msg = new_exc_msg[:-1]
-                    original_exc_value.add_note(f"\nException ignored in '{iname}.__find__' module {imodule!r}:\n"  # Change to warning
-                             + new_exc_msg)
-                except:
-                    original_exc_value.add_note("\n<handle error failed in '{iname}.__find__' module {imodule!r}>\n")
+            if isinstance(exception_target, list):
+                new_type, new_value, new_tb = sys.exc_info()
+                _remove_exception(new_value, original_exc_value)
+                import_error_set = _import_error_set(new_value)
+                if import_error_set:
+                    _handle_special(new_tb, f"ImportError found in '{iname}.__find__' module {imodule}",
+                                    "Don't import any modules in the method '__find__'", exception_target)
+                    continue
+                _add_exception_note(new_type, new_value, new_tb, f"'{iname}.__find__' module {imodule!r}",
+                                    exception_target, original_exc_value)
     if PathFinder in sys.meta_path:
         if not parent:
             for paths in sys.path:
@@ -1908,18 +1966,62 @@ def _suggestion_for_module(name, mod="normal", original_exc_value=None):
             all_result.append(result)
     return _calculate_closed_name(child, sorted(all_result))
 
-def _find_wrong_hook(name):
-    parent, _, child = name.rpartition('.')
-    for i in sys.meta_path:
-        try:
-            func = getattr(i, '__find__', None)
-            if callable(func):
-                list_d = func(parent)
-                if child in list_d:
-                    return i
-        except:
-            pass
-    return None
+
+def _import_error_set(err, result=None, _seen=None):
+    if not isinstance(result, set):
+        result = set()
+    if not isinstance(_seen, set):
+        _seen = set()
+    if not err or id(err) in _seen:
+        return result
+    _seen.add(id(err))
+    if isinstance(err, ImportError):
+        result.add(id(err))
+    if minor >= 11 and isinstance(err, BaseExceptionGroup):
+        for e in err.exceptions:
+            _import_error_set(e, result, _seen)
+    if err.__cause__ is not None:
+        _import_error_set(err.__cause__, result, _seen)
+    if err.__context__ is not None:
+        _import_error_set(err.__context__, result, _seen)
+    return result
+
+
+def _calculate_closed_name(wrong_name, d):
+    try:
+        import _suggestions
+    except ImportError:
+        pass
+    else:
+        suggestion = _suggestions._generate_suggestions(d, wrong_name)
+        if suggestion:
+            return suggestion
+
+    # Compute the closest match
+
+    if len(d) > _MAX_CANDIDATE_ITEMS:
+        return None
+    wrong_name_len = len(wrong_name)
+    if wrong_name_len > _MAX_STRING_SIZE:
+        return None
+    best_distance = wrong_name_len
+    suggestion = None
+    for possible_name in d:
+        if possible_name == wrong_name:
+            # A missing attribute is "found". Don't suggest it (see GH-88821).
+            continue
+        # No more than 1/3 of the involved characters should need changed.
+        max_distance = (len(possible_name) + wrong_name_len + 3) * _MOVE_COST // 6
+        # Don't take matches we've already beaten.
+        max_distance = min(max_distance, best_distance - 1)
+        current_distance = _levenshtein_distance(wrong_name, possible_name, max_distance)
+        if current_distance > max_distance:
+            continue
+        if not suggestion or current_distance < best_distance:
+            suggestion = possible_name
+            best_distance = current_distance
+    return suggestion
+
 
 def _levenshtein_distance(a, b, max_cost):
     # A Python implementation of Python/suggestions.c:levenshtein_distance.
