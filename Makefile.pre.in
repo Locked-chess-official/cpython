@@ -1034,7 +1034,7 @@ libpython3.so:	libpython$(LDVERSION).so
 	$(BLDSHARED) $(NO_AS_NEEDED) -o $@ -Wl,-h$@ $^
 
 libpython$(LDVERSION).dylib: $(LIBRARY_OBJS)
-	 $(CC) -dynamiclib $(PY_CORE_LDFLAGS) -undefined dynamic_lookup -Wl,-install_name,$(prefix)/lib/libpython$(LDVERSION).dylib -Wl,-compatibility_version,$(VERSION) -Wl,-current_version,$(VERSION) -o $@ $(LIBRARY_OBJS) $(DTRACE_OBJS) $(SHLIBS) $(LIBC) $(LIBM); \
+	$(CC) -dynamiclib $(PY_CORE_LDFLAGS) -undefined dynamic_lookup -Wl,-install_name,$(prefix)/lib/libpython$(LDVERSION).dylib -Wl,-compatibility_version,$(VERSION) -Wl,-current_version,$(VERSION) -o $@ $(LIBRARY_OBJS) $(DTRACE_OBJS) $(SHLIBS) $(LIBC) $(LIBM); \
 
 
 libpython$(VERSION).sl: $(LIBRARY_OBJS)
@@ -2337,7 +2337,7 @@ testios:
 
 # Generate the pyconfig_undef.h
 $(PYCONFIG_UNDEF): $(srcdir)/pyconfig.h $(BUILDPYTHON)
-    $(RUNSHARED) $(PYTHON_FOR_BUILD) $(srcdir)/Tools/python_undef/generate_undef.py
+	$(RUNSHARED) $(PYTHON_FOR_BUILD) $(srcdir)/Tools/python_undef/generate_undef.py
 
 # Like test, but using --slow-ci which enables all test resources and use
 # longer timeout. Run an optional pybuildbot.identify script to include
@@ -3252,7 +3252,6 @@ clean-retain-profile: pycremoval
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/lib
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/include
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/Python.framework
-	-rm -f $(PYCONFIG_UNDEF)
 
 .PHONY: profile-removal
 profile-removal:
@@ -3265,7 +3264,7 @@ profile-removal:
 	rm -f profile-bolt-stamp
 
 .PHONY: clean
-clean: clean-retain-profile clean-bolt
+clean: clean-retain-profile clean-bolt clean-pyconfig-undef
 	@if test @DEF_MAKE_ALL_RULE@ = profile-opt -o @DEF_MAKE_ALL_RULE@ = bolt-opt; then \
 		rm -f profile-gen-stamp profile-clean-stamp; \
 		$(MAKE) profile-removal; \
@@ -3282,6 +3281,10 @@ clobber: clean
 	-rm -rf iOSTestbed.*
 	-rm -f python-config.py python-config
 	-rm -rf cross-build
+
+.PHONY: clean-pyconfig-undef
+clean-pyconfig-undef:
+	rm -f Include/pyconfig_undef.h
 
 # Make things extra clean, before making a distribution:
 # remove all generated files, even Makefile[.pre]
