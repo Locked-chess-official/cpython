@@ -71,6 +71,7 @@ set kill=
 set do_pgo=
 set pgo_job=-m test --pgo
 set UseTIER2=
+set clean_undef=
 
 :CheckOpts
 if "%~1"=="-h" goto Usage
@@ -98,6 +99,7 @@ if "%~1"=="--experimental-jit-interpreter-off" (set UseTIER2=6) & shift & goto C
 if "%~1"=="--without-remote-debug" (set DisableRemoteDebug=true) & shift & goto CheckOpts
 if "%~1"=="--pystats" (set PyStats=1) & shift & goto CheckOpts
 if "%~1"=="--tail-call-interp" (set UseTailCallInterp=true) & shift & goto CheckOpts
+if "%~1"=="--clean-undef" (set clean_undef=true) & shift & shift & goto CheckOpts
 rem These use the actual property names used by MSBuild.  We could just let
 rem them in through the environment, but we specify them on the command line
 rem anyway for visibility so set defaults after this
@@ -114,6 +116,15 @@ if "%IncludeTkinter%"=="" set IncludeTkinter=true
 if "%UseJIT%" NEQ "true" set IncludeLLVM=false
 
 if "%IncludeExternals%"=="true" call "%dir%get_externals.bat"
+if "%clean_undef%"=="true" (
+    if exist "Include\pyconfig_undef.h" del /f /q "Include\pyconfig_undef.h"
+    if exist "Include\pyconfig_undef.h" (
+        echo Failed to delete pyconfig_undef.h
+        exit /b 1
+    )
+    echo pyconfig_undef.h cleaned successfully
+    exit /b 0
+)
 
 if "%do_pgo%" EQU "true" if "%platf%" EQU "x64" (
     if "%PROCESSOR_ARCHITEW6432%" NEQ "AMD64" if "%PROCESSOR_ARCHITECTURE%" NEQ "AMD64" (
@@ -203,6 +214,14 @@ echo on
  /p:UseTailCallInterp=%UseTailCallInterp%^
  /p:DisableRemoteDebug=%DisableRemoteDebug%^
  %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+ if ERRORLEVEL 0 (
+    "%~dp0..\python.bat" "%~dp0..\Tools\python_undef\generate_undef.py"
+    if ERRORLEVEL 1 (
+        echo Failed to generate pyconfig_undef.h
+        exit /b 1
+    )
+ )
 
 @echo off
 exit /b %ERRORLEVEL%

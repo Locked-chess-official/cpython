@@ -152,4 +152,6 @@ __pragma(warning(disable: 4201))
 __pragma(warning(pop))  // warning(disable: 4201)
 #endif
 
+#include "legacy.h"
+
 #endif /* !Py_PYTHON_H */

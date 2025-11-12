@@ -765,6 +765,11 @@ LIBHACL_HMAC_HEADERS= \
 		$(LIBHACL_HEADERS)
 
 #########################################################################
+# PEP743
+# File generate_undef.py generate the pyconfig_undef.h
+PYCONFIG_UNDEF=Include/pyconfig_undef.h
+
+#########################################################################
 # Rules
 
 # Default target
@@ -799,7 +804,7 @@ list-targets:
 	@grep -E '^[A-Za-z][-A-Za-z0-9]+:' Makefile | awk -F : '{print $$1}'
 
 .PHONY: build_all
-build_all:	check-clean-src check-app-store-compliance $(BUILDPYTHON) platform sharedmods \
+build_all:	check-clean-src check-app-store-compliance $(BUILDPYTHON) $(PYCONFIG_UNDEF) platform sharedmods \
 		gdbhooks Programs/_testembed scripts checksharedmods rundsymutil build-details.json
 
 .PHONY: build_wasm
@@ -2330,6 +2335,10 @@ testios:
 	# Run the testbed project
 	$(PYTHON_FOR_BUILD) "$(XCFOLDER)" run --verbose -- test -uall --single-process --rerun -W
 
+# Generate the pyconfig_undef.h
+$(PYCONFIG_UNDEF): $(srcdir)/pyconfig.h $(BUILDPYTHON)
+    $(RUNSHARED) $(PYTHON_FOR_BUILD) $(srcdir)/Tools/python_undef/generate_undef.py
+
 # Like test, but using --slow-ci which enables all test resources and use
 # longer timeout. Run an optional pybuildbot.identify script to include
 # information about the build environment.
@@ -3243,6 +3252,7 @@ clean-retain-profile: pycremoval
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/lib
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/include
 	-rm -rf Apple/iOS/testbed/Python.xcframework/ios-*/Python.framework
+	-rm -f $(PYCONFIG_UNDEF)
 
 .PHONY: profile-removal
 profile-removal:
