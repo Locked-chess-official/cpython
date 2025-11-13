@@ -4,8 +4,10 @@
 #ifdef Py_OMIT_LEGACY_API
 #include "pyconfig_undef.h"
 
-// Undefine legacy APIs here as needed
-// Which macros to undefine is depended on CPython core developers' decision.
+#else
+
+// Here to redefine the omit CAPI
+// Which macros and functions to redefine here belong to the developmenters.
 
 #endif /* Py_OMIT_LEGACY_API */
 
