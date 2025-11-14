@@ -8,6 +8,10 @@
 // Since this is a "meta-include" file, "#ifdef __cplusplus / extern "C" {"
 // is not needed.
 
+#ifdef Py_OMIT_LEGACY_API
+#include "pyconfig_keep_now_macro.h"
+#endif
+
 
 // Include Python header files
 #include "patchlevel.h"

@@ -765,9 +765,12 @@ LIBHACL_HMAC_HEADERS= \
 		$(LIBHACL_HEADERS)
 
 #########################################################################
-# PEP743
-# File generate_undef.py generate the pyconfig_undef.h
-PYCONFIG_UNDEF=Include/pyconfig_undef.h
+# PEP743 struct implementation
+# File generate_undef.py generate the pyconfig_undef.h, pyconfig_keep_now_macro.h and pyconfig_warning.h
+PYCONFIG_UNDEF= \
+		$(srcdir)/pyconfig_undef.h \
+		$(srcdir)/pyconfig_keep_now_macro.h \
+		$(srcdir)/pyconfig_warning.h
 
 #########################################################################
 # Rules
@@ -2936,6 +2939,10 @@ inclinstall:
 	fi
 	echo $(INSTALL_DATA) pyconfig.h $(DESTDIR)$(CONFINCLUDEPY)/pyconfig.h
 	$(INSTALL_DATA) pyconfig.h $(DESTDIR)$(CONFINCLUDEPY)/pyconfig.h
+	@for i in $(PYCONFIG_UNDEF); do \
+		echo $(INSTALL_DATA) $$i $(CONFINCLUDEPY); \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(CONFINCLUDEPY); \
+	done
 
 # Install the library and miscellaneous stuff needed for extending/embedding
 # This goes into $(exec_prefix)
@@ -3284,7 +3291,7 @@ clobber: clean
 
 .PHONY: clean-pyconfig-undef
 clean-pyconfig-undef:
-	rm -f Include/pyconfig_undef.h
+	rm -f $(PYCONFIG_UNDEF)
 
 # Make things extra clean, before making a distribution:
 # remove all generated files, even Makefile[.pre]

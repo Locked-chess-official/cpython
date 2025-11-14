@@ -204,7 +204,9 @@ WIN32 is still required for the locale module.
 
 /* _W64 is not defined for VC6 or eVC4 */
 #ifndef _W64
-#define _W64
+#define _Py_W64
+#else
+#define _Py_W64 _W64
 #endif
 
 /* Define like size_t, omitting the "unsigned" */
@@ -212,7 +214,7 @@ WIN32 is still required for the locale module.
 typedef __int64 Py_ssize_t;
 #   define PY_SSIZE_T_MAX LLONG_MAX
 #else
-typedef _W64 int Py_ssize_t;
+typedef _Py_W64 int Py_ssize_t;
 #   define PY_SSIZE_T_MAX INT_MAX
 #endif
 #define HAVE_PY_SSIZE_T 1

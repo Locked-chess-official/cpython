@@ -10,6 +10,7 @@
 //
 // Several parts of this module are broken out into files in _testcapi/.
 // Include definitions from there.
+#define _Py_TESTCAPI_MODULE_BUILD
 #include "_testcapi/parts.h"
 
 #include "frameobject.h"          // PyFrame_New()
@@ -3539,3 +3540,5 @@ PyInit__testcapi(void)
 {
     return PyModuleDef_Init(&_testcapimodule);
 }
+
+#undef _Py_TESTCAPI_MODULE_BUILD

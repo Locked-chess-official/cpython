@@ -117,13 +117,17 @@ if "%UseJIT%" NEQ "true" set IncludeLLVM=false
 
 if "%IncludeExternals%"=="true" call "%dir%get_externals.bat"
 if "%clean_undef%"=="true" (
-    if exist "Include\pyconfig_undef.h" del /f /q "Include\pyconfig_undef.h"
-    if exist "Include\pyconfig_undef.h" (
+    if exist "%~dp0..\PC\pyconfig_undef.h" del /f /q "%~dp0..\PC\pyconfig_undef.h"
+    if exist "%~dp0..\PC\pyconfig_keep_now_macro.h" del /f /q "%~dp0..\PC\pyconfig_keep_now_macro.h
+    if exist "%~dp0..\PC\pyconfig_undef.h" (
         echo Failed to delete pyconfig_undef.h
         exit /b 1
     )
-    echo pyconfig_undef.h cleaned successfully
-    exit /b 0
+    else if exist "%~dp0..\PC\pyconfig_keep_now_macro.h" (
+        echo Failed to delete pyconfig_keep_now_macro.h
+        exit /b 1
+    )
+    echo pyconfig_undef.h and pyconfig_keep_now_macro.h cleaned successfully
 )
 
 if "%do_pgo%" EQU "true" if "%platf%" EQU "x64" (
