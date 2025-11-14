@@ -8286,3 +8286,7 @@ if test "$ac_cv_header_stdatomic_h" != "yes"; then
     version of Python may require stdatomic.h.
   ]))
 fi
+
+AC_CONFIG_COMMANDS([pyconfig_warning.h],
+  [touch pyconfig_warning.h],
+  [pyconfig_warning.h])
