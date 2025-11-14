@@ -11,7 +11,7 @@
  && !defined(PYTESTCAPI_NEED_INTERNAL_API)) \
  && !defined(_Py_IMMORTAL_BUILD) \
  && !defined(_Py_TESTCAPI_MODULE_BUILD)
- 
+
 #include "pyconfig_warning.h"
 // Here to redefine the omit CAPI
 // Which macros and functions to redefine here belong to the developmenters.
