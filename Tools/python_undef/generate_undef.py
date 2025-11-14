@@ -62,7 +62,7 @@ def generate_undef_code(macro_name: str):
     return f"""#undef {macro_name}
 #ifdef _Py_FORWARD_DEFINE_{macro_name}
 #undef _Py_FORWARD_DEFINE_{macro_name}
-#pargma pop_macro("{macro_name}")
+#pragma pop_macro("{macro_name}")
 #endif
 
 """
@@ -73,7 +73,7 @@ def generate_keep_now_macro_code(macro_name: str):
     """
     return f"""#ifdef {macro_name}
 #define _Py_FORWARD_DEFINE_{macro_name}
-#pargma push_macro("{macro_name}")
+#pragma push_macro("{macro_name}")
 #undef {macro_name}
 #endif
 
