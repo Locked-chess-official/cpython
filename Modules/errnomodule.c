@@ -1,4 +1,5 @@
 /* Errno module */
+#define _Py_ERRORMODULE_BUILD
 
 // Need limited C API version 3.13 for Py_mod_gil
 #include "pyconfig.h"   // Py_GIL_DISABLED
@@ -986,3 +987,5 @@ PyInit_errno(void)
 {
     return PyModuleDef_Init(&errnomodule);
 }
+
+#undef _Py_ERRORMODULE_BUILD
