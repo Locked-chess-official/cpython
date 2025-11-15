@@ -4,6 +4,7 @@
  * See Python/gc.c for the implementation of the garbage collector.
  */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_gc.h"
 #include "pycore_object.h"      // _PyObject_IS_GC()
@@ -556,3 +557,5 @@ PyInit_gc(void)
 {
     return PyModuleDef_Init(&gcmodule);
 }
+
+#undef _Python_MODULE_BUILDING

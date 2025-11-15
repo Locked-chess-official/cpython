@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * C Extension module to test pycore_critical_section.h API.
  */
@@ -303,3 +304,5 @@ _PyTestInternalCapi_Init_CriticalSection(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

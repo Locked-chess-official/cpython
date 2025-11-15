@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 
@@ -53,3 +54,5 @@ _PyTestCapi_Init_Modsupport(PyObject *m)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

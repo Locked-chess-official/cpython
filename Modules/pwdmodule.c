@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 
 /* UNIX password file access module */
 
@@ -408,3 +409,5 @@ PyInit_pwd(void)
 {
     return PyModuleDef_Init(&pwdmodule);
 }
+
+#undef _Python_MODULE_BUILDING

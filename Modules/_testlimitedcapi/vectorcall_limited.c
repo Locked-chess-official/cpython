@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* Test Vectorcall in the limited API */
 
 // Need limited C API version 3.12 for PyObject_Vectorcall()
@@ -247,3 +248,5 @@ _PyTestLimitedCAPI_Init_VectorcallLimited(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

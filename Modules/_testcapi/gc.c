@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 static PyObject*
@@ -344,3 +345,5 @@ int _PyTestCapi_Init_GC(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

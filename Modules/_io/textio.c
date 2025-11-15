@@ -6,6 +6,7 @@
     Written by Amaury Forgeot d'Arc and Antoine Pitrou
 */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"          // _PyObject_CallMethod()
 #include "pycore_codecs.h"        // _PyCodecInfo_GetIncrementalDecoder()
@@ -3425,3 +3426,5 @@ PyType_Spec _Py_textiowrapper_spec = {
               Py_TPFLAGS_IMMUTABLETYPE),
     .slots = textiowrapper_slots,
 };
+
+#undef _Python_MODULE_BUILDING

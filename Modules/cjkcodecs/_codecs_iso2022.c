@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_iso2022.c: Codecs collection for ISO-2022 encodings.
  *
@@ -1151,3 +1152,5 @@ BEGIN_CODECS_LIST(7)
 END_CODECS_LIST
 
 I_AM_A_MODULE_FOR(iso2022)
+
+#undef _Python_MODULE_BUILDING

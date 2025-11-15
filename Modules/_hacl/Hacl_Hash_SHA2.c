@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -1580,3 +1581,5 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *output, uint8_t *input, uint32_t input_len
   Hacl_Hash_SHA2_sha384_finish(st, rb);
 }
 
+
+#undef _Python_MODULE_BUILDING

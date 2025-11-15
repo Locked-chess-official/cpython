@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 #include <stddef.h>
@@ -734,3 +735,5 @@ _PyTestCapi_Init_Mem(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

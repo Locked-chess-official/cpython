@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "../_ssl.h"
 
@@ -249,3 +250,5 @@ static PyType_Spec PySSLCertificate_spec = {
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION | Py_TPFLAGS_IMMUTABLETYPE,
     PySSLCertificate_slots,
 };
+
+#undef _Python_MODULE_BUILDING

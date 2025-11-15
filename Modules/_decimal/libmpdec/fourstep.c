@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -257,3 +258,5 @@ inv_four_step_fnt(mpd_uint_t *a, mpd_size_t n, int modnum)
 
     return 1;
 }
+
+#undef _Python_MODULE_BUILDING

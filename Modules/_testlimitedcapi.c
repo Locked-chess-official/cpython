@@ -5,6 +5,7 @@
  * standard Python regression test, via Lib/test/test_capi.py.
  */
 
+#define _Python_MODULE_BUILDING
 #include "_testlimitedcapi/parts.h"
 
 static PyMethodDef TestMethods[] = {
@@ -94,3 +95,5 @@ PyInit__testlimitedcapi(void)
     }
     return mod;
 }
+
+#undef _Python_MODULE_BUILDING

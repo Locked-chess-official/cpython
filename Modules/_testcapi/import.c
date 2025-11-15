@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include "util.h"
 
@@ -42,3 +43,5 @@ _PyTestCapi_Init_Import(PyObject *m)
     return PyModule_AddFunctions(m, test_methods);
 }
 
+
+#undef _Python_MODULE_BUILDING

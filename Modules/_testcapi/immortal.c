@@ -1,4 +1,4 @@
-#define _Py_IMMORTAL_BUILD
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 #define Py_BUILD_CORE
@@ -67,4 +67,4 @@ _PyTestCapi_Init_Immortal(PyObject *mod)
     return 0;
 }
 
-#undef _Py_IMMORTAL_BUILD
+#undef _Python_MODULE_BUILDING

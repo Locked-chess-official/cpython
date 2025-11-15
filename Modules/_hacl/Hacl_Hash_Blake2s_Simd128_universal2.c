@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // This file isn't part of a standard HACL source tree.
 //
 // It is required for compatibility with universal2 macOS builds. The code in
@@ -12,3 +13,5 @@
 #if !(defined(__APPLE__) && defined(__arm64__))
 #include "Hacl_Hash_Blake2s_Simd128.c"
 #endif
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 #include "datetime.h"             // PyDateTimeAPI
@@ -521,3 +522,5 @@ PyInit__testcapi_datetime(void)
 {
     return PyModuleDef_Init(&_testcapi_datetime_module);
 }
+
+#undef _Python_MODULE_BUILDING

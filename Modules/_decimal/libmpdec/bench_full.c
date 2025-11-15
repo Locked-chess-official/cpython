@@ -25,7 +25,8 @@
  * SUCH DAMAGE.
  */
 
-
+ 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <stdint.h>
@@ -191,3 +192,5 @@ main(int argc, char **argv)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

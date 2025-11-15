@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 
@@ -66,3 +67,5 @@ _PyTestCapi_Init_Config(PyObject *mod)
 {
     return PyModule_AddFunctions(mod, test_methods);
 }
+
+#undef _Python_MODULE_BUILDING

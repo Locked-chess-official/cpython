@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "pyconfig.h"   // Py_GIL_DISABLED
 #ifndef Py_GIL_DISABLED
    // Need limited C API 3.14 to test PyUnicode_Equal()
@@ -1954,3 +1955,5 @@ _PyTestLimitedCAPI_Init_Unicode(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

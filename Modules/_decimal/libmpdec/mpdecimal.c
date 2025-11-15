@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -9013,3 +9014,5 @@ mpd_as_uint128_triple(const mpd_t *a)
 
     return triple;
 }
+
+#undef _Python_MODULE_BUILDING

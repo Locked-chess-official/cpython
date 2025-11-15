@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2008-2020 Stefan Krah. All rights reserved.
  *
@@ -25,7 +26,8 @@
  * SUCH DAMAGE.
  */
 
-
+ 
+#define _Python_MODULE_BUILDING
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -80,3 +82,5 @@ main(int argc, char **argv)
 }
 
 
+
+#undef _Python_MODULE_BUILDING

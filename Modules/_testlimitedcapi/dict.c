@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include "util.h"
 
@@ -289,3 +290,5 @@ _PyTestLimitedCAPI_Init_Dict(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

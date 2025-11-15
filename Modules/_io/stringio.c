@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include <stddef.h>               // offsetof()
 #include "pycore_object.h"
@@ -1101,3 +1102,5 @@ PyType_Spec _Py_stringio_spec = {
               Py_TPFLAGS_IMMUTABLETYPE),
     .slots = stringio_slots,
 };
+
+#undef _Python_MODULE_BUILDING

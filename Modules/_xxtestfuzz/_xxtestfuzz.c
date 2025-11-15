@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include <Python.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -50,3 +51,5 @@ PyInit__xxtestfuzz(void)
 {
     return PyModuleDef_Init(&_fuzzmodule);
 }
+
+#undef _Python_MODULE_BUILDING

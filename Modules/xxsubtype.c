@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 #include <stddef.h>               // offsetof()
@@ -326,3 +327,5 @@ PyInit_xxsubtype(void)
 {
     return PyModuleDef_Init(&xxsubtypemodule);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,5 +1,6 @@
 /* Python interpreter main program */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"          // _PyObject_CallNoArgs()
 #include "pycore_fileutils.h"     // struct _Py_stat_struct
@@ -825,3 +826,5 @@ Py_BytesMain(int argc, char **argv)
         .wchar_argv = NULL};
     return pymain_main(&args);
 }
+
+#undef _Python_MODULE_BUILDING

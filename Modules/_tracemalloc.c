@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_tracemalloc.h"  // _PyTraceMalloc_IsTracing
 
@@ -227,3 +228,5 @@ PyInit__tracemalloc(void)
 
     return mod;
 }
+
+#undef _Python_MODULE_BUILDING

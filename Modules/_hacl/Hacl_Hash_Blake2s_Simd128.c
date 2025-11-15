@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -1557,3 +1558,5 @@ Hacl_Hash_Blake2s_Simd128_hash_with_key_and_params(
   Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec128, void *);
 }
 
+
+#undef _Python_MODULE_BUILDING

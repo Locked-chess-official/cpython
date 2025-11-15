@@ -30,6 +30,7 @@ Copyright (c) Corporation for National Research Initiatives.
 
    ------------------------------------------------------------------------ */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_codecs.h"        // _PyCodec_Lookup()
 #include "pycore_unicodeobject.h" // _PyUnicode_EncodeCharmap
@@ -1135,3 +1136,5 @@ PyInit__codecs(void)
 {
     return PyModuleDef_Init(&codecsmodule);
 }
+
+#undef _Python_MODULE_BUILDING

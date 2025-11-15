@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "../_ssl.h"
 
@@ -32,3 +33,5 @@ _PySSL_UnicodeFromBIO(_sslmodulestate *state, BIO *bio, const char *error)
     }
     return PyUnicode_DecodeUTF8(data, size, error);
 }
+
+#undef _Python_MODULE_BUILDING

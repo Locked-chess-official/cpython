@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -1403,3 +1404,5 @@ void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
   Hacl_Hash_MD5_hash_oneshot(output, input, input_len);
 }
 
+
+#undef _Python_MODULE_BUILDING

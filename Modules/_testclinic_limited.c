@@ -1,3 +1,4 @@
+
 // _testclinic_limited can built with the Py_BUILD_CORE_BUILTIN macro defined
 // if one of the Modules/Setup files asks to build it as "static" (gh-109723).
 #undef Py_BUILD_CORE
@@ -13,6 +14,7 @@
 /* Always enable assertions */
 #undef NDEBUG
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 
@@ -151,3 +153,5 @@ PyInit__testclinic_limited(void)
 #endif
     return m;
 }
+
+#undef _Python_MODULE_BUILDING

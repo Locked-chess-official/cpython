@@ -9,6 +9,7 @@
 #  define Py_LIMITED_API 0x030d0000
 #endif
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #if defined(HAVE_UUID_H)
   // AIX, FreeBSD, libuuid with pkgconf
@@ -152,3 +153,5 @@ PyInit__uuid(void)
 {
     return PyModuleDef_Init(&uuidmodule);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 
 /* Signal module -- many thanks to Lance Ellinghaus */
 
@@ -2078,3 +2079,5 @@ void *_PyOS_SigintEvent(void)
     return state->sigint_event;
 }
 #endif
+
+#undef _Python_MODULE_BUILDING

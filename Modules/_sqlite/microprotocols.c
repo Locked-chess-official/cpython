@@ -23,6 +23,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#define _Python_MODULE_BUILDING
 #include <Python.h>
 
 #include "cursor.h"
@@ -141,3 +142,5 @@ pysqlite_microprotocols_adapt(pysqlite_state *state, PyObject *obj,
     PyErr_SetString(state->ProgrammingError, "can't adapt");
     return NULL;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -171,3 +172,5 @@ fnt_dif2(mpd_uint_t a[], mpd_size_t n, struct fnt_params *tparams)
 
     bitreverse_permute(a, n);
 }
+
+#undef _Python_MODULE_BUILDING

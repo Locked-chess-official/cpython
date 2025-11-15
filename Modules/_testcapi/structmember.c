@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include <stddef.h>   // for offsetof()
 
@@ -218,3 +219,5 @@ _PyTestCapi_Init_Structmember(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

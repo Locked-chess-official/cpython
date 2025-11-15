@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_ceval.h"         // _PyEval_IsGILEnabled()
 #include "pycore_initconfig.h"    // _PyStatus_ERR()
@@ -1544,3 +1545,5 @@ void _PyFaulthandler_Fini(void)
     }
 #endif
 }
+
+#undef _Python_MODULE_BUILDING

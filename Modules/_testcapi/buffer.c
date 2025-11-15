@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* Test PEP 688 - Buffers */
 
 #include "parts.h"
@@ -109,3 +110,5 @@ _PyTestCapi_Init_Buffer(PyObject *m) {
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

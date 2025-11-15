@@ -7,6 +7,7 @@
     Mostly written by Amaury Forgeot d'Arc
 */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_abstract.h"      // _PyNumber_Index()
 #include "pycore_interp.h"        // _PyInterpreterState_GetConfig()
@@ -745,3 +746,5 @@ PyInit__io(void)
 {
     return PyModuleDef_Init(&_PyIO_Module);
 }
+
+#undef _Python_MODULE_BUILDING

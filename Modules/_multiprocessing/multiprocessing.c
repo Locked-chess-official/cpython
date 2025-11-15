@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * Extension module used by multiprocessing package
  *
@@ -293,3 +294,5 @@ PyInit__multiprocessing(void)
 {
     return PyModuleDef_Init(&multiprocessing_module);
 }
+
+#undef _Python_MODULE_BUILDING

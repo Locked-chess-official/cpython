@@ -1,6 +1,7 @@
 /* C Extension module to test all aspects of PEP-3118.
    Written by Stefan Krah. */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 
@@ -2929,3 +2930,5 @@ PyInit__testbuffer(void)
     }
     return mod;
 }
+
+#undef _Python_MODULE_BUILDING

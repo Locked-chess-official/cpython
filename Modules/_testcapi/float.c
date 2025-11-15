@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // clinic/float.c.h uses internal pycore_modsupport.h API
 #define PYTESTCAPI_NEED_INTERNAL_API
 
@@ -173,3 +174,5 @@ _PyTestCapi_Init_Float(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

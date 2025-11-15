@@ -70,6 +70,7 @@
 #  define Py_LIMITED_API 0x030d0000
 #endif
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include <string.h>
 
@@ -497,3 +498,5 @@ PyInit_xxlimited(void)
 {
     return PyModuleDef_Init(&xxmodule);
 }
+
+#undef _Python_MODULE_BUILDING

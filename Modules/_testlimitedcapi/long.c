@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "pyconfig.h"   // Py_GIL_DISABLED
 #ifndef Py_GIL_DISABLED
    // Need limited C API 3.14 to test PyLong_AsInt64()
@@ -846,3 +847,5 @@ _PyTestLimitedCAPI_Init_Long(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

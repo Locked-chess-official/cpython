@@ -3,9 +3,10 @@
  *  upon normal program termination.
  *
  *   Translated from atexit.py by Collin Winter.
- +   Copyright 2007 Python Software Foundation.
+ *   Copyright 2007 Python Software Foundation.
  */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_atexit.h"        // export _Py_AtExit()
 #include "pycore_initconfig.h"    // _PyStatus_NO_MEMORY
@@ -341,3 +342,5 @@ PyInit_atexit(void)
 {
     return PyModuleDef_Init(&atexitmodule);
 }
+
+#undef _Python_MODULE_BUILDING

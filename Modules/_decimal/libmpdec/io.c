@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -1604,3 +1605,5 @@ mpd_print(const mpd_t *dec)
         fputs("mpd_fprint: output error\n", stderr); /* GCOV_NOT_REACHED */
     }
 }
+
+#undef _Python_MODULE_BUILDING

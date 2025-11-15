@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * Tests for Python/getargs.c and Python/modsupport.c;
  * APIs that parse and build arguments.
@@ -823,3 +824,5 @@ _PyTestCapi_Init_GetArgs(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

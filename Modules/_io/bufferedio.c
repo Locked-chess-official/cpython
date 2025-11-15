@@ -7,6 +7,7 @@
     Written by Amaury Forgeot d'Arc and Antoine Pitrou
 */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"                // _PyObject_CallNoArgs()
 #include "pycore_fileutils.h"           // _PyFile_Flush
@@ -2783,3 +2784,5 @@ PyType_Spec _Py_bufferedrandom_spec = {
               Py_TPFLAGS_IMMUTABLETYPE),
     .slots = bufferedrandom_slots,
 };
+
+#undef _Python_MODULE_BUILDING

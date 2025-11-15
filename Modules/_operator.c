@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_modsupport.h"    // _PyArg_NoKwnames()
 #include "pycore_moduleobject.h"  // _PyModule_GetState()
@@ -2030,3 +2031,5 @@ PyInit__operator(void)
 {
     return PyModuleDef_Init(&operatormodule);
 }
+
+#undef _Python_MODULE_BUILDING

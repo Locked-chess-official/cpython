@@ -1,5 +1,6 @@
 /* Author: Daniel Stutzbach */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_BEGIN_SUPPRESS_IPH
 #include "pycore_object.h"        // _PyObject_GC_UNTRACK()
@@ -1336,3 +1337,5 @@ PyType_Spec _Py_fileio_spec = {
               Py_TPFLAGS_IMMUTABLETYPE),
     .slots = fileio_slots,
 };
+
+#undef _Python_MODULE_BUILDING

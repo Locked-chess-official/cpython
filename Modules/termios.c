@@ -6,6 +6,7 @@
 #ifndef Py_GIL_DISABLED
 #  define Py_LIMITED_API 0x030d0000
 #endif
+#define _Python_MODULE_BUILDING
 
 #include "Python.h"
 
@@ -1397,3 +1398,5 @@ PyMODINIT_FUNC PyInit_termios(void)
 {
     return PyModuleDef_Init(&termiosmodule);
 }
+
+#undef _Python_MODULE_BUILDING

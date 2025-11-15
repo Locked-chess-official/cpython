@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // Use pycore_bytes.h
 #define PYTESTCAPI_NEED_INTERNAL_API
 
@@ -379,3 +380,5 @@ _PyTestCapi_Init_Bytes(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

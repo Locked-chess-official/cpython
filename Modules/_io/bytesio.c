@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_critical_section.h"  // Py_BEGIN_CRITICAL_SECTION()
 #include "pycore_object.h"
@@ -1253,3 +1254,5 @@ PyType_Spec _Py_bytesiobuf_spec = {
               Py_TPFLAGS_IMMUTABLETYPE | Py_TPFLAGS_DISALLOW_INSTANTIATION),
     .slots = bytesiobuf_slots,
 };
+
+#undef _Python_MODULE_BUILDING

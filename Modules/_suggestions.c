@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_pyerrors.h"
 #include "clinic/_suggestions.c.h"
@@ -68,3 +69,5 @@ static struct PyModuleDef suggestions_module = {
 PyMODINIT_FUNC PyInit__suggestions(void) {
     return PyModuleDef_Init(&suggestions_module);
 }
+
+#undef _Python_MODULE_BUILDING

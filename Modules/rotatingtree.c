@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "rotatingtree.h"
 
@@ -123,3 +124,5 @@ RotatingTree_Enum(rotating_node_t *root, rotating_tree_enum_fn enumfn,
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

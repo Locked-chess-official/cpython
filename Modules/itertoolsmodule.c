@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"              // _PyObject_CallNoArgs()
 #include "pycore_ceval.h"             // _PyEval_GetBuiltin()
@@ -4107,3 +4108,5 @@ PyInit_itertools(void)
 {
     return PyModuleDef_Init(&itertoolsmodule);
 }
+
+#undef _Python_MODULE_BUILDING

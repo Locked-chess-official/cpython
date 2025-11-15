@@ -46,6 +46,7 @@
    USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#define _Python_MODULE_BUILDING
 #include "expat_config.h"
 
 #include <stddef.h>
@@ -1670,3 +1671,5 @@ XmlInitUnknownEncodingNS(void *mem, const int *table, CONVERTER convert,
 }
 
 #endif /* XML_NS */
+
+#undef _Python_MODULE_BUILDING

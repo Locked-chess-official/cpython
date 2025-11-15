@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "pyconfig.h"   // Py_GIL_DISABLED
 // Need limited C API version 3.15 for PySys_GetAttr() etc
 #if !defined(Py_GIL_DISABLED) && !defined(Py_LIMITED_API)
@@ -127,3 +128,5 @@ _PyTestLimitedCAPI_Init_Sys(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* Test version macros in the limited API */
 
 #include "pyconfig.h"  // Py_GIL_DISABLED
@@ -75,3 +76,5 @@ _PyTestLimitedCAPI_Init_Version(PyObject *m)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

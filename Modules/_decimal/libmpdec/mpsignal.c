@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <stddef.h>
@@ -965,3 +966,5 @@ mpd_invroot(mpd_t *result, const mpd_t *a, mpd_context_t *ctx)
     mpd_qinvroot(result, a, ctx, &status);
     mpd_addstatus_raise(ctx, status);
 }
+
+#undef _Python_MODULE_BUILDING

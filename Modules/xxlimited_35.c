@@ -11,6 +11,7 @@
 #  define Py_LIMITED_API 0x03050000
 #endif
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 /* Xxo objects */
@@ -330,3 +331,5 @@ PyInit_xxlimited_35(void)
 {
     return PyModuleDef_Init(&xxmodule);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -9,6 +9,7 @@
 #  define Py_LIMITED_API 0x030d0000
 #endif
 
+#define _Python_MODULE_BUILDING
 #include <Python.h>
 
 static PyModuleDef_Slot shared_slots[] = {
@@ -66,3 +67,5 @@ static struct PyModuleDef _barmodule = {
 PyMODINIT_FUNC PyInit__testimportmultiple_bar(void){
     return PyModuleDef_Init(&_barmodule);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -6,6 +6,7 @@
     Written by Steve Dower
 */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_BEGIN_SUPPRESS_IPH
 #include "pycore_object.h"        // _PyObject_GC_UNTRACK()
@@ -1262,3 +1263,5 @@ PyType_Spec _Py_winconsoleio_spec = {
 };
 
 #endif /* HAVE_WINDOWS_CONSOLE_IO */
+
+#undef _Python_MODULE_BUILDING

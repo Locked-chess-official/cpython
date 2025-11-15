@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // C Extension module to test pycore_lock.h API
 
 #include "parts.h"
@@ -525,3 +526,5 @@ _PyTestInternalCapi_Init_Lock(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

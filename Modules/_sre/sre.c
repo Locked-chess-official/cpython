@@ -38,6 +38,7 @@
 static const char copyright[] =
     " SRE 2.2.2 Copyright (c) 1997-2002 by Secret Labs AB ";
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_critical_section.h" // Py_BEGIN_CRITICAL_SECTION
 #include "pycore_dict.h"             // _PyDict_Next()
@@ -3455,3 +3456,5 @@ PyInit__sre(void)
 
 /* vim:ts=4:sw=4:et
 */
+
+#undef _Python_MODULE_BUILDING

@@ -9,6 +9,7 @@
 
 // --- Python includes ------------------------------------------------------
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 #ifdef __VXWORKS__
@@ -18805,3 +18806,5 @@ INITFUNC(void)
 {
     return PyModuleDef_Init(&posixmodule);
 }
+
+#undef _Python_MODULE_BUILDING

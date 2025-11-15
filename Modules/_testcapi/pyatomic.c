@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * C Extension module to smoke test pyatomic.h API.
  *
@@ -190,3 +191,5 @@ _PyTestCapi_Init_PyAtomic(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

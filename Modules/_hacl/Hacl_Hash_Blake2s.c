@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -1671,3 +1672,5 @@ Hacl_Hash_Blake2s_hash_with_key_and_params(
   Lib_Memzero0_memzero(b, 16U, uint32_t, void *);
 }
 
+
+#undef _Python_MODULE_BUILDING

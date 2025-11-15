@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_jp.c: Codecs collection for Japanese encodings
  *
@@ -768,3 +769,5 @@ END_CODECS_LIST
 #undef CODEC_CUSTOM
 
 I_AM_A_MODULE_FOR(jp)
+
+#undef _Python_MODULE_BUILDING

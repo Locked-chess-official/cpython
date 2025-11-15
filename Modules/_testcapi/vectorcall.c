@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // clinic/vectorcall.c.h uses internal pycore_modsupport.h API
 #define PYTESTCAPI_NEED_INTERNAL_API
 
@@ -407,3 +408,5 @@ _PyTestCapi_Init_Vectorcall(PyObject *m) {
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

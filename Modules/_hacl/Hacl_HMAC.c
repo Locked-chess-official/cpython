@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -1565,3 +1566,5 @@ Hacl_HMAC_compute_blake2b_32(
   Hacl_Hash_Blake2b_finish(64U, dst, s0);
 }
 
+
+#undef _Python_MODULE_BUILDING

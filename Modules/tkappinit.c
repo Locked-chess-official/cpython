@@ -12,6 +12,7 @@
    it explicitly, e.g. tkapp.eval("load {} Blt").
  */
 
+#define _Python_MODULE_BUILDING
 #include <string.h>
 #include <tcl.h>
 #include <tk.h>
@@ -90,3 +91,5 @@ Tcl_AppInit(Tcl_Interp *interp)
 #endif
     return TCL_OK;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -6,6 +6,7 @@
 #  define Py_LIMITED_API 0x030d0000
 #endif
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "clinic/_statisticsmodule.c.h"
 
@@ -157,3 +158,5 @@ PyInit__statistics(void)
 {
     return PyModuleDef_Init(&statisticsmodule);
 }
+
+#undef _Python_MODULE_BUILDING

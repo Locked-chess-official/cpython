@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include "util.h"
 
@@ -150,3 +151,5 @@ _PyTestCapi_Init_Tuple(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #if defined(__has_include)
 #if __has_include("config.h")
 #include "config.h"
@@ -70,3 +71,5 @@ void Lib_Memzero0_memzero0(void *dst, uint64_t len) {
       dst_[i++] = 0U;
   #endif
 }
+
+#undef _Python_MODULE_BUILDING

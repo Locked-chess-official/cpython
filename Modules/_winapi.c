@@ -34,6 +34,7 @@
 /* Licensed to PSF under a Contributor Agreement. */
 /* See https://www.python.org/2.4/license for licensing details. */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_moduleobject.h"  // _PyModule_GetState()
 #include "pycore_pylifecycle.h"   // _Py_IsInterpreterFinalizing()
@@ -3269,3 +3270,5 @@ PyInit__winapi(void)
 {
     return PyModuleDef_Init(&winapi_module);
 }
+
+#undef _Python_MODULE_BUILDING

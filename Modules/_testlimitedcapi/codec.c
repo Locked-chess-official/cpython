@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "pyconfig.h"   // Py_GIL_DISABLED
 
 // Need limited C API version 3.5 for PyCodec_NameReplaceErrors()
@@ -27,3 +28,5 @@ _PyTestLimitedCAPI_Init_Codec(PyObject *module)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

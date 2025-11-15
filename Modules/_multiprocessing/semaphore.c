@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * A type which wraps a semaphore
  *
@@ -797,3 +798,5 @@ _PyMp_sem_unlink(const char *name)
 }
 
 #endif // HAVE_MP_SEMAPHORE
+
+#undef _Python_MODULE_BUILDING

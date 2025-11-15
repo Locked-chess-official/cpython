@@ -39,6 +39,7 @@
    USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#define _Python_MODULE_BUILDING
 #ifdef XML_TOK_IMPL_C
 
 #  ifndef IS_INVALID_CHAR // i.e. for UTF-16 and XML_MIN_SIZE not defined
@@ -1817,3 +1818,5 @@ PREFIX(updatePosition)(const ENCODING *enc, const char *ptr, const char *end,
 #  undef CHECK_NMSTRT_CASES
 
 #endif /* XML_TOK_IMPL_C */
+
+#undef _Python_MODULE_BUILDING

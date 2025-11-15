@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -75,3 +76,5 @@ main(int argc, char **argv)
 }
 
 
+
+#undef _Python_MODULE_BUILDING

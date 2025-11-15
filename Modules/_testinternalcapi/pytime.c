@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* Test pycore_time.h */
 
 #include "parts.h"
@@ -259,3 +260,5 @@ _PyTestInternalCapi_Init_PyTime(PyObject *m)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_hk.c: Codecs collection for encodings from Hong Kong
  *
@@ -188,3 +189,5 @@ BEGIN_CODECS_LIST(1)
 END_CODECS_LIST
 
 I_AM_A_MODULE_FOR(hk)
+
+#undef _Python_MODULE_BUILDING

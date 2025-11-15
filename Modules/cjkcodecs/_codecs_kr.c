@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_kr.c: Codecs collection for Korean encodings
  *
@@ -466,3 +467,5 @@ BEGIN_CODECS_LIST(3)
 END_CODECS_LIST
 
 I_AM_A_MODULE_FOR(kr)
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_tw.c: Codecs collection for Taiwan's encodings
  *
@@ -141,3 +142,5 @@ BEGIN_CODECS_LIST(2)
 END_CODECS_LIST
 
 I_AM_A_MODULE_FOR(tw)
+
+#undef _Python_MODULE_BUILDING

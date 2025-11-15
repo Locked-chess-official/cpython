@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include <stddef.h>               // offsetof()
 
@@ -1447,3 +1448,5 @@ _PyTestCapi_Init_Heaptype(PyObject *m) {
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

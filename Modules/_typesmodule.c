@@ -1,5 +1,6 @@
 /* _types module */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_descrobject.h"   // _PyMethodWrapper_Type
 #include "pycore_namespace.h"     // _PyNamespace_Type
@@ -71,3 +72,5 @@ PyInit__types(void)
 {
     return PyModuleDef_Init(&typesmodule);
 }
+
+#undef _Python_MODULE_BUILDING

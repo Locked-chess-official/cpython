@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"          // _PyObject_CallNoArgs()
 #include "pycore_dict.h"          // _PyDict_GetItem_KnownHash()
@@ -2874,3 +2875,5 @@ PyInit__collections(void)
 {
     return PyModuleDef_Init(&_collectionsmodule);
 }
+
+#undef _Python_MODULE_BUILDING

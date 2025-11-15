@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
  * _codecs_cn.c: Codecs collection for Mainland Chinese encodings
  *
@@ -468,3 +469,5 @@ BEGIN_CODECS_LIST(4)
 END_CODECS_LIST
 
 I_AM_A_MODULE_FOR(cn)
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #define PYTESTCAPI_NEED_INTERNAL_API
 #include "parts.h"
 #include "util.h"
@@ -111,3 +112,5 @@ _PyTestCapi_Init_Run(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

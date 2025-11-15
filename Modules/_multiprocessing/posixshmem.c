@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /*
 posixshmem - A Python extension that provides shm_open() and shm_unlink()
 */
@@ -149,3 +150,5 @@ PyInit__posixshmem(void)
 {
     return PyModuleDef_Init(&_posixshmemmodule);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -178,3 +179,5 @@ crt3(mpd_uint_t *x1, mpd_uint_t *x2, mpd_uint_t *x3, mpd_size_t rsize)
 
     assert(carry[0] == 0 && carry[1] == 0 && carry[2] == 0);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_dict.h"              // _PyDict_DelItemIf()
 #include "pycore_object.h"            // _PyObject_GET_WEAKREFS_LISTPTR()
@@ -185,3 +186,5 @@ PyInit__weakref(void)
 {
     return PyModuleDef_Init(&weakrefmodule);
 }
+
+#undef _Python_MODULE_BUILDING

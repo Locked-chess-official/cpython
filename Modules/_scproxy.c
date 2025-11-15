@@ -4,6 +4,8 @@
  */
 
 // Need limited C API version 3.13 for Py_mod_gil
+
+#define _Python_MODULE_BUILDING
 #include "pyconfig.h"   // Py_GIL_DISABLED
 #ifndef Py_GIL_DISABLED
 #  define Py_LIMITED_API 0x030d0000
@@ -256,3 +258,5 @@ PyInit__scproxy(void)
 {
     return PyModuleDef_Init(&_scproxy_module);
 }
+
+#undef _Python_MODULE_BUILDING

@@ -1,5 +1,6 @@
 /* Return the initial module search path. */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_abspath()
 #include "pycore_initconfig.h"    // _PyStatus_EXCEPTION()
@@ -979,3 +980,5 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
 
     return _PyStatus_OK();
 }
+
+#undef _Python_MODULE_BUILDING

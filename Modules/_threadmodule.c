@@ -1,6 +1,7 @@
 /* Thread module */
 /* Interface to Sjoerd's portable C thread library */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _PyFile_Flush
 #include "pycore_interp.h"        // _PyInterpreterState.threads.count
@@ -2879,3 +2880,5 @@ PyInit__thread(void)
 {
     return PyModuleDef_Init(&thread_module);
 }
+
+#undef _Python_MODULE_BUILDING

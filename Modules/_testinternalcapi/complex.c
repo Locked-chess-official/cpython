@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include "../_testcapi/util.h"
 
@@ -64,3 +65,5 @@ _PyTestInternalCapi_Init_Complex(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

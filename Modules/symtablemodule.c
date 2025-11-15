@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_pythonrun.h"     // _Py_SourceAsString()
 #include "pycore_symtable.h"      // struct symtable
@@ -128,3 +129,5 @@ PyInit__symtable(void)
 {
     return PyModuleDef_Init(&symtablemodule);
 }
+
+#undef _Python_MODULE_BUILDING

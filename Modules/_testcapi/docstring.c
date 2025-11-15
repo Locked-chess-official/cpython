@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 
@@ -205,3 +206,5 @@ _PyTestCapi_Init_Docstring(PyObject *mod)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

@@ -26,6 +26,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -130,3 +131,5 @@ _mpd_init_w3table(mpd_uint_t w3table[3], int sign, int modnum)
     w3table[1] = kernel;
     w3table[2] = POWMOD(kernel, 2);
 }
+
+#undef _Python_MODULE_BUILDING

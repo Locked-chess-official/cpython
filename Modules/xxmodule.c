@@ -13,6 +13,7 @@
 
 /* Xxo objects */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 
 static PyObject *ErrorObject;
@@ -411,3 +412,5 @@ PyInit_xx(void)
 {
     return PyModuleDef_Init(&xxmodule);
 }
+
+#undef _Python_MODULE_BUILDING

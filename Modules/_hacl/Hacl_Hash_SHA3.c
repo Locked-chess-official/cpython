@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -2455,3 +2456,5 @@ Hacl_Hash_SHA3_shake128_squeeze_nblocks(
   }
 }
 
+
+#undef _Python_MODULE_BUILDING

@@ -64,6 +64,7 @@
    USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#define _Python_MODULE_BUILDING
 #define XML_BUILDING_EXPAT 1
 
 #include "expat_config.h"
@@ -9214,3 +9215,5 @@ getDebugLevel(const char *variableName, unsigned long defaultDebugLevel) {
 
   return debugLevel;
 }
+
+#undef _Python_MODULE_BUILDING

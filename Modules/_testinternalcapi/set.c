@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 #include "../_testcapi/util.h"  // NULLABLE, RETURN_INT
 
@@ -61,3 +62,5 @@ _PyTestInternalCapi_Init_Set(PyObject *m)
     }
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

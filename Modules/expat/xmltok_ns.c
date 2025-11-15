@@ -34,6 +34,7 @@
    USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#define _Python_MODULE_BUILDING
 #ifdef XML_TOK_NS_C
 
 const ENCODING *
@@ -120,3 +121,5 @@ NS(XmlParseXmlDecl)(int isGeneralTextEntity, const ENCODING *enc,
 }
 
 #endif /* XML_TOK_NS_C */
+
+#undef _Python_MODULE_BUILDING

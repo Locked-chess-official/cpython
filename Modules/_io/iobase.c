@@ -8,6 +8,7 @@
 */
 
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_call.h"          // _PyObject_CallMethod()
 #include "pycore_fileutils.h"           // _PyFile_Flush
@@ -1052,3 +1053,5 @@ PyType_Spec _Py_rawiobase_spec = {
               Py_TPFLAGS_IMMUTABLETYPE),
     .slots = rawiobase_slots,
 };
+
+#undef _Python_MODULE_BUILDING

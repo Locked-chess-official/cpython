@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* MIT License
  *
  * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
@@ -2524,3 +2525,5 @@ Hacl_Streaming_HMAC_agile_state
   KRML_HOST_EXIT(255U);
 }
 
+
+#undef _Python_MODULE_BUILDING

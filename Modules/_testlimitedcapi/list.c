@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // Need limited C API version 3.13 for PyList_GetItemRef()
 #include "pyconfig.h"   // Py_GIL_DISABLED
 #if !defined(Py_GIL_DISABLED) && !defined(Py_LIMITED_API)
@@ -173,3 +174,5 @@ _PyTestLimitedCAPI_Init_List(PyObject *m)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

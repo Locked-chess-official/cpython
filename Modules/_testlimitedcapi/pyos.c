@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include "parts.h"
 
 
@@ -58,3 +59,5 @@ _PyTestLimitedCAPI_Init_PyOS(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

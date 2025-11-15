@@ -1,5 +1,6 @@
 /* Time module */
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_BEGIN_SUPPRESS_IPH
 #include "pycore_moduleobject.h"  // _PyModule_GetState()
@@ -2393,3 +2394,5 @@ error:
     return -1;
 #endif
 }
+
+#undef _Python_MODULE_BUILDING

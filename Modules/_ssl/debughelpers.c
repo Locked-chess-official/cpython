@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 /* Debug helpers */
 
 #ifndef SSL3_MT_CHANGE_CIPHER_SPEC
@@ -223,3 +224,5 @@ _PySSLContext_set_keylog_filename(PyObject *op, PyObject *arg,
     SSL_CTX_set_keylog_callback(self->ctx, _PySSL_keylog_callback);
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

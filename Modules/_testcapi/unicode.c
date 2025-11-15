@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 #include <stddef.h>               // ptrdiff_t
 
 #include "parts.h"
@@ -598,3 +599,5 @@ _PyTestCapi_Init_Unicode(PyObject *m) {
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING

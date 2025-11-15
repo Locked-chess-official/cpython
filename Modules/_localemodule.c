@@ -9,6 +9,7 @@ This software comes with no warranty. Use at your own risk.
 
 ******************************************************************/
 
+#define _Python_MODULE_BUILDING
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_GetLocaleconvNumeric()
 #include "pycore_pymem.h"         // _PyMem_Strdup()
@@ -1116,3 +1117,5 @@ c-basic-offset: 4
 indent-tabs-mode: nil
 End:
 */
+
+#undef _Python_MODULE_BUILDING

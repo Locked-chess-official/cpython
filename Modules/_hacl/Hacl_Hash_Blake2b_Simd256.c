@@ -23,6 +23,7 @@
  */
 
 
+#define _Python_MODULE_BUILDING
 #include "internal/Hacl_Hash_Blake2b_Simd256.h"
 
 #include "Hacl_Streaming_Types.h"
@@ -1597,3 +1598,5 @@ Hacl_Hash_Blake2b_Simd256_hash_with_key_and_params(
   Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec256, void *);
 }
 
+
+#undef _Python_MODULE_BUILDING

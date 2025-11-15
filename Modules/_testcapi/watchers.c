@@ -1,3 +1,4 @@
+#define _Python_MODULE_BUILDING
 // clinic/watchers.c.h uses internal pycore_modsupport.h API
 #define PYTESTCAPI_NEED_INTERNAL_API
 
@@ -867,3 +868,5 @@ _PyTestCapi_Init_Watchers(PyObject *mod)
 
     return 0;
 }
+
+#undef _Python_MODULE_BUILDING
