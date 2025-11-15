@@ -9,12 +9,12 @@
 #define Py_PYCONFIG_WARNING_H
 
 /* Cross-compiler warning macro */
-#if defined(__GNUC__) || defined(__clang__)
-#  define _Py_Config_Macro_Warning(msg) __attribute__((deprecated(msg)))
+#if defined(__clang__) || defined(__GNUC__)
+    #define _Py_Config_Macro_Warning(msg) _Pragma("GCC warning \"" msg "\"")
 #elif defined(_MSC_VER)
-#  define _Py_Config_Macro_Warning(msg) __declspec(deprecated(msg))
+    #define _Py_Config_Macro_Warning(msg) __pragma(message("warning: " msg))
 #else
-#  define _Py_Config_Macro_Warning(msg)
+    #define _Py_Config_Macro_Warning(msg)
 #endif
 
 #undef HAVE_X509_VERIFY_PARAM_SET1_HOST

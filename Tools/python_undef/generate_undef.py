@@ -231,12 +231,12 @@ def generate_python_undef_header(pyconfig_path: str, output_path: str|None=None,
 #ifndef Py_PYCONFIG_WARNING_H
 #define Py_PYCONFIG_WARNING_H
 
-#if defined(__GNUC__) || defined(__clang__)
-#  define _Py_Config_Macro_Warning(msg) __attribute__((deprecated(msg)))
+#if defined(__clang__) || defined(__GNUC__)
+    #define _Py_Config_Macro_Warning(msg) _Pragma("GCC warning \"" msg "\"")
 #elif defined(_MSC_VER)
-#  define _Py_Config_Macro_Warning(msg) __declspec(deprecated(msg))
+    #define _Py_Config_Macro_Warning(msg) __pragma(message("warning: " msg))
 #else
-#  define _Py_Config_Macro_Warning(msg)
+    #define _Py_Config_Macro_Warning(msg)
 #endif
 
 """
