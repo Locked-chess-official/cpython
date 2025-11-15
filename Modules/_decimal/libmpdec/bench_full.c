@@ -25,7 +25,7 @@
  * SUCH DAMAGE.
  */
 
- 
+
 #define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 

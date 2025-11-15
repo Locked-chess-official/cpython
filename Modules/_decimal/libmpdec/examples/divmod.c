@@ -26,7 +26,7 @@
  * SUCH DAMAGE.
  */
 
- 
+
 #define _Python_MODULE_BUILDING
 #include <stdio.h>
 #include <stdlib.h>
