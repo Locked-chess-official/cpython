@@ -30,6 +30,10 @@
 #define LIBMPDEC_MPDECIMAL_H_
 
 
+#ifndef _Python_MODULE_BUILDING
+  #define _Python_MODULE_BUILDING
+#endif
+
 #ifndef _MSC_VER
   #include "pyconfig.h"
 #endif

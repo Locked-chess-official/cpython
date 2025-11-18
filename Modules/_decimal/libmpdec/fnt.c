@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -78,5 +76,3 @@ std_inv_fnt(mpd_uint_t *a, mpd_size_t n, int modnum)
     mpd_free(tparams);
     return 1;
 }
-
-#undef _Python_MODULE_BUILDING

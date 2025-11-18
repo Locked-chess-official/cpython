@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 #include "basearith.h"
 #include "constants.h"
@@ -129,5 +127,3 @@ const char * const mpd_clamp_string[MPD_CLAMP_GUARD] = {
     "CLAMP_DEFAULT",
     "CLAMP_IEEE_754"
 };
-
-#undef _Python_MODULE_BUILDING

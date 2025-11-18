@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -348,5 +346,3 @@ mpd_realloc_dyn_cxx(mpd_t *result, mpd_ssize_t nwords)
 
     return 1;
 }
-
-#undef _Python_MODULE_BUILDING

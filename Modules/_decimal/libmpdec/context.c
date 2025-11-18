@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <signal.h>
@@ -285,5 +283,3 @@ mpd_addstatus_raise(mpd_context_t *ctx, uint32_t flags)
         mpd_traphandler(ctx);
     }
 }
-
-#undef _Python_MODULE_BUILDING

@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -77,7 +75,3 @@ main(int argc, char **argv)
 
 	return 0;
 }
-
-
-
-#undef _Python_MODULE_BUILDING

@@ -6,6 +6,11 @@ preserve
 #  include "pycore_gc.h"          // PyGC_Head
 #  include "pycore_runtime.h"     // _Py_ID()
 #endif
+
+#ifndef _Python_MODULE_BUILDING
+  #define _Python_MODULE_BUILDING
+#endif
+
 #include "pycore_abstract.h"      // _PyNumber_Index()
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 

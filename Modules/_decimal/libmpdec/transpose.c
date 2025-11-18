@@ -25,8 +25,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 
 #include <assert.h>
@@ -275,5 +273,3 @@ transpose_pow2(mpd_uint_t *matrix, mpd_size_t rows, mpd_size_t cols)
 
     return 1;
 }
-
-#undef _Python_MODULE_BUILDING

@@ -59,7 +59,9 @@ def is_standard_python_macro(macro_name: str):
 
 def generate_undef_code(macro_name: str):
     """Generate the code to undefine a macro."""
-    return f"""#undef {macro_name}
+    return f"""#ifdef {macro_name}
+#undef {macro_name}
+#endif
 #ifdef _Py_FORWARD_DEFINE_{macro_name}
 #undef _Py_FORWARD_DEFINE_{macro_name}
 #pragma pop_macro("{macro_name}")

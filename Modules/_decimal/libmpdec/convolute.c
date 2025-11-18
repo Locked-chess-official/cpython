@@ -26,8 +26,6 @@
  * SUCH DAMAGE.
  */
 
-
-#define _Python_MODULE_BUILDING
 #include "mpdecimal.h"
 #include "bits.h"
 #include "constants.h"
@@ -171,5 +169,3 @@ fnt_autoconvolute(mpd_uint_t *c1, mpd_size_t n, int modnum)
 
     return 1;
 }
-
-#undef _Python_MODULE_BUILDING
