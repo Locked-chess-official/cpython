@@ -7,14 +7,14 @@
 extern "C" {
 #endif
 
-PyAPI_FUNC(PyObject *) Py_CompileString(const char *, const char *, int);
+PyAPI_FUNC(PyObject *) Py_CompileString(const char *, const char *, int) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyErr_Print(void);
-PyAPI_FUNC(void) PyErr_PrintEx(int);
-PyAPI_FUNC(void) PyErr_Display(PyObject *, PyObject *, PyObject *);
+PyAPI_FUNC(void) PyErr_Print(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyErr_PrintEx(int) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyErr_Display(PyObject *, PyObject *, PyObject *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030C0000
-PyAPI_FUNC(void) PyErr_DisplayException(PyObject *);
+PyAPI_FUNC(void) PyErr_DisplayException(PyObject *) Py_NOEXCEPT;
 #endif
 
 
@@ -26,7 +26,7 @@ PyAPI_DATA(int) (*PyOS_InputHook)(void);
 #endif
 #ifdef USE_STACKCHECK
 /* Check that we aren't overflowing our stack */
-PyAPI_FUNC(int) PyOS_CheckStack(void);
+PyAPI_FUNC(int) PyOS_CheckStack(void) Py_NOEXCEPT;
 #endif
 
 

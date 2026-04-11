@@ -90,12 +90,12 @@ PyObject_{New, NewVar, Del}.
    the object gets initialized via PyObject_{Init, InitVar} after obtaining
    the raw memory.
 */
-PyAPI_FUNC(void *) PyObject_Malloc(size_t size);
+PyAPI_FUNC(void *) PyObject_Malloc(size_t size) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
-PyAPI_FUNC(void *) PyObject_Calloc(size_t nelem, size_t elsize);
+PyAPI_FUNC(void *) PyObject_Calloc(size_t nelem, size_t elsize) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(void *) PyObject_Realloc(void *ptr, size_t new_size);
-PyAPI_FUNC(void) PyObject_Free(void *ptr);
+PyAPI_FUNC(void *) PyObject_Realloc(void *ptr, size_t new_size) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyObject_Free(void *ptr) Py_NOEXCEPT;
 
 
 // Deprecated aliases only kept for backward compatibility.
@@ -114,9 +114,9 @@ PyAPI_FUNC(void) PyObject_Free(void *ptr);
  */
 
 /* Functions */
-PyAPI_FUNC(PyObject *) PyObject_Init(PyObject *, PyTypeObject *);
+PyAPI_FUNC(PyObject *) PyObject_Init(PyObject *, PyTypeObject *) Py_NOEXCEPT;
 PyAPI_FUNC(PyVarObject *) PyObject_InitVar(PyVarObject *,
-                                           PyTypeObject *, Py_ssize_t);
+                                           PyTypeObject *, Py_ssize_t) Py_NOEXCEPT;
 
 #define PyObject_INIT(op, typeobj) \
     PyObject_Init(_PyObject_CAST(op), (typeobj))
@@ -124,8 +124,8 @@ PyAPI_FUNC(PyVarObject *) PyObject_InitVar(PyVarObject *,
     PyObject_InitVar(_PyVarObject_CAST(op), (typeobj), (size))
 
 
-PyAPI_FUNC(PyObject *) _PyObject_New(PyTypeObject *);
-PyAPI_FUNC(PyVarObject *) _PyObject_NewVar(PyTypeObject *, Py_ssize_t);
+PyAPI_FUNC(PyObject *) _PyObject_New(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyVarObject *) _PyObject_NewVar(PyTypeObject *, Py_ssize_t) Py_NOEXCEPT;
 
 #define PyObject_New(type, typeobj) ((type *)_PyObject_New(typeobj))
 
@@ -147,43 +147,43 @@ PyAPI_FUNC(PyVarObject *) _PyObject_NewVar(PyTypeObject *, Py_ssize_t);
  */
 
 /* C equivalent of gc.collect(). */
-PyAPI_FUNC(Py_ssize_t) PyGC_Collect(void);
+PyAPI_FUNC(Py_ssize_t) PyGC_Collect(void) Py_NOEXCEPT;
 /* C API for controlling the state of the garbage collector */
-PyAPI_FUNC(int) PyGC_Enable(void);
-PyAPI_FUNC(int) PyGC_Disable(void);
-PyAPI_FUNC(int) PyGC_IsEnabled(void);
+PyAPI_FUNC(int) PyGC_Enable(void) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyGC_Disable(void) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyGC_IsEnabled(void) Py_NOEXCEPT;
 
 /* Test if a type has a GC head */
 #define PyType_IS_GC(t) PyType_HasFeature((t), Py_TPFLAGS_HAVE_GC)
 
-PyAPI_FUNC(PyVarObject *) _PyObject_GC_Resize(PyVarObject *, Py_ssize_t);
+PyAPI_FUNC(PyVarObject *) _PyObject_GC_Resize(PyVarObject *, Py_ssize_t) Py_NOEXCEPT;
 #define PyObject_GC_Resize(type, op, n) \
                 ( (type *) _PyObject_GC_Resize(_PyVarObject_CAST(op), (n)) )
 
 
 
-PyAPI_FUNC(PyObject *) _PyObject_GC_New(PyTypeObject *);
-PyAPI_FUNC(PyVarObject *) _PyObject_GC_NewVar(PyTypeObject *, Py_ssize_t);
+PyAPI_FUNC(PyObject *) _PyObject_GC_New(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyVarObject *) _PyObject_GC_NewVar(PyTypeObject *, Py_ssize_t) Py_NOEXCEPT;
 
 /* Tell the GC to track this object.
  *
  * See also private _PyObject_GC_TRACK() macro. */
-PyAPI_FUNC(void) PyObject_GC_Track(void *);
+PyAPI_FUNC(void) PyObject_GC_Track(void *) Py_NOEXCEPT;
 
 /* Tell the GC to stop tracking this object.
  *
  * See also private _PyObject_GC_UNTRACK() macro. */
-PyAPI_FUNC(void) PyObject_GC_UnTrack(void *);
+PyAPI_FUNC(void) PyObject_GC_UnTrack(void *) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyObject_GC_Del(void *);
+PyAPI_FUNC(void) PyObject_GC_Del(void *) Py_NOEXCEPT;
 
 #define PyObject_GC_New(type, typeobj) \
     _Py_CAST(type*, _PyObject_GC_New(typeobj))
 #define PyObject_GC_NewVar(type, typeobj, n) \
     _Py_CAST(type*, _PyObject_GC_NewVar((typeobj), (n)))
 
-PyAPI_FUNC(int) PyObject_GC_IsTracked(PyObject *);
-PyAPI_FUNC(int) PyObject_GC_IsFinalized(PyObject *);
+PyAPI_FUNC(int) PyObject_GC_IsTracked(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_GC_IsFinalized(PyObject *) Py_NOEXCEPT;
 
 /* Utility macro to help write tp_traverse functions.
  * To use this macro, the tp_traverse function must name its arguments

@@ -24,12 +24,12 @@ PyAPI_DATA(PyTypeObject) _PyWeakref_CallableProxyType;
 
 
 PyAPI_FUNC(PyObject *) PyWeakref_NewRef(PyObject *ob,
-                                        PyObject *callback);
+                                        PyObject *callback) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyWeakref_NewProxy(PyObject *ob,
-                                          PyObject *callback);
+                                          PyObject *callback) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030D0000
-PyAPI_FUNC(int) PyWeakref_GetRef(PyObject *ref, PyObject **pobj);
+PyAPI_FUNC(int) PyWeakref_GetRef(PyObject *ref, PyObject **pobj) Py_NOEXCEPT;
 #endif
 
 

@@ -9,11 +9,11 @@ extern "C" {
 PyAPI_FUNC(int) PySys_Audit(
     const char *event,
     const char *argFormat,
-    ...);
+    ...) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PySys_AuditTuple(
     const char *event,
-    PyObject *args);
+    PyObject *args) Py_NOEXCEPT;
 #endif
 
 

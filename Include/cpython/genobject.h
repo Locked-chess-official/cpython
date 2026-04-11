@@ -16,10 +16,10 @@ PyAPI_DATA(PyTypeObject) PyGen_Type;
 #define PyGen_Check(op) PyObject_TypeCheck((op), &PyGen_Type)
 #define PyGen_CheckExact(op) Py_IS_TYPE((op), &PyGen_Type)
 
-PyAPI_FUNC(PyObject *) PyGen_New(PyFrameObject *);
+PyAPI_FUNC(PyObject *) PyGen_New(PyFrameObject *) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyGen_NewWithQualName(PyFrameObject *,
-    PyObject *name, PyObject *qualname);
-PyAPI_FUNC(PyCodeObject *) PyGen_GetCode(PyGenObject *gen);
+    PyObject *name, PyObject *qualname) Py_NOEXCEPT;
+PyAPI_FUNC(PyCodeObject *) PyGen_GetCode(PyGenObject *gen) Py_NOEXCEPT;
 
 
 /* --- PyCoroObject ------------------------------------------------------- */
@@ -30,7 +30,7 @@ PyAPI_DATA(PyTypeObject) PyCoro_Type;
 
 #define PyCoro_CheckExact(op) Py_IS_TYPE((op), &PyCoro_Type)
 PyAPI_FUNC(PyObject *) PyCoro_New(PyFrameObject *,
-    PyObject *name, PyObject *qualname);
+    PyObject *name, PyObject *qualname) Py_NOEXCEPT;
 
 
 /* --- Asynchronous Generators -------------------------------------------- */
@@ -41,7 +41,7 @@ PyAPI_DATA(PyTypeObject) PyAsyncGen_Type;
 PyAPI_DATA(PyTypeObject) _PyAsyncGenASend_Type;
 
 PyAPI_FUNC(PyObject *) PyAsyncGen_New(PyFrameObject *,
-    PyObject *name, PyObject *qualname);
+    PyObject *name, PyObject *qualname) Py_NOEXCEPT;
 
 #define PyAsyncGen_CheckExact(op) Py_IS_TYPE((op), &PyAsyncGen_Type)
 

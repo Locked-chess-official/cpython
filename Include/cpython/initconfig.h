@@ -18,13 +18,13 @@ typedef struct {
     int exitcode;
 } PyStatus;
 
-PyAPI_FUNC(PyStatus) PyStatus_Ok(void);
-PyAPI_FUNC(PyStatus) PyStatus_Error(const char *err_msg);
-PyAPI_FUNC(PyStatus) PyStatus_NoMemory(void);
-PyAPI_FUNC(PyStatus) PyStatus_Exit(int exitcode);
-PyAPI_FUNC(int) PyStatus_IsError(PyStatus err);
-PyAPI_FUNC(int) PyStatus_IsExit(PyStatus err);
-PyAPI_FUNC(int) PyStatus_Exception(PyStatus err);
+PyAPI_FUNC(PyStatus) PyStatus_Ok(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyStatus) PyStatus_Error(const char *err_msg) Py_NOEXCEPT;
+PyAPI_FUNC(PyStatus) PyStatus_NoMemory(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyStatus) PyStatus_Exit(int exitcode) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyStatus_IsError(PyStatus err) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyStatus_IsExit(PyStatus err) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyStatus_Exception(PyStatus err) Py_NOEXCEPT;
 
 /* --- PyWideStringList ------------------------------------------------ */
 
@@ -36,10 +36,10 @@ typedef struct {
 } PyWideStringList;
 
 PyAPI_FUNC(PyStatus) PyWideStringList_Append(PyWideStringList *list,
-    const wchar_t *item);
+    const wchar_t *item) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyWideStringList_Insert(PyWideStringList *list,
     Py_ssize_t index,
-    const wchar_t *item);
+    const wchar_t *item) Py_NOEXCEPT;
 
 
 /* --- PyPreConfig ----------------------------------------------- */
@@ -123,8 +123,8 @@ typedef struct PyPreConfig {
     int allocator;
 } PyPreConfig;
 
-PyAPI_FUNC(void) PyPreConfig_InitPythonConfig(PyPreConfig *config);
-PyAPI_FUNC(void) PyPreConfig_InitIsolatedConfig(PyPreConfig *config);
+PyAPI_FUNC(void) PyPreConfig_InitPythonConfig(PyPreConfig *config) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyPreConfig_InitIsolatedConfig(PyPreConfig *config) Py_NOEXCEPT;
 
 
 /* --- PyConfig ---------------------------------------------- */
@@ -244,36 +244,36 @@ typedef struct PyConfig {
 #endif
 } PyConfig;
 
-PyAPI_FUNC(void) PyConfig_InitPythonConfig(PyConfig *config);
-PyAPI_FUNC(void) PyConfig_InitIsolatedConfig(PyConfig *config);
-PyAPI_FUNC(void) PyConfig_Clear(PyConfig *);
+PyAPI_FUNC(void) PyConfig_InitPythonConfig(PyConfig *config) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyConfig_InitIsolatedConfig(PyConfig *config) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyConfig_Clear(PyConfig *) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyConfig_SetString(
     PyConfig *config,
     wchar_t **config_str,
-    const wchar_t *str);
+    const wchar_t *str) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyConfig_SetBytesString(
     PyConfig *config,
     wchar_t **config_str,
-    const char *str);
-PyAPI_FUNC(PyStatus) PyConfig_Read(PyConfig *config);
+    const char *str) Py_NOEXCEPT;
+PyAPI_FUNC(PyStatus) PyConfig_Read(PyConfig *config) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyConfig_SetBytesArgv(
     PyConfig *config,
     Py_ssize_t argc,
-    char * const *argv);
+    char * const *argv) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyConfig_SetArgv(PyConfig *config,
     Py_ssize_t argc,
-    wchar_t * const *argv);
+    wchar_t * const *argv) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) PyConfig_SetWideStringList(PyConfig *config,
     PyWideStringList *list,
-    Py_ssize_t length, wchar_t **items);
+    Py_ssize_t length, wchar_t **items) Py_NOEXCEPT;
 
 
 /* --- PyConfig_Get() ----------------------------------------- */
 
-PyAPI_FUNC(PyObject*) PyConfig_Get(const char *name);
-PyAPI_FUNC(int) PyConfig_GetInt(const char *name, int *value);
-PyAPI_FUNC(PyObject*) PyConfig_Names(void);
-PyAPI_FUNC(int) PyConfig_Set(const char *name, PyObject *value);
+PyAPI_FUNC(PyObject*) PyConfig_Get(const char *name) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyConfig_GetInt(const char *name, int *value) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyConfig_Names(void) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyConfig_Set(const char *name, PyObject *value) Py_NOEXCEPT;
 
 
 /* --- Helper functions --------------------------------------- */
@@ -281,51 +281,51 @@ PyAPI_FUNC(int) PyConfig_Set(const char *name, PyObject *value);
 /* Get the original command line arguments, before Python modified them.
 
    See also PyConfig.orig_argv. */
-PyAPI_FUNC(void) Py_GetArgcArgv(int *argc, wchar_t ***argv);
+PyAPI_FUNC(void) Py_GetArgcArgv(int *argc, wchar_t ***argv) Py_NOEXCEPT;
 
 
 // --- PyInitConfig ---------------------------------------------------------
 
 typedef struct PyInitConfig PyInitConfig;
 
-PyAPI_FUNC(PyInitConfig*) PyInitConfig_Create(void);
-PyAPI_FUNC(void) PyInitConfig_Free(PyInitConfig *config);
+PyAPI_FUNC(PyInitConfig*) PyInitConfig_Create(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyInitConfig_Free(PyInitConfig *config) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyInitConfig_GetError(PyInitConfig* config,
-    const char **err_msg);
+    const char **err_msg) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_GetExitCode(PyInitConfig* config,
-    int *exitcode);
+    int *exitcode) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyInitConfig_HasOption(PyInitConfig *config,
-    const char *name);
+    const char *name) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_GetInt(PyInitConfig *config,
     const char *name,
-    int64_t *value);
+    int64_t *value) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_GetStr(PyInitConfig *config,
     const char *name,
-    char **value);
+    char **value) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_GetStrList(PyInitConfig *config,
     const char *name,
     size_t *length,
-    char ***items);
-PyAPI_FUNC(void) PyInitConfig_FreeStrList(size_t length, char **items);
+    char ***items) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyInitConfig_FreeStrList(size_t length, char **items) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyInitConfig_SetInt(PyInitConfig *config,
     const char *name,
-    int64_t value);
+    int64_t value) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_SetStr(PyInitConfig *config,
     const char *name,
-    const char *value);
+    const char *value) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyInitConfig_SetStrList(PyInitConfig *config,
     const char *name,
     size_t length,
-    char * const *items);
+    char * const *items) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyInitConfig_AddModule(PyInitConfig *config,
     const char *name,
-    PyObject* (*initfunc)(void));
+    PyObject* (*initfunc)(void)) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) Py_InitializeFromInitConfig(PyInitConfig *config);
+PyAPI_FUNC(int) Py_InitializeFromInitConfig(PyInitConfig *config) Py_NOEXCEPT;
 
 
 #ifdef __cplusplus

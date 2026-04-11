@@ -4,7 +4,7 @@
 
 PyAPI_FUNC(FILE*) Py_fopen(
     PyObject *path,
-    const char *mode);
+    const char *mode) Py_NOEXCEPT;
 
 // Deprecated alias kept for backward compatibility
 Py_DEPRECATED(3.14) static inline FILE*
@@ -13,4 +13,4 @@ _Py_fopen_obj(PyObject *path, const char *mode)
     return Py_fopen(path, mode);
 }
 
-PyAPI_FUNC(int) Py_fclose(FILE *file);
+PyAPI_FUNC(int) Py_fclose(FILE *file) Py_NOEXCEPT;

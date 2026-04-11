@@ -43,11 +43,11 @@ extern "C" {
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
 PyAPI_FUNC(wchar_t *) Py_DecodeLocale(
     const char *arg,
-    size_t *size);
+    size_t *size) Py_NOEXCEPT;
 
 PyAPI_FUNC(char*) Py_EncodeLocale(
     const wchar_t *text,
-    size_t *error_pos);
+    size_t *error_pos) Py_NOEXCEPT;
 #endif
 
 #ifndef Py_LIMITED_API

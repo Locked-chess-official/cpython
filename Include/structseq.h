@@ -21,12 +21,12 @@ typedef struct PyStructSequence_Desc {
 
 PyAPI_DATA(const char * const) PyStructSequence_UnnamedField;
 
-PyAPI_FUNC(PyTypeObject*) PyStructSequence_NewType(PyStructSequence_Desc *desc);
+PyAPI_FUNC(PyTypeObject*) PyStructSequence_NewType(PyStructSequence_Desc *desc) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyStructSequence_New(PyTypeObject* type);
+PyAPI_FUNC(PyObject *) PyStructSequence_New(PyTypeObject* type) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyStructSequence_SetItem(PyObject*, Py_ssize_t, PyObject*);
-PyAPI_FUNC(PyObject*) PyStructSequence_GetItem(PyObject*, Py_ssize_t);
+PyAPI_FUNC(void) PyStructSequence_SetItem(PyObject*, Py_ssize_t, PyObject*) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyStructSequence_GetItem(PyObject*, Py_ssize_t) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_STRUCTSEQ_H

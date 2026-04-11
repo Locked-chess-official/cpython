@@ -11,14 +11,14 @@ typedef int64_t PyTime_t;
 #define PyTime_MIN INT64_MIN
 #define PyTime_MAX INT64_MAX
 
-PyAPI_FUNC(double) PyTime_AsSecondsDouble(PyTime_t t);
-PyAPI_FUNC(int) PyTime_Monotonic(PyTime_t *result);
-PyAPI_FUNC(int) PyTime_PerfCounter(PyTime_t *result);
-PyAPI_FUNC(int) PyTime_Time(PyTime_t *result);
+PyAPI_FUNC(double) PyTime_AsSecondsDouble(PyTime_t t) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTime_Monotonic(PyTime_t *result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTime_PerfCounter(PyTime_t *result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTime_Time(PyTime_t *result) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyTime_MonotonicRaw(PyTime_t *result);
-PyAPI_FUNC(int) PyTime_PerfCounterRaw(PyTime_t *result);
-PyAPI_FUNC(int) PyTime_TimeRaw(PyTime_t *result);
+PyAPI_FUNC(int) PyTime_MonotonicRaw(PyTime_t *result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTime_PerfCounterRaw(PyTime_t *result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTime_TimeRaw(PyTime_t *result) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

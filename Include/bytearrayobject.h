@@ -25,12 +25,12 @@ PyAPI_DATA(PyTypeObject) PyByteArrayIter_Type;
 #define PyByteArray_CheckExact(self) Py_IS_TYPE((self), &PyByteArray_Type)
 
 /* Direct API functions */
-PyAPI_FUNC(PyObject *) PyByteArray_FromObject(PyObject *);
-PyAPI_FUNC(PyObject *) PyByteArray_Concat(PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyByteArray_FromStringAndSize(const char *, Py_ssize_t);
-PyAPI_FUNC(Py_ssize_t) PyByteArray_Size(PyObject *);
-PyAPI_FUNC(char *) PyByteArray_AsString(PyObject *);
-PyAPI_FUNC(int) PyByteArray_Resize(PyObject *, Py_ssize_t);
+PyAPI_FUNC(PyObject *) PyByteArray_FromObject(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyByteArray_Concat(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyByteArray_FromStringAndSize(const char *, Py_ssize_t) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PyByteArray_Size(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(char *) PyByteArray_AsString(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyByteArray_Resize(PyObject *, Py_ssize_t) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_BYTEARRAYOBJECT_H

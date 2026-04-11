@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 
-PyAPI_FUNC(PyObject *) PyEval_EvalCode(PyObject *, PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyEval_EvalCode(PyObject *, PyObject *, PyObject *) Py_NOEXCEPT;
 
 PyAPI_FUNC(PyObject *) PyEval_EvalCodeEx(PyObject *co,
                                          PyObject *globals,
@@ -15,19 +15,19 @@ PyAPI_FUNC(PyObject *) PyEval_EvalCodeEx(PyObject *co,
                                          PyObject *const *args, int argc,
                                          PyObject *const *kwds, int kwdc,
                                          PyObject *const *defs, int defc,
-                                         PyObject *kwdefs, PyObject *closure);
+                                         PyObject *kwdefs, PyObject *closure) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyEval_GetBuiltins(void);
-PyAPI_FUNC(PyObject *) PyEval_GetGlobals(void);
-PyAPI_FUNC(PyObject *) PyEval_GetLocals(void);
-PyAPI_FUNC(PyFrameObject *) PyEval_GetFrame(void);
+PyAPI_FUNC(PyObject *) PyEval_GetBuiltins(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyEval_GetGlobals(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyEval_GetLocals(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyFrameObject *) PyEval_GetFrame(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyEval_GetFrameBuiltins(void);
-PyAPI_FUNC(PyObject *) PyEval_GetFrameGlobals(void);
-PyAPI_FUNC(PyObject *) PyEval_GetFrameLocals(void);
+PyAPI_FUNC(PyObject *) PyEval_GetFrameBuiltins(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyEval_GetFrameGlobals(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyEval_GetFrameLocals(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) Py_AddPendingCall(int (*func)(void *), void *arg);
-PyAPI_FUNC(int) Py_MakePendingCalls(void);
+PyAPI_FUNC(int) Py_AddPendingCall(int (*func)(void *), void *arg) Py_NOEXCEPT;
+PyAPI_FUNC(int) Py_MakePendingCalls(void) Py_NOEXCEPT;
 
 /* Protection against deeply nested recursive calls
 
@@ -54,17 +54,17 @@ PyAPI_FUNC(int) Py_MakePendingCalls(void);
    http://mail.python.org/pipermail/python-dev/2008-August/082106.html
    for some observations.
 */
-PyAPI_FUNC(void) Py_SetRecursionLimit(int);
-PyAPI_FUNC(int) Py_GetRecursionLimit(void);
+PyAPI_FUNC(void) Py_SetRecursionLimit(int) Py_NOEXCEPT;
+PyAPI_FUNC(int) Py_GetRecursionLimit(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) Py_EnterRecursiveCall(const char *where);
-PyAPI_FUNC(void) Py_LeaveRecursiveCall(void);
+PyAPI_FUNC(int) Py_EnterRecursiveCall(const char *where) Py_NOEXCEPT;
+PyAPI_FUNC(void) Py_LeaveRecursiveCall(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(const char *) PyEval_GetFuncName(PyObject *);
-PyAPI_FUNC(const char *) PyEval_GetFuncDesc(PyObject *);
+PyAPI_FUNC(const char *) PyEval_GetFuncName(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(const char *) PyEval_GetFuncDesc(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyEval_EvalFrame(PyFrameObject *);
-PyAPI_FUNC(PyObject *) PyEval_EvalFrameEx(PyFrameObject *f, int exc);
+PyAPI_FUNC(PyObject *) PyEval_EvalFrame(PyFrameObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyEval_EvalFrameEx(PyFrameObject *f, int exc) Py_NOEXCEPT;
 
 /* Interface for threads.
 
@@ -108,13 +108,13 @@ PyAPI_FUNC(PyObject *) PyEval_EvalFrameEx(PyFrameObject *f, int exc);
    mechanism!
 */
 
-PyAPI_FUNC(PyThreadState *) PyEval_SaveThread(void);
-PyAPI_FUNC(void) PyEval_RestoreThread(PyThreadState *);
+PyAPI_FUNC(PyThreadState *) PyEval_SaveThread(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyEval_RestoreThread(PyThreadState *) Py_NOEXCEPT;
 
-Py_DEPRECATED(3.9) PyAPI_FUNC(void) PyEval_InitThreads(void);
+Py_DEPRECATED(3.9) PyAPI_FUNC(void) PyEval_InitThreads(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyEval_AcquireThread(PyThreadState *tstate);
-PyAPI_FUNC(void) PyEval_ReleaseThread(PyThreadState *tstate);
+PyAPI_FUNC(void) PyEval_AcquireThread(PyThreadState *tstate) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyEval_ReleaseThread(PyThreadState *tstate) Py_NOEXCEPT;
 
 #define Py_BEGIN_ALLOW_THREADS { \
                         PyThreadState *_save; \

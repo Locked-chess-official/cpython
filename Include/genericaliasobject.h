@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-PyAPI_FUNC(PyObject *) Py_GenericAlias(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) Py_GenericAlias(PyObject *, PyObject *) Py_NOEXCEPT;
 PyAPI_DATA(PyTypeObject) Py_GenericAliasType;
 
 #ifdef __cplusplus

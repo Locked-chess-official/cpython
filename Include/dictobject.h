@@ -18,23 +18,23 @@ PyAPI_DATA(PyTypeObject) PyDict_Type;
                  PyType_FastSubclass(Py_TYPE(op), Py_TPFLAGS_DICT_SUBCLASS)
 #define PyDict_CheckExact(op) Py_IS_TYPE((op), &PyDict_Type)
 
-PyAPI_FUNC(PyObject *) PyDict_New(void);
-PyAPI_FUNC(PyObject *) PyDict_GetItem(PyObject *mp, PyObject *key);
-PyAPI_FUNC(PyObject *) PyDict_GetItemWithError(PyObject *mp, PyObject *key);
-PyAPI_FUNC(int) PyDict_SetItem(PyObject *mp, PyObject *key, PyObject *item);
-PyAPI_FUNC(int) PyDict_DelItem(PyObject *mp, PyObject *key);
-PyAPI_FUNC(void) PyDict_Clear(PyObject *mp);
+PyAPI_FUNC(PyObject *) PyDict_New(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_GetItem(PyObject *mp, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_GetItemWithError(PyObject *mp, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_SetItem(PyObject *mp, PyObject *key, PyObject *item) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_DelItem(PyObject *mp, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyDict_Clear(PyObject *mp) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyDict_Next(
-    PyObject *mp, Py_ssize_t *pos, PyObject **key, PyObject **value);
-PyAPI_FUNC(PyObject *) PyDict_Keys(PyObject *mp);
-PyAPI_FUNC(PyObject *) PyDict_Values(PyObject *mp);
-PyAPI_FUNC(PyObject *) PyDict_Items(PyObject *mp);
-PyAPI_FUNC(Py_ssize_t) PyDict_Size(PyObject *mp);
-PyAPI_FUNC(PyObject *) PyDict_Copy(PyObject *mp);
-PyAPI_FUNC(int) PyDict_Contains(PyObject *mp, PyObject *key);
+    PyObject *mp, Py_ssize_t *pos, PyObject **key, PyObject **value) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_Keys(PyObject *mp) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_Values(PyObject *mp) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_Items(PyObject *mp) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PyDict_Size(PyObject *mp) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDict_Copy(PyObject *mp) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_Contains(PyObject *mp, PyObject *key) Py_NOEXCEPT;
 
 /* PyDict_Update(mp, other) is equivalent to PyDict_Merge(mp, other, 1). */
-PyAPI_FUNC(int) PyDict_Update(PyObject *mp, PyObject *other);
+PyAPI_FUNC(int) PyDict_Update(PyObject *mp, PyObject *other) Py_NOEXCEPT;
 
 /* PyDict_Merge updates/merges from a mapping object (an object that
    supports PyMapping_Keys() and PyObject_GetItem()).  If override is true,
@@ -43,7 +43,7 @@ PyAPI_FUNC(int) PyDict_Update(PyObject *mp, PyObject *other);
 */
 PyAPI_FUNC(int) PyDict_Merge(PyObject *mp,
                              PyObject *other,
-                             int override);
+                             int override) Py_NOEXCEPT;
 
 /* PyDict_MergeFromSeq2 updates/merges from an iterable object producing
    iterable objects of length 2.  If override is true, the last occurrence
@@ -52,11 +52,11 @@ PyAPI_FUNC(int) PyDict_Merge(PyObject *mp,
 */
 PyAPI_FUNC(int) PyDict_MergeFromSeq2(PyObject *d,
                                      PyObject *seq2,
-                                     int override);
+                                     int override) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyDict_GetItemString(PyObject *dp, const char *key);
-PyAPI_FUNC(int) PyDict_SetItemString(PyObject *dp, const char *key, PyObject *item);
-PyAPI_FUNC(int) PyDict_DelItemString(PyObject *dp, const char *key);
+PyAPI_FUNC(PyObject *) PyDict_GetItemString(PyObject *dp, const char *key) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_SetItemString(PyObject *dp, const char *key, PyObject *item) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_DelItemString(PyObject *dp, const char *key) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030D0000
 // Return the object from dictionary *op* which has a key *key*.
@@ -64,8 +64,8 @@ PyAPI_FUNC(int) PyDict_DelItemString(PyObject *dp, const char *key);
 //   and return 1.
 // - If the key is missing, set *result to NULL and return 0 .
 // - On error, raise an exception and return -1.
-PyAPI_FUNC(int) PyDict_GetItemRef(PyObject *mp, PyObject *key, PyObject **result);
-PyAPI_FUNC(int) PyDict_GetItemStringRef(PyObject *mp, const char *key, PyObject **result);
+PyAPI_FUNC(int) PyDict_GetItemRef(PyObject *mp, PyObject *key, PyObject **result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_GetItemStringRef(PyObject *mp, const char *key, PyObject **result) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030F0000
@@ -77,11 +77,11 @@ PyAPI_FUNC(int) PyDict_GetItemStringRef(PyObject *mp, const char *key, PyObject 
 //   -1 on error
 //    0 if `key` was not present and `default_value` was inserted
 //    1 if `key` was present and `default_value` was not inserted
-PyAPI_FUNC(int) PyDict_SetDefaultRef(PyObject *mp, PyObject *key, PyObject *default_value, PyObject **result);
+PyAPI_FUNC(int) PyDict_SetDefaultRef(PyObject *mp, PyObject *key, PyObject *default_value, PyObject **result) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030A0000
-PyAPI_FUNC(PyObject *) PyObject_GenericGetDict(PyObject *, void *);
+PyAPI_FUNC(PyObject *) PyObject_GenericGetDict(PyObject *, void *) Py_NOEXCEPT;
 #endif
 
 /* Dictionary (keys, values, items) views */

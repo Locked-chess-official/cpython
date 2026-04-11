@@ -14,7 +14,7 @@ typedef struct {
      */
 } PyBytesObject;
 
-PyAPI_FUNC(int) _PyBytes_Resize(PyObject **, Py_ssize_t);
+PyAPI_FUNC(int) _PyBytes_Resize(PyObject **, Py_ssize_t) Py_NOEXCEPT;
 
 /* Macros and static inline functions, trading safety for speed */
 #define _PyBytes_CAST(op) \
@@ -32,7 +32,7 @@ static inline Py_ssize_t PyBytes_GET_SIZE(PyObject *op) {
 }
 #define PyBytes_GET_SIZE(self) PyBytes_GET_SIZE(_PyObject_CAST(self))
 
-PyAPI_FUNC(PyObject*) PyBytes_Join(PyObject *sep, PyObject *iterable);
+PyAPI_FUNC(PyObject*) PyBytes_Join(PyObject *sep, PyObject *iterable) Py_NOEXCEPT;
 
 // Deprecated alias kept for backward compatibility
 Py_DEPRECATED(3.14) static inline PyObject*
@@ -47,39 +47,39 @@ _PyBytes_Join(PyObject *sep, PyObject *iterable)
 typedef struct PyBytesWriter PyBytesWriter;
 
 PyAPI_FUNC(PyBytesWriter *) PyBytesWriter_Create(
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(void) PyBytesWriter_Discard(
-    PyBytesWriter *writer);
+    PyBytesWriter *writer) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject*) PyBytesWriter_Finish(
-    PyBytesWriter *writer);
+    PyBytesWriter *writer) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject*) PyBytesWriter_FinishWithSize(
     PyBytesWriter *writer,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject*) PyBytesWriter_FinishWithPointer(
     PyBytesWriter *writer,
-    void *buf);
+    void *buf) Py_NOEXCEPT;
 
 PyAPI_FUNC(void*) PyBytesWriter_GetData(
-    PyBytesWriter *writer);
+    PyBytesWriter *writer) Py_NOEXCEPT;
 PyAPI_FUNC(Py_ssize_t) PyBytesWriter_GetSize(
-    PyBytesWriter *writer);
+    PyBytesWriter *writer) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyBytesWriter_WriteBytes(
     PyBytesWriter *writer,
     const void *bytes,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyBytesWriter_Format(
     PyBytesWriter *writer,
     const char *format,
-    ...);
+    ...) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyBytesWriter_Resize(
     PyBytesWriter *writer,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyBytesWriter_Grow(
     PyBytesWriter *writer,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(void*) PyBytesWriter_GrowAndUpdatePointer(
     PyBytesWriter *writer,
     Py_ssize_t size,
-    void *buf);
+    void *buf) Py_NOEXCEPT;

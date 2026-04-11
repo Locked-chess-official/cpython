@@ -274,7 +274,7 @@ extern "C" {
  * Usage:
  *    Py_DEPRECATED(3.3) extern int old_var;
  *    Py_DEPRECATED(3.4) typedef int T1;
- *    Py_DEPRECATED(3.8) PyAPI_FUNC(int) Py_OldFunction(void);
+ *    Py_DEPRECATED(3.8) PyAPI_FUNC(int) Py_OldFunction(void) Py_NOEXCEPT;
  */
 #if defined(__GNUC__) \
     && ((__GNUC__ >= 4) || (__GNUC__ == 3) && (__GNUC_MINOR__ >= 1))
@@ -548,7 +548,7 @@ extern "C" {
 #endif
 
 /* Mark a function which cannot return. Example:
-   PyAPI_FUNC(void) _Py_NO_RETURN PyThread_exit_thread(void);
+   PyAPI_FUNC(void) _Py_NO_RETURN PyThread_exit_thread(void) Py_NOEXCEPT;
 
    XLC support is intentionally omitted due to bpo-40244 */
 #ifndef _Py_NO_RETURN

@@ -17,9 +17,9 @@ PyAPI_DATA(PyTypeObject) PyCell_Type;
 
 #define PyCell_Check(op) Py_IS_TYPE((op), &PyCell_Type)
 
-PyAPI_FUNC(PyObject *) PyCell_New(PyObject *);
-PyAPI_FUNC(PyObject *) PyCell_Get(PyObject *);
-PyAPI_FUNC(int) PyCell_Set(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyCell_New(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyCell_Get(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyCell_Set(PyObject *, PyObject *) Py_NOEXCEPT;
 
 static inline PyObject* PyCell_GET(PyObject *op) {
     PyObject *res;

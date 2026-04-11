@@ -58,5 +58,5 @@ typedef struct {
 } PyWrapperDescrObject;
 
 PyAPI_FUNC(PyObject *) PyDescr_NewWrapper(PyTypeObject *,
-                                                struct wrapperbase *, void *);
-PyAPI_FUNC(int) PyDescr_IsData(PyObject *);
+                                                struct wrapperbase *, void *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDescr_IsData(PyObject *) Py_NOEXCEPT;

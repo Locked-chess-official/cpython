@@ -15,13 +15,13 @@ PyAPI_DATA(PyTypeObject) PyPickleBuffer_Type;
 #define PyPickleBuffer_Check(op) Py_IS_TYPE((op), &PyPickleBuffer_Type)
 
 /* Create a PickleBuffer redirecting to the given buffer-enabled object */
-PyAPI_FUNC(PyObject *) PyPickleBuffer_FromObject(PyObject *);
+PyAPI_FUNC(PyObject *) PyPickleBuffer_FromObject(PyObject *) Py_NOEXCEPT;
 /* Get the PickleBuffer's underlying view to the original object
  * (NULL if released)
  */
-PyAPI_FUNC(const Py_buffer *) PyPickleBuffer_GetBuffer(PyObject *);
+PyAPI_FUNC(const Py_buffer *) PyPickleBuffer_GetBuffer(PyObject *) Py_NOEXCEPT;
 /* Release the PickleBuffer.  Returns 0 on success, -1 on error. */
-PyAPI_FUNC(int) PyPickleBuffer_Release(PyObject *);
+PyAPI_FUNC(int) PyPickleBuffer_Release(PyObject *) Py_NOEXCEPT;
 
 #endif /* !Py_LIMITED_API */
 

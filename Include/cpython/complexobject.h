@@ -9,13 +9,13 @@ typedef struct {
 
 /* Operations on complex numbers (soft deprecated
    since Python 3.15). */
-PyAPI_FUNC(Py_complex) _Py_c_sum(Py_complex, Py_complex);
-PyAPI_FUNC(Py_complex) _Py_c_diff(Py_complex, Py_complex);
-PyAPI_FUNC(Py_complex) _Py_c_neg(Py_complex);
-PyAPI_FUNC(Py_complex) _Py_c_prod(Py_complex, Py_complex);
-PyAPI_FUNC(Py_complex) _Py_c_quot(Py_complex, Py_complex);
-PyAPI_FUNC(Py_complex) _Py_c_pow(Py_complex, Py_complex);
-PyAPI_FUNC(double) _Py_c_abs(Py_complex);
+PyAPI_FUNC(Py_complex) _Py_c_sum(Py_complex, Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(Py_complex) _Py_c_diff(Py_complex, Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(Py_complex) _Py_c_neg(Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(Py_complex) _Py_c_prod(Py_complex, Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(Py_complex) _Py_c_quot(Py_complex, Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(Py_complex) _Py_c_pow(Py_complex, Py_complex) Py_NOEXCEPT;
+PyAPI_FUNC(double) _Py_c_abs(Py_complex) Py_NOEXCEPT;
 
 
 /* Complex object interface */
@@ -29,6 +29,6 @@ typedef struct {
     Py_complex cval;
 } PyComplexObject;
 
-PyAPI_FUNC(PyObject *) PyComplex_FromCComplex(Py_complex);
+PyAPI_FUNC(PyObject *) PyComplex_FromCComplex(Py_complex) Py_NOEXCEPT;
 
-PyAPI_FUNC(Py_complex) PyComplex_AsCComplex(PyObject *op);
+PyAPI_FUNC(Py_complex) PyComplex_AsCComplex(PyObject *op) Py_NOEXCEPT;

@@ -93,7 +93,7 @@ check by comparing the reference count field to the minimum immortality refcount
 
 
 // Py_REFCNT() implementation for the stable ABI
-PyAPI_FUNC(Py_ssize_t) Py_REFCNT(PyObject *ob);
+PyAPI_FUNC(Py_ssize_t) Py_REFCNT(PyObject *ob) Py_NOEXCEPT;
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 >= 0x030e0000
     // Stable ABI implements Py_REFCNT() as a function call
@@ -146,7 +146,7 @@ static inline Py_ALWAYS_INLINE int _Py_IsStaticImmortal(PyObject *op)
 #endif // !defined(_Py_OPAQUE_PYOBJECT)
 
 // Py_SET_REFCNT() implementation for stable ABI
-PyAPI_FUNC(void) _Py_SetRefcnt(PyObject *ob, Py_ssize_t refcnt);
+PyAPI_FUNC(void) _Py_SetRefcnt(PyObject *ob, Py_ssize_t refcnt) Py_NOEXCEPT;
 
 static inline void Py_SET_REFCNT(PyObject *ob, Py_ssize_t refcnt) {
     assert(refcnt >= 0);
@@ -228,25 +228,25 @@ you can count such references to the type object.)
 
 #if defined(Py_REF_DEBUG) && !defined(Py_LIMITED_API)
 PyAPI_FUNC(void) _Py_NegativeRefcount(const char *filename, int lineno,
-                                      PyObject *op);
-PyAPI_FUNC(void) _Py_INCREF_IncRefTotal(void);
-PyAPI_FUNC(void) _Py_DECREF_DecRefTotal(void);
+                                      PyObject *op) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_INCREF_IncRefTotal(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_DECREF_DecRefTotal(void) Py_NOEXCEPT;
 #endif  // Py_REF_DEBUG && !Py_LIMITED_API
 
-PyAPI_FUNC(void) _Py_Dealloc(PyObject *);
+PyAPI_FUNC(void) _Py_Dealloc(PyObject *) Py_NOEXCEPT;
 
 
 /*
 These are provided as conveniences to Python runtime embedders, so that
 they can have object code that is not dependent on Python compilation flags.
 */
-PyAPI_FUNC(void) Py_IncRef(PyObject *);
-PyAPI_FUNC(void) Py_DecRef(PyObject *);
+PyAPI_FUNC(void) Py_IncRef(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) Py_DecRef(PyObject *) Py_NOEXCEPT;
 
 // Similar to Py_IncRef() and Py_DecRef() but the argument must be non-NULL.
 // Private functions used by Py_INCREF() and Py_DECREF().
-PyAPI_FUNC(void) _Py_IncRef(PyObject *);
-PyAPI_FUNC(void) _Py_DecRef(PyObject *);
+PyAPI_FUNC(void) _Py_IncRef(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_DecRef(PyObject *) Py_NOEXCEPT;
 
 static inline Py_ALWAYS_INLINE void Py_INCREF(PyObject *op)
 {
@@ -308,14 +308,14 @@ static inline Py_ALWAYS_INLINE void Py_INCREF(PyObject *op)
 
 #if !defined(Py_LIMITED_API) && defined(Py_GIL_DISABLED)
 // Implements Py_DECREF on objects not owned by the current thread.
-PyAPI_FUNC(void) _Py_DecRefShared(PyObject *);
-PyAPI_FUNC(void) _Py_DecRefSharedDebug(PyObject *, const char *, int);
+PyAPI_FUNC(void) _Py_DecRefShared(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_DecRefSharedDebug(PyObject *, const char *, int) Py_NOEXCEPT;
 
 // Called from Py_DECREF by the owning thread when the local refcount reaches
 // zero. The call will deallocate the object if the shared refcount is also
 // zero. Otherwise, the thread gives up ownership and merges the reference
 // count fields.
-PyAPI_FUNC(void) _Py_MergeZeroLocalRefcount(PyObject *);
+PyAPI_FUNC(void) _Py_MergeZeroLocalRefcount(PyObject *) Py_NOEXCEPT;
 #endif
 
 #if defined(Py_LIMITED_API) && (Py_LIMITED_API+0 >= 0x030c0000 || defined(Py_REF_DEBUG))
@@ -519,10 +519,10 @@ static inline void Py_XDECREF(PyObject *op)
 
 // Create a new strong reference to an object:
 // increment the reference count of the object and return the object.
-PyAPI_FUNC(PyObject*) Py_NewRef(PyObject *obj);
+PyAPI_FUNC(PyObject*) Py_NewRef(PyObject *obj) Py_NOEXCEPT;
 
 // Similar to Py_NewRef(), but the object can be NULL.
-PyAPI_FUNC(PyObject*) Py_XNewRef(PyObject *obj);
+PyAPI_FUNC(PyObject*) Py_XNewRef(PyObject *obj) Py_NOEXCEPT;
 
 static inline PyObject* _Py_NewRef(PyObject *obj)
 {

@@ -182,13 +182,13 @@ PyAPI_FUNC(PyCodeObject *) PyUnstable_Code_New(
         int, int, int, int, int, PyObject *, PyObject *,
         PyObject *, PyObject *, PyObject *, PyObject *,
         PyObject *, PyObject *, PyObject *, int, PyObject *,
-        PyObject *);
+        PyObject *) Py_NOEXCEPT;
 
 PyAPI_FUNC(PyCodeObject *) PyUnstable_Code_NewWithPosOnlyArgs(
         int, int, int, int, int, int, PyObject *, PyObject *,
         PyObject *, PyObject *, PyObject *, PyObject *,
         PyObject *, PyObject *, PyObject *, int, PyObject *,
-        PyObject *);
+        PyObject *) Py_NOEXCEPT;
         /* same as struct above */
 // Old names -- remove when this API changes:
 _Py_DEPRECATED_EXTERNALLY(3.12) static inline PyCodeObject *
@@ -214,14 +214,14 @@ PyCode_NewWithPosOnlyArgs(
 
 /* Creates a new empty code object with the specified source location. */
 PyAPI_FUNC(PyCodeObject *)
-PyCode_NewEmpty(const char *filename, const char *funcname, int firstlineno);
+PyCode_NewEmpty(const char *filename, const char *funcname, int firstlineno) Py_NOEXCEPT;
 
 /* Return the line number associated with the specified bytecode index
    in this code object.  If you just need the line number of a frame,
    use PyFrame_GetLineNumber() instead. */
-PyAPI_FUNC(int) PyCode_Addr2Line(PyCodeObject *, int);
+PyAPI_FUNC(int) PyCode_Addr2Line(PyCodeObject *, int) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCode_Addr2Location(PyCodeObject *, int, int *, int *, int *, int *);
+PyAPI_FUNC(int) PyCode_Addr2Location(PyCodeObject *, int, int *, int *, int *, int *) Py_NOEXCEPT;
 
 #define PY_FOREACH_CODE_EVENT(V) \
     V(CREATE)                 \
@@ -254,14 +254,14 @@ typedef int (*PyCode_WatchCallback)(
  * Returns a handle that may be passed to PyCode_ClearWatcher on success,
  * or -1 and sets an error if no more handles are available.
  */
-PyAPI_FUNC(int) PyCode_AddWatcher(PyCode_WatchCallback callback);
+PyAPI_FUNC(int) PyCode_AddWatcher(PyCode_WatchCallback callback) Py_NOEXCEPT;
 
 /*
  * Clear the watcher associated with the watcher_id handle.
  *
  * Returns 0 on success or -1 if no watcher exists for the provided id.
  */
-PyAPI_FUNC(int) PyCode_ClearWatcher(int watcher_id);
+PyAPI_FUNC(int) PyCode_ClearWatcher(int watcher_id) Py_NOEXCEPT;
 
 /* for internal use only */
 struct _opaque {
@@ -280,15 +280,15 @@ typedef struct _line_offsets {
 /* Update *bounds to describe the first and one-past-the-last instructions in the
    same line as lasti.  Return the number of that line.
 */
-PyAPI_FUNC(int) _PyCode_CheckLineNumber(int lasti, PyCodeAddressRange *bounds);
+PyAPI_FUNC(int) _PyCode_CheckLineNumber(int lasti, PyCodeAddressRange *bounds) Py_NOEXCEPT;
 
 PyAPI_FUNC(PyObject*) PyCode_Optimize(PyObject *code, PyObject* consts,
-                                      PyObject *names, PyObject *lnotab);
+                                      PyObject *names, PyObject *lnotab) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyUnstable_Code_GetExtra(
-    PyObject *code, Py_ssize_t index, void **extra);
+    PyObject *code, Py_ssize_t index, void **extra) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnstable_Code_SetExtra(
-    PyObject *code, Py_ssize_t index, void *extra);
+    PyObject *code, Py_ssize_t index, void *extra) Py_NOEXCEPT;
 // Old names -- remove when this API changes:
 _Py_DEPRECATED_EXTERNALLY(3.12) static inline int
 _PyCode_GetExtra(PyObject *code, Py_ssize_t index, void **extra)
@@ -303,13 +303,13 @@ _PyCode_SetExtra(PyObject *code, Py_ssize_t index, void *extra)
 
 /* Equivalent to getattr(code, 'co_code') in Python.
    Returns a strong reference to a bytes object. */
-PyAPI_FUNC(PyObject *) PyCode_GetCode(PyCodeObject *code);
+PyAPI_FUNC(PyObject *) PyCode_GetCode(PyCodeObject *code) Py_NOEXCEPT;
 /* Equivalent to getattr(code, 'co_varnames') in Python. */
-PyAPI_FUNC(PyObject *) PyCode_GetVarnames(PyCodeObject *code);
+PyAPI_FUNC(PyObject *) PyCode_GetVarnames(PyCodeObject *code) Py_NOEXCEPT;
 /* Equivalent to getattr(code, 'co_cellvars') in Python. */
-PyAPI_FUNC(PyObject *) PyCode_GetCellvars(PyCodeObject *code);
+PyAPI_FUNC(PyObject *) PyCode_GetCellvars(PyCodeObject *code) Py_NOEXCEPT;
 /* Equivalent to getattr(code, 'co_freevars') in Python. */
-PyAPI_FUNC(PyObject *) PyCode_GetFreevars(PyCodeObject *code);
+PyAPI_FUNC(PyObject *) PyCode_GetFreevars(PyCodeObject *code) Py_NOEXCEPT;
 
 typedef enum _PyCodeLocationInfoKind {
     /* short forms are 0 to 9 */

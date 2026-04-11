@@ -10,9 +10,9 @@ extern "C" {
 #endif
 
 /* Return the line of code the frame is currently executing. */
-PyAPI_FUNC(int) PyFrame_GetLineNumber(PyFrameObject *);
+PyAPI_FUNC(int) PyFrame_GetLineNumber(PyFrameObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyCodeObject *) PyFrame_GetCode(PyFrameObject *frame);
+PyAPI_FUNC(PyCodeObject *) PyFrame_GetCode(PyFrameObject *frame) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_PYFRAME_H

@@ -523,6 +523,12 @@ to the C language.
    extension modules should not use it for their own symbols.
 
 
+.. c:macro:: Py_NOEXCEPT
+
+   Macro used by CPython to declare a function in c++. It will declare that the function won't throw any c++ exception.
+   In c it has no value.
+
+
 Outdated macros
 ---------------
 

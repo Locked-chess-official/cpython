@@ -71,22 +71,22 @@ typedef struct PyCriticalSection PyCriticalSection;
 typedef struct PyCriticalSection2 PyCriticalSection2;
 
 PyAPI_FUNC(void)
-PyCriticalSection_Begin(PyCriticalSection *c, PyObject *op);
+PyCriticalSection_Begin(PyCriticalSection *c, PyObject *op) Py_NOEXCEPT;
 
 PyAPI_FUNC(void)
-PyCriticalSection_BeginMutex(PyCriticalSection *c, PyMutex *m);
+PyCriticalSection_BeginMutex(PyCriticalSection *c, PyMutex *m) Py_NOEXCEPT;
 
 PyAPI_FUNC(void)
-PyCriticalSection_End(PyCriticalSection *c);
+PyCriticalSection_End(PyCriticalSection *c) Py_NOEXCEPT;
 
 PyAPI_FUNC(void)
-PyCriticalSection2_Begin(PyCriticalSection2 *c, PyObject *a, PyObject *b);
+PyCriticalSection2_Begin(PyCriticalSection2 *c, PyObject *a, PyObject *b) Py_NOEXCEPT;
 
 PyAPI_FUNC(void)
-PyCriticalSection2_BeginMutex(PyCriticalSection2 *c, PyMutex *m1, PyMutex *m2);
+PyCriticalSection2_BeginMutex(PyCriticalSection2 *c, PyMutex *m1, PyMutex *m2) Py_NOEXCEPT;
 
 PyAPI_FUNC(void)
-PyCriticalSection2_End(PyCriticalSection2 *c);
+PyCriticalSection2_End(PyCriticalSection2 *c) Py_NOEXCEPT;
 
 #ifndef Py_GIL_DISABLED
 # define Py_BEGIN_CRITICAL_SECTION(op)      \

@@ -10,11 +10,11 @@ extern "C" {
 
 PyAPI_FUNC(PyObject *) PyFile_FromFd(int, const char *, const char *, int,
                                      const char *, const char *,
-                                     const char *, int);
-PyAPI_FUNC(PyObject *) PyFile_GetLine(PyObject *, int);
-PyAPI_FUNC(int) PyFile_WriteObject(PyObject *, PyObject *, int);
-PyAPI_FUNC(int) PyFile_WriteString(const char *, PyObject *);
-PyAPI_FUNC(int) PyObject_AsFileDescriptor(PyObject *);
+                                     const char *, int) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFile_GetLine(PyObject *, int) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFile_WriteObject(PyObject *, PyObject *, int) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFile_WriteString(const char *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_AsFileDescriptor(PyObject *) Py_NOEXCEPT;
 
 /* The default encoding used by the platform file system APIs
    If non-NULL, this is different than the default encoding for strings

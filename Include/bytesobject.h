@@ -28,21 +28,21 @@ PyAPI_DATA(PyTypeObject) PyBytesIter_Type;
                  PyType_FastSubclass(Py_TYPE(op), Py_TPFLAGS_BYTES_SUBCLASS)
 #define PyBytes_CheckExact(op) Py_IS_TYPE((op), &PyBytes_Type)
 
-PyAPI_FUNC(PyObject *) PyBytes_FromStringAndSize(const char *, Py_ssize_t);
-PyAPI_FUNC(PyObject *) PyBytes_FromString(const char *);
-PyAPI_FUNC(PyObject *) PyBytes_FromObject(PyObject *);
+PyAPI_FUNC(PyObject *) PyBytes_FromStringAndSize(const char *, Py_ssize_t) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyBytes_FromString(const char *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyBytes_FromObject(PyObject *) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyBytes_FromFormatV(const char*, va_list)
-                                Py_GCC_ATTRIBUTE((format(printf, 1, 0)));
+                                Py_GCC_ATTRIBUTE((format(printf, 1, 0))) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyBytes_FromFormat(const char*, ...)
-                                Py_GCC_ATTRIBUTE((format(printf, 1, 2)));
-PyAPI_FUNC(Py_ssize_t) PyBytes_Size(PyObject *);
-PyAPI_FUNC(char *) PyBytes_AsString(PyObject *);
-PyAPI_FUNC(PyObject *) PyBytes_Repr(PyObject *, int);
-PyAPI_FUNC(void) PyBytes_Concat(PyObject **, PyObject *);
-PyAPI_FUNC(void) PyBytes_ConcatAndDel(PyObject **, PyObject *);
+                                Py_GCC_ATTRIBUTE((format(printf, 1, 2))) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PyBytes_Size(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(char *) PyBytes_AsString(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyBytes_Repr(PyObject *, int) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyBytes_Concat(PyObject **, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyBytes_ConcatAndDel(PyObject **, PyObject *) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyBytes_DecodeEscape(const char *, Py_ssize_t,
                                             const char *, Py_ssize_t,
-                                            const char *);
+                                            const char *) Py_NOEXCEPT;
 
 /* Provides access to the internal data buffer and size of a bytes object.
    Passing NULL as len parameter will force the string buffer to be
@@ -52,7 +52,7 @@ PyAPI_FUNC(int) PyBytes_AsStringAndSize(
     PyObject *obj,      /* bytes object */
     char **s,           /* pointer to buffer variable */
     Py_ssize_t *len     /* pointer to length variable or NULL */
-    );
+    ) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_BYTESOBJECT_H

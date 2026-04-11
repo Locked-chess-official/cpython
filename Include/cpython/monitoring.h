@@ -50,74 +50,74 @@ typedef struct _PyMonitoringState {
 
 PyAPI_FUNC(int)
 PyMonitoring_EnterScope(PyMonitoringState *state_array, uint64_t *version,
-                         const uint8_t *event_types, Py_ssize_t length);
+                         const uint8_t *event_types, Py_ssize_t length) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-PyMonitoring_ExitScope(void);
+PyMonitoring_ExitScope(void) Py_NOEXCEPT;
 
 
 PyAPI_FUNC(int)
-_PyMonitoring_FirePyStartEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FirePyStartEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FirePyResumeEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FirePyResumeEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FirePyReturnEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                                PyObject *retval);
+                                PyObject *retval) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FirePyYieldEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                               PyObject *retval);
+                               PyObject *retval) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireCallEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                            PyObject* callable, PyObject *arg0);
+                            PyObject* callable, PyObject *arg0) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireLineEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                            int lineno);
+                            int lineno) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireJumpEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                            PyObject *target_offset);
+                            PyObject *target_offset) Py_NOEXCEPT;
 
 Py_DEPRECATED(3.14) PyAPI_FUNC(int)
 _PyMonitoring_FireBranchEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                              PyObject *target_offset);
+                              PyObject *target_offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireBranchRightEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                              PyObject *target_offset);
+                              PyObject *target_offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireBranchLeftEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                              PyObject *target_offset);
+                              PyObject *target_offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
 _PyMonitoring_FireCReturnEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,
-                               PyObject *retval);
+                               PyObject *retval) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FirePyThrowEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FirePyThrowEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FireRaiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FireRaiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FireReraiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FireReraiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FireExceptionHandledEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FireExceptionHandledEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FireCRaiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FireCRaiseEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FirePyUnwindEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset);
+_PyMonitoring_FirePyUnwindEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(int)
-_PyMonitoring_FireStopIterationEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset, PyObject *value);
+_PyMonitoring_FireStopIterationEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset, PyObject *value) Py_NOEXCEPT;
 
 
 #define _PYMONITORING_IF_ACTIVE(STATE, X)  \

@@ -4,36 +4,36 @@
 
 /* Py_FrozenMain is kept out of the Limited API until documented and present
    in all builds of Python */
-PyAPI_FUNC(int) Py_FrozenMain(int argc, char **argv);
+PyAPI_FUNC(int) Py_FrozenMain(int argc, char **argv) Py_NOEXCEPT;
 
 /* PEP 432 Multi-phase initialization API (Private while provisional!) */
 
 PyAPI_FUNC(PyStatus) Py_PreInitialize(
-    const PyPreConfig *src_config);
+    const PyPreConfig *src_config) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) Py_PreInitializeFromBytesArgs(
     const PyPreConfig *src_config,
     Py_ssize_t argc,
-    char **argv);
+    char **argv) Py_NOEXCEPT;
 PyAPI_FUNC(PyStatus) Py_PreInitializeFromArgs(
     const PyPreConfig *src_config,
     Py_ssize_t argc,
-    wchar_t **argv);
+    wchar_t **argv) Py_NOEXCEPT;
 
 
 /* Initialization and finalization */
 
 PyAPI_FUNC(PyStatus) Py_InitializeFromConfig(
-    const PyConfig *config);
+    const PyConfig *config) Py_NOEXCEPT;
 
 // Python 3.8 provisional API (PEP 587)
-PyAPI_FUNC(PyStatus) _Py_InitializeMain(void);
+PyAPI_FUNC(PyStatus) _Py_InitializeMain(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) Py_RunMain(void);
+PyAPI_FUNC(int) Py_RunMain(void) Py_NOEXCEPT;
 
 
-PyAPI_FUNC(void) _Py_NO_RETURN Py_ExitStatusException(PyStatus err);
+PyAPI_FUNC(void) _Py_NO_RETURN Py_ExitStatusException(PyStatus err) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) Py_FdIsInteractive(FILE *, const char *);
+PyAPI_FUNC(int) Py_FdIsInteractive(FILE *, const char *) Py_NOEXCEPT;
 
 /* --- PyInterpreterConfig ------------------------------------ */
 
@@ -85,8 +85,8 @@ typedef struct {
 
 PyAPI_FUNC(PyStatus) Py_NewInterpreterFromConfig(
     PyThreadState **tstate_p,
-    const PyInterpreterConfig *config);
+    const PyInterpreterConfig *config) Py_NOEXCEPT;
 
 typedef void (*atexit_datacallbackfunc)(void *);
 PyAPI_FUNC(int) PyUnstable_AtExit(
-        PyInterpreterState *, atexit_datacallbackfunc, void *);
+        PyInterpreterState *, atexit_datacallbackfunc, void *) Py_NOEXCEPT;

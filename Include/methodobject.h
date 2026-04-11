@@ -61,9 +61,9 @@ typedef PyCFunctionFastWithKeywords _PyCFunctionFastWithKeywords;
 #define _PyCFunctionFastWithKeywords_CAST(func)         \
     _Py_FUNC_CAST(PyCFunctionFastWithKeywords, func)
 
-PyAPI_FUNC(PyCFunction) PyCFunction_GetFunction(PyObject *);
-PyAPI_FUNC(PyObject *) PyCFunction_GetSelf(PyObject *);
-PyAPI_FUNC(int) PyCFunction_GetFlags(PyObject *);
+PyAPI_FUNC(PyCFunction) PyCFunction_GetFunction(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyCFunction_GetSelf(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyCFunction_GetFlags(PyObject *) Py_NOEXCEPT;
 
 struct PyMethodDef {
     const char  *ml_name;   /* The name of the built-in function/method */
@@ -76,17 +76,17 @@ struct PyMethodDef {
 /* PyCFunction_New is declared as a function for stable ABI (declaration is
  * needed for e.g. GCC with -fvisibility=hidden), but redefined as a macro
  * that calls PyCFunction_NewEx. */
-PyAPI_FUNC(PyObject *) PyCFunction_New(PyMethodDef *, PyObject *);
+PyAPI_FUNC(PyObject *) PyCFunction_New(PyMethodDef *, PyObject *) Py_NOEXCEPT;
 #define PyCFunction_New(ML, SELF) PyCFunction_NewEx((ML), (SELF), NULL)
 
 /* PyCFunction_NewEx is similar: on 3.9+, this calls PyCMethod_New. */
 PyAPI_FUNC(PyObject *) PyCFunction_NewEx(PyMethodDef *, PyObject *,
-                                         PyObject *);
+                                         PyObject *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03090000
 #define PyCFunction_NewEx(ML, SELF, MOD) PyCMethod_New((ML), (SELF), (MOD), NULL)
 PyAPI_FUNC(PyObject *) PyCMethod_New(PyMethodDef *, PyObject *,
-                                     PyObject *, PyTypeObject *);
+                                     PyObject *, PyTypeObject *) Py_NOEXCEPT;
 #endif
 
 

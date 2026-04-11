@@ -11,9 +11,9 @@ extern "C" {
 removed (with effort). */
 #define MAX_CO_EXTRA_USERS 255
 
-PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_New(void);
-PyAPI_FUNC(void) PyInterpreterState_Clear(PyInterpreterState *);
-PyAPI_FUNC(void) PyInterpreterState_Delete(PyInterpreterState *);
+PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_New(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyInterpreterState_Clear(PyInterpreterState *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyInterpreterState_Delete(PyInterpreterState *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03090000
 /* New in 3.9 */
@@ -23,31 +23,31 @@ PyAPI_FUNC(void) PyInterpreterState_Delete(PyInterpreterState *);
    interpreter. It cannot return NULL.
 
    The caller must hold the GIL. */
-PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Get(void);
+PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Get(void) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03080000
 /* New in 3.8 */
-PyAPI_FUNC(PyObject *) PyInterpreterState_GetDict(PyInterpreterState *);
+PyAPI_FUNC(PyObject *) PyInterpreterState_GetDict(PyInterpreterState *) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03070000
 /* New in 3.7 */
-PyAPI_FUNC(int64_t) PyInterpreterState_GetID(PyInterpreterState *);
+PyAPI_FUNC(int64_t) PyInterpreterState_GetID(PyInterpreterState *) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03030000
 
 /* State unique per thread */
 
 /* New in 3.3 */
-PyAPI_FUNC(int) PyState_AddModule(PyObject*, PyModuleDef*);
-PyAPI_FUNC(int) PyState_RemoveModule(PyModuleDef*);
+PyAPI_FUNC(int) PyState_AddModule(PyObject*, PyModuleDef*) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyState_RemoveModule(PyModuleDef*) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(PyObject*) PyState_FindModule(PyModuleDef*);
+PyAPI_FUNC(PyObject*) PyState_FindModule(PyModuleDef*) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyThreadState *) PyThreadState_New(PyInterpreterState *);
-PyAPI_FUNC(void) PyThreadState_Clear(PyThreadState *);
-PyAPI_FUNC(void) PyThreadState_Delete(PyThreadState *);
+PyAPI_FUNC(PyThreadState *) PyThreadState_New(PyInterpreterState *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyThreadState_Clear(PyThreadState *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyThreadState_Delete(PyThreadState *) Py_NOEXCEPT;
 
 /* Get the current thread state.
 
@@ -57,20 +57,20 @@ PyAPI_FUNC(void) PyThreadState_Delete(PyThreadState *);
    The caller must hold the GIL.
 
    See also PyThreadState_GetUnchecked() and _PyThreadState_GET(). */
-PyAPI_FUNC(PyThreadState *) PyThreadState_Get(void);
+PyAPI_FUNC(PyThreadState *) PyThreadState_Get(void) Py_NOEXCEPT;
 
 // Alias to PyThreadState_Get()
 #define PyThreadState_GET() PyThreadState_Get()
 
-PyAPI_FUNC(PyThreadState *) PyThreadState_Swap(PyThreadState *);
-PyAPI_FUNC(PyObject *) PyThreadState_GetDict(void);
-PyAPI_FUNC(int) PyThreadState_SetAsyncExc(unsigned long, PyObject *);
+PyAPI_FUNC(PyThreadState *) PyThreadState_Swap(PyThreadState *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyThreadState_GetDict(void) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyThreadState_SetAsyncExc(unsigned long, PyObject *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03090000
 /* New in 3.9 */
-PyAPI_FUNC(PyInterpreterState*) PyThreadState_GetInterpreter(PyThreadState *tstate);
-PyAPI_FUNC(PyFrameObject*) PyThreadState_GetFrame(PyThreadState *tstate);
-PyAPI_FUNC(uint64_t) PyThreadState_GetID(PyThreadState *tstate);
+PyAPI_FUNC(PyInterpreterState*) PyThreadState_GetInterpreter(PyThreadState *tstate) Py_NOEXCEPT;
+PyAPI_FUNC(PyFrameObject*) PyThreadState_GetFrame(PyThreadState *tstate) Py_NOEXCEPT;
+PyAPI_FUNC(uint64_t) PyThreadState_GetID(PyThreadState *tstate) Py_NOEXCEPT;
 #endif
 
 typedef
@@ -99,7 +99,7 @@ typedef
 
    Failure is a fatal error.
 */
-PyAPI_FUNC(PyGILState_STATE) PyGILState_Ensure(void);
+PyAPI_FUNC(PyGILState_STATE) PyGILState_Ensure(void) Py_NOEXCEPT;
 
 /* Release any resources previously acquired.  After this call, Python's
    state will be the same as it was prior to the corresponding
@@ -109,7 +109,7 @@ PyAPI_FUNC(PyGILState_STATE) PyGILState_Ensure(void);
    Every call to PyGILState_Ensure must be matched by a call to
    PyGILState_Release on the same thread.
 */
-PyAPI_FUNC(void) PyGILState_Release(PyGILState_STATE);
+PyAPI_FUNC(void) PyGILState_Release(PyGILState_STATE) Py_NOEXCEPT;
 
 /* Helper/diagnostic function - get the current thread state for
    this thread.  May return NULL if no GILState API has been used
@@ -117,7 +117,7 @@ PyAPI_FUNC(void) PyGILState_Release(PyGILState_STATE);
    thread-state, even if no auto-thread-state call has been made
    on the main thread.
 */
-PyAPI_FUNC(PyThreadState *) PyGILState_GetThisThreadState(void);
+PyAPI_FUNC(PyThreadState *) PyGILState_GetThisThreadState(void) Py_NOEXCEPT;
 
 
 #ifndef Py_LIMITED_API

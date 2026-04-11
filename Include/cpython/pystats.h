@@ -197,7 +197,7 @@ typedef struct _stats {
 } PyStats;
 
 // Export for most shared extensions
-PyAPI_FUNC(PyStats *) _PyStats_GetLocal(void);
+PyAPI_FUNC(PyStats *) _PyStats_GetLocal(void) Py_NOEXCEPT;
 
 #if defined(HAVE_THREAD_LOCAL) && !defined(Py_BUILD_CORE_MODULE)
 // use inline function version defined in cpython/pystate.h

@@ -15,7 +15,7 @@ extern "C" {
 PyAPI_FUNC(int) PyTraceMalloc_Track(
     unsigned int domain,
     uintptr_t ptr,
-    size_t size);
+    size_t size) Py_NOEXCEPT;
 
 /* Untrack an allocated memory block in the tracemalloc module.
    Do nothing if the block was not tracked.
@@ -23,7 +23,7 @@ PyAPI_FUNC(int) PyTraceMalloc_Track(
    Return -2 if tracemalloc is disabled, otherwise return 0. */
 PyAPI_FUNC(int) PyTraceMalloc_Untrack(
     unsigned int domain,
-    uintptr_t ptr);
+    uintptr_t ptr) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

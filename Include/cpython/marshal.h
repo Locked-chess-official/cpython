@@ -3,15 +3,15 @@
 #endif
 
 PyAPI_FUNC(PyObject *) PyMarshal_ReadObjectFromString(const char *,
-                                                      Py_ssize_t);
-PyAPI_FUNC(PyObject *) PyMarshal_WriteObjectToString(PyObject *, int);
+                                                      Py_ssize_t) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyMarshal_WriteObjectToString(PyObject *, int) Py_NOEXCEPT;
 
 #define Py_MARSHAL_VERSION 6
 
-PyAPI_FUNC(long) PyMarshal_ReadLongFromFile(FILE *);
-PyAPI_FUNC(int) PyMarshal_ReadShortFromFile(FILE *);
-PyAPI_FUNC(PyObject *) PyMarshal_ReadObjectFromFile(FILE *);
-PyAPI_FUNC(PyObject *) PyMarshal_ReadLastObjectFromFile(FILE *);
+PyAPI_FUNC(long) PyMarshal_ReadLongFromFile(FILE *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyMarshal_ReadShortFromFile(FILE *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyMarshal_ReadObjectFromFile(FILE *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyMarshal_ReadLastObjectFromFile(FILE *) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyMarshal_WriteLongToFile(long, FILE *, int);
-PyAPI_FUNC(void) PyMarshal_WriteObjectToFile(PyObject *, FILE *, int);
+PyAPI_FUNC(void) PyMarshal_WriteLongToFile(long, FILE *, int) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyMarshal_WriteObjectToFile(PyObject *, FILE *, int) Py_NOEXCEPT;

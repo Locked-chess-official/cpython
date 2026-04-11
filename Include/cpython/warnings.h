@@ -8,13 +8,13 @@ PyAPI_FUNC(int) PyErr_WarnExplicitObject(
     PyObject *filename,
     int lineno,
     PyObject *module,
-    PyObject *registry);
+    PyObject *registry) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyErr_WarnExplicitFormat(
     PyObject *category,
     const char *filename, int lineno,
     const char *module, PyObject *registry,
-    const char *format, ...);
+    const char *format, ...) Py_NOEXCEPT;
 
 // DEPRECATED: Use PyErr_WarnEx() instead.
 #define PyErr_Warn(category, msg) PyErr_WarnEx((category), (msg), 1)

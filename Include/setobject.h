@@ -10,15 +10,15 @@ PyAPI_DATA(PyTypeObject) PySet_Type;
 PyAPI_DATA(PyTypeObject) PyFrozenSet_Type;
 PyAPI_DATA(PyTypeObject) PySetIter_Type;
 
-PyAPI_FUNC(PyObject *) PySet_New(PyObject *);
-PyAPI_FUNC(PyObject *) PyFrozenSet_New(PyObject *);
+PyAPI_FUNC(PyObject *) PySet_New(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFrozenSet_New(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PySet_Add(PyObject *set, PyObject *key);
-PyAPI_FUNC(int) PySet_Clear(PyObject *set);
-PyAPI_FUNC(int) PySet_Contains(PyObject *anyset, PyObject *key);
-PyAPI_FUNC(int) PySet_Discard(PyObject *set, PyObject *key);
-PyAPI_FUNC(PyObject *) PySet_Pop(PyObject *set);
-PyAPI_FUNC(Py_ssize_t) PySet_Size(PyObject *anyset);
+PyAPI_FUNC(int) PySet_Add(PyObject *set, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(int) PySet_Clear(PyObject *set) Py_NOEXCEPT;
+PyAPI_FUNC(int) PySet_Contains(PyObject *anyset, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(int) PySet_Discard(PyObject *set, PyObject *key) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PySet_Pop(PyObject *set) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PySet_Size(PyObject *anyset) Py_NOEXCEPT;
 
 #define PyFrozenSet_CheckExact(ob) Py_IS_TYPE((ob), &PyFrozenSet_Type)
 #define PyFrozenSet_Check(ob) \

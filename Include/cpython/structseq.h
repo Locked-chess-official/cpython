@@ -3,9 +3,9 @@
 #endif
 
 PyAPI_FUNC(void) PyStructSequence_InitType(PyTypeObject *type,
-                                           PyStructSequence_Desc *desc);
+                                           PyStructSequence_Desc *desc) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyStructSequence_InitType2(PyTypeObject *type,
-                                           PyStructSequence_Desc *desc);
+                                           PyStructSequence_Desc *desc) Py_NOEXCEPT;
 
 typedef PyTupleObject PyStructSequence;
 #define PyStructSequence_SET_ITEM PyStructSequence_SetItem

@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-PyAPI_FUNC(int) PyOS_mystrnicmp(const char *, const char *, Py_ssize_t);
-PyAPI_FUNC(int) PyOS_mystricmp(const char *, const char *);
+PyAPI_FUNC(int) PyOS_mystrnicmp(const char *, const char *, Py_ssize_t) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyOS_mystricmp(const char *, const char *) Py_NOEXCEPT;
 
 #ifdef MS_WINDOWS
 #define PyOS_strnicmp strnicmp

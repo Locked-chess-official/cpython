@@ -5,4 +5,4 @@
 
 typedef int(*Py_AuditHookFunction)(const char *, PyObject *, void *);
 
-PyAPI_FUNC(int) PySys_AddAuditHook(Py_AuditHookFunction, void*);
+PyAPI_FUNC(int) PySys_AddAuditHook(Py_AuditHookFunction, void*) Py_NOEXCEPT;

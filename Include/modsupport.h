@@ -6,42 +6,42 @@
 extern "C" {
 #endif
 
-PyAPI_FUNC(int) PyArg_Parse(PyObject *, const char *, ...);
-PyAPI_FUNC(int) PyArg_ParseTuple(PyObject *, const char *, ...);
+PyAPI_FUNC(int) PyArg_Parse(PyObject *, const char *, ...) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyArg_ParseTuple(PyObject *, const char *, ...) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyArg_ParseTupleAndKeywords(PyObject *, PyObject *,
-                                            const char *, PY_CXX_CONST char * const *, ...);
-PyAPI_FUNC(int) PyArg_VaParse(PyObject *, const char *, va_list);
+                                            const char *, PY_CXX_CONST char * const *, ...) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyArg_VaParse(PyObject *, const char *, va_list) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyArg_VaParseTupleAndKeywords(PyObject *, PyObject *,
-                                              const char *, PY_CXX_CONST char * const *, va_list);
+                                              const char *, PY_CXX_CONST char * const *, va_list) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyArg_ValidateKeywordArguments(PyObject *);
-PyAPI_FUNC(int) PyArg_UnpackTuple(PyObject *, const char *, Py_ssize_t, Py_ssize_t, ...);
-PyAPI_FUNC(PyObject *) Py_BuildValue(const char *, ...);
-PyAPI_FUNC(PyObject *) Py_VaBuildValue(const char *, va_list);
+PyAPI_FUNC(int) PyArg_ValidateKeywordArguments(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyArg_UnpackTuple(PyObject *, const char *, Py_ssize_t, Py_ssize_t, ...) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) Py_BuildValue(const char *, ...) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) Py_VaBuildValue(const char *, va_list) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030a0000
 // Add an attribute with name 'name' and value 'obj' to the module 'mod.
 // On success, return 0.
 // On error, raise an exception and return -1.
-PyAPI_FUNC(int) PyModule_AddObjectRef(PyObject *mod, const char *name, PyObject *value);
+PyAPI_FUNC(int) PyModule_AddObjectRef(PyObject *mod, const char *name, PyObject *value) Py_NOEXCEPT;
 #endif   /* Py_LIMITED_API */
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
 // Similar to PyModule_AddObjectRef() but steal a reference to 'value'.
-PyAPI_FUNC(int) PyModule_Add(PyObject *mod, const char *name, PyObject *value);
+PyAPI_FUNC(int) PyModule_Add(PyObject *mod, const char *name, PyObject *value) Py_NOEXCEPT;
 #endif   /* Py_LIMITED_API */
 
 // Similar to PyModule_AddObjectRef() and PyModule_Add() but steal
 // a reference to 'value' on success and only on success.
 // Errorprone. Should not be used in new code.
-PyAPI_FUNC(int) PyModule_AddObject(PyObject *mod, const char *, PyObject *value);
+PyAPI_FUNC(int) PyModule_AddObject(PyObject *mod, const char *, PyObject *value) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyModule_AddIntConstant(PyObject *, const char *, long);
-PyAPI_FUNC(int) PyModule_AddStringConstant(PyObject *, const char *, const char *);
+PyAPI_FUNC(int) PyModule_AddIntConstant(PyObject *, const char *, long) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_AddStringConstant(PyObject *, const char *, const char *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03090000
 /* New in 3.9 */
-PyAPI_FUNC(int) PyModule_AddType(PyObject *module, PyTypeObject *type);
+PyAPI_FUNC(int) PyModule_AddType(PyObject *module, PyTypeObject *type) Py_NOEXCEPT;
 #endif /* Py_LIMITED_API */
 
 #define PyModule_AddIntMacro(m, c) PyModule_AddIntConstant((m), #c, (c))
@@ -49,14 +49,14 @@ PyAPI_FUNC(int) PyModule_AddType(PyObject *module, PyTypeObject *type);
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
 /* New in 3.5 */
-PyAPI_FUNC(int) PyModule_SetDocString(PyObject *, const char *);
-PyAPI_FUNC(int) PyModule_AddFunctions(PyObject *, PyMethodDef *);
-PyAPI_FUNC(int) PyModule_ExecDef(PyObject *module, PyModuleDef *def);
+PyAPI_FUNC(int) PyModule_SetDocString(PyObject *, const char *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_AddFunctions(PyObject *, PyMethodDef *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_ExecDef(PyObject *module, PyModuleDef *def) Py_NOEXCEPT;
 #endif
 
 #define Py_CLEANUP_SUPPORTED 0x20000
 
-PyAPI_FUNC(PyObject *) PyModule_Create2(PyModuleDef*, int apiver);
+PyAPI_FUNC(PyObject *) PyModule_Create2(PyModuleDef*, int apiver) Py_NOEXCEPT;
 
 #ifdef Py_LIMITED_API
 #define PyModule_Create(module) \
@@ -70,7 +70,7 @@ PyAPI_FUNC(PyObject *) PyModule_Create2(PyModuleDef*, int apiver);
 /* New in 3.5 */
 PyAPI_FUNC(PyObject *) PyModule_FromDefAndSpec2(PyModuleDef *def,
                                                 PyObject *spec,
-                                                int module_api_version);
+                                                int module_api_version) Py_NOEXCEPT;
 
 #ifdef Py_LIMITED_API
 #define PyModule_FromDefAndSpec(module, spec) \
@@ -98,7 +98,7 @@ typedef struct PyABIInfo {
 
 #define PyABIInfo_FREETHREADING_AGNOSTIC (PyABIInfo_GIL|PyABIInfo_FREETHREADED)
 
-PyAPI_FUNC(int) PyABIInfo_Check(PyABIInfo *info, const char *module_name);
+PyAPI_FUNC(int) PyABIInfo_Check(PyABIInfo *info, const char *module_name) Py_NOEXCEPT;
 
 // Define the defaults
 #ifdef Py_LIMITED_API

@@ -13,33 +13,33 @@ extern "C" {
         PyType_FastSubclass(Py_TYPE(op), Py_TPFLAGS_LONG_SUBCLASS)
 #define PyLong_CheckExact(op) Py_IS_TYPE((op), &PyLong_Type)
 
-PyAPI_FUNC(PyObject *) PyLong_FromLong(long);
-PyAPI_FUNC(PyObject *) PyLong_FromUnsignedLong(unsigned long);
-PyAPI_FUNC(PyObject *) PyLong_FromSize_t(size_t);
-PyAPI_FUNC(PyObject *) PyLong_FromSsize_t(Py_ssize_t);
-PyAPI_FUNC(PyObject *) PyLong_FromDouble(double);
+PyAPI_FUNC(PyObject *) PyLong_FromLong(long) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromUnsignedLong(unsigned long) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromSize_t(size_t) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromSsize_t(Py_ssize_t) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromDouble(double) Py_NOEXCEPT;
 
-PyAPI_FUNC(long) PyLong_AsLong(PyObject *);
-PyAPI_FUNC(long) PyLong_AsLongAndOverflow(PyObject *, int *);
-PyAPI_FUNC(Py_ssize_t) PyLong_AsSsize_t(PyObject *);
-PyAPI_FUNC(size_t) PyLong_AsSize_t(PyObject *);
-PyAPI_FUNC(unsigned long) PyLong_AsUnsignedLong(PyObject *);
-PyAPI_FUNC(unsigned long) PyLong_AsUnsignedLongMask(PyObject *);
+PyAPI_FUNC(long) PyLong_AsLong(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(long) PyLong_AsLongAndOverflow(PyObject *, int *) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PyLong_AsSsize_t(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(size_t) PyLong_AsSize_t(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(unsigned long) PyLong_AsUnsignedLong(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(unsigned long) PyLong_AsUnsignedLongMask(PyObject *) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
-PyAPI_FUNC(int) PyLong_AsInt(PyObject *);
+PyAPI_FUNC(int) PyLong_AsInt(PyObject *) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030e0000
-PyAPI_FUNC(PyObject*) PyLong_FromInt32(int32_t value);
-PyAPI_FUNC(PyObject*) PyLong_FromUInt32(uint32_t value);
-PyAPI_FUNC(PyObject*) PyLong_FromInt64(int64_t value);
-PyAPI_FUNC(PyObject*) PyLong_FromUInt64(uint64_t value);
+PyAPI_FUNC(PyObject*) PyLong_FromInt32(int32_t value) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyLong_FromUInt32(uint32_t value) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyLong_FromInt64(int64_t value) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyLong_FromUInt64(uint64_t value) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyLong_AsInt32(PyObject *obj, int32_t *value);
-PyAPI_FUNC(int) PyLong_AsUInt32(PyObject *obj, uint32_t *value);
-PyAPI_FUNC(int) PyLong_AsInt64(PyObject *obj, int64_t *value);
-PyAPI_FUNC(int) PyLong_AsUInt64(PyObject *obj, uint64_t *value);
+PyAPI_FUNC(int) PyLong_AsInt32(PyObject *obj, int32_t *value) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyLong_AsUInt32(PyObject *obj, uint32_t *value) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyLong_AsInt64(PyObject *obj, int64_t *value) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyLong_AsUInt64(PyObject *obj, uint64_t *value) Py_NOEXCEPT;
 
 #define Py_ASNATIVEBYTES_DEFAULTS -1
 #define Py_ASNATIVEBYTES_BIG_ENDIAN 0
@@ -77,7 +77,7 @@ PyAPI_FUNC(int) PyLong_AsUInt64(PyObject *obj, uint64_t *value);
    calculate the bit length of an integer object.
    */
 PyAPI_FUNC(Py_ssize_t) PyLong_AsNativeBytes(PyObject* v, void* buffer,
-    Py_ssize_t n_bytes, int flags);
+    Py_ssize_t n_bytes, int flags) Py_NOEXCEPT;
 
 /* PyLong_FromNativeBytes: Create an int value from a native integer
    n_bytes is the number of bytes to read from the buffer. Passing 0 will
@@ -88,13 +88,13 @@ PyAPI_FUNC(Py_ssize_t) PyLong_AsNativeBytes(PyObject* v, void* buffer,
 
    Returns the int object, or NULL with an exception set. */
 PyAPI_FUNC(PyObject*) PyLong_FromNativeBytes(const void* buffer, size_t n_bytes,
-    int flags);
+    int flags) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject*) PyLong_FromUnsignedNativeBytes(const void* buffer,
-    size_t n_bytes, int flags);
+    size_t n_bytes, int flags) Py_NOEXCEPT;
 
 #endif
 
-PyAPI_FUNC(PyObject *) PyLong_GetInfo(void);
+PyAPI_FUNC(PyObject *) PyLong_GetInfo(void) Py_NOEXCEPT;
 
 /* It may be useful in the future. I've added it in the PyInt -> PyLong
    cleanup to keep the extra information. [CH] */
@@ -147,24 +147,24 @@ PyLong_AsPid(PyObject *obj)
 #  error "void* different in size from int, long and long long"
 #endif /* SIZEOF_VOID_P */
 
-PyAPI_FUNC(double) PyLong_AsDouble(PyObject *);
-PyAPI_FUNC(PyObject *) PyLong_FromVoidPtr(void *);
-PyAPI_FUNC(void *) PyLong_AsVoidPtr(PyObject *);
+PyAPI_FUNC(double) PyLong_AsDouble(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromVoidPtr(void *) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyLong_AsVoidPtr(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyLong_FromLongLong(long long);
-PyAPI_FUNC(PyObject *) PyLong_FromUnsignedLongLong(unsigned long long);
-PyAPI_FUNC(long long) PyLong_AsLongLong(PyObject *);
-PyAPI_FUNC(unsigned long long) PyLong_AsUnsignedLongLong(PyObject *);
-PyAPI_FUNC(unsigned long long) PyLong_AsUnsignedLongLongMask(PyObject *);
-PyAPI_FUNC(long long) PyLong_AsLongLongAndOverflow(PyObject *, int *);
+PyAPI_FUNC(PyObject *) PyLong_FromLongLong(long long) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyLong_FromUnsignedLongLong(unsigned long long) Py_NOEXCEPT;
+PyAPI_FUNC(long long) PyLong_AsLongLong(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(unsigned long long) PyLong_AsUnsignedLongLong(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(unsigned long long) PyLong_AsUnsignedLongLongMask(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(long long) PyLong_AsLongLongAndOverflow(PyObject *, int *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyLong_FromString(const char *, char **, int);
+PyAPI_FUNC(PyObject *) PyLong_FromString(const char *, char **, int) Py_NOEXCEPT;
 
 /* These aren't really part of the int object, but they're handy. The
    functions are in Python/mystrtoul.c.
  */
-PyAPI_FUNC(unsigned long) PyOS_strtoul(const char *, char **, int);
-PyAPI_FUNC(long) PyOS_strtol(const char *, char **, int);
+PyAPI_FUNC(unsigned long) PyOS_strtoul(const char *, char **, int) Py_NOEXCEPT;
+PyAPI_FUNC(long) PyOS_strtol(const char *, char **, int) Py_NOEXCEPT;
 
 /* --- Import/Export API -------------------------------------------------- */
 
@@ -175,7 +175,7 @@ typedef struct PyLongLayout {
     int8_t digit_endianness;
 } PyLongLayout;
 
-PyAPI_FUNC(const PyLongLayout*) PyLong_GetNativeLayout(void);
+PyAPI_FUNC(const PyLongLayout*) PyLong_GetNativeLayout(void) Py_NOEXCEPT;
 
 typedef struct PyLongExport {
     int64_t value;
@@ -188,9 +188,9 @@ typedef struct PyLongExport {
 
 PyAPI_FUNC(int) PyLong_Export(
     PyObject *obj,
-    PyLongExport *export_long);
+    PyLongExport *export_long) Py_NOEXCEPT;
 PyAPI_FUNC(void) PyLong_FreeExport(
-    PyLongExport *export_long);
+    PyLongExport *export_long) Py_NOEXCEPT;
 
 
 /* --- PyLongWriter API --------------------------------------------------- */
@@ -200,9 +200,9 @@ typedef struct PyLongWriter PyLongWriter;
 PyAPI_FUNC(PyLongWriter*) PyLongWriter_Create(
     int negative,
     Py_ssize_t ndigits,
-    void **digits);
-PyAPI_FUNC(PyObject*) PyLongWriter_Finish(PyLongWriter *writer);
-PyAPI_FUNC(void) PyLongWriter_Discard(PyLongWriter *writer);
+    void **digits) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyLongWriter_Finish(PyLongWriter *writer) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyLongWriter_Discard(PyLongWriter *writer) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_LONGOBJECT_H

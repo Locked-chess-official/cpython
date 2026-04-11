@@ -49,7 +49,7 @@ typedef struct {
 
 /* Get the memory block allocator of the specified domain. */
 PyAPI_FUNC(void) PyMem_GetAllocator(PyMemAllocatorDomain domain,
-                                    PyMemAllocatorEx *allocator);
+                                    PyMemAllocatorEx *allocator) Py_NOEXCEPT;
 
 /* Set the memory block allocator of the specified domain.
 
@@ -63,7 +63,7 @@ PyAPI_FUNC(void) PyMem_GetAllocator(PyMemAllocatorDomain domain,
    PyMem_SetupDebugHooks() function must be called to reinstall the debug hooks
    on top on the new allocator. */
 PyAPI_FUNC(void) PyMem_SetAllocator(PyMemAllocatorDomain domain,
-                                    PyMemAllocatorEx *allocator);
+                                    PyMemAllocatorEx *allocator) Py_NOEXCEPT;
 
 /* Setup hooks to detect bugs in the following Python memory allocator
    functions:
@@ -81,4 +81,4 @@ PyAPI_FUNC(void) PyMem_SetAllocator(PyMemAllocatorDomain domain,
    - detect write after the end of the buffer (buffer overflow)
 
    The function does nothing if Python is not compiled is debug mode. */
-PyAPI_FUNC(void) PyMem_SetupDebugHooks(void);
+PyAPI_FUNC(void) PyMem_SetupDebugHooks(void) Py_NOEXCEPT;

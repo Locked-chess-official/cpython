@@ -67,20 +67,20 @@ PyAPI_DATA(PyTypeObject) PyFunction_Type;
 
 #define PyFunction_Check(op) Py_IS_TYPE((op), &PyFunction_Type)
 
-PyAPI_FUNC(PyObject *) PyFunction_New(PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_NewWithQualName(PyObject *, PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetCode(PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetGlobals(PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetModule(PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetDefaults(PyObject *);
-PyAPI_FUNC(int) PyFunction_SetDefaults(PyObject *, PyObject *);
-PyAPI_FUNC(void) PyFunction_SetVectorcall(PyFunctionObject *, vectorcallfunc);
-PyAPI_FUNC(PyObject *) PyFunction_GetKwDefaults(PyObject *);
-PyAPI_FUNC(int) PyFunction_SetKwDefaults(PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetClosure(PyObject *);
-PyAPI_FUNC(int) PyFunction_SetClosure(PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyFunction_GetAnnotations(PyObject *);
-PyAPI_FUNC(int) PyFunction_SetAnnotations(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyFunction_New(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_NewWithQualName(PyObject *, PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetCode(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetGlobals(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetModule(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetDefaults(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFunction_SetDefaults(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyFunction_SetVectorcall(PyFunctionObject *, vectorcallfunc) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetKwDefaults(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFunction_SetKwDefaults(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetClosure(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFunction_SetClosure(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyFunction_GetAnnotations(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyFunction_SetAnnotations(PyObject *, PyObject *) Py_NOEXCEPT;
 
 #define _PyFunction_CAST(func) \
     (assert(PyFunction_Check(func)), _Py_CAST(PyFunctionObject*, func))
@@ -126,8 +126,8 @@ static inline PyObject* PyFunction_GET_ANNOTATIONS(PyObject *func) {
 PyAPI_DATA(PyTypeObject) PyClassMethod_Type;
 PyAPI_DATA(PyTypeObject) PyStaticMethod_Type;
 
-PyAPI_FUNC(PyObject *) PyClassMethod_New(PyObject *);
-PyAPI_FUNC(PyObject *) PyStaticMethod_New(PyObject *);
+PyAPI_FUNC(PyObject *) PyClassMethod_New(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyStaticMethod_New(PyObject *) Py_NOEXCEPT;
 
 #define PY_FOREACH_FUNC_EVENT(V) \
     V(CREATE)                    \
@@ -170,14 +170,14 @@ typedef int (*PyFunction_WatchCallback)(
  * Returns a handle that may be passed to PyFunction_ClearWatcher on success,
  * or -1 and sets an error if no more handles are available.
  */
-PyAPI_FUNC(int) PyFunction_AddWatcher(PyFunction_WatchCallback callback);
+PyAPI_FUNC(int) PyFunction_AddWatcher(PyFunction_WatchCallback callback) Py_NOEXCEPT;
 
 /*
  * Clear the watcher associated with the watcher_id handle.
  *
  * Returns 0 on success or -1 if no watcher exists for the supplied id.
  */
-PyAPI_FUNC(int) PyFunction_ClearWatcher(int watcher_id);
+PyAPI_FUNC(int) PyFunction_ClearWatcher(int watcher_id) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

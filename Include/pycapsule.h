@@ -28,29 +28,29 @@ typedef void (*PyCapsule_Destructor)(PyObject *);
 PyAPI_FUNC(PyObject *) PyCapsule_New(
     void *pointer,
     const char *name,
-    PyCapsule_Destructor destructor);
+    PyCapsule_Destructor destructor) Py_NOEXCEPT;
 
-PyAPI_FUNC(void *) PyCapsule_GetPointer(PyObject *capsule, const char *name);
+PyAPI_FUNC(void *) PyCapsule_GetPointer(PyObject *capsule, const char *name) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyCapsule_Destructor) PyCapsule_GetDestructor(PyObject *capsule);
+PyAPI_FUNC(PyCapsule_Destructor) PyCapsule_GetDestructor(PyObject *capsule) Py_NOEXCEPT;
 
-PyAPI_FUNC(const char *) PyCapsule_GetName(PyObject *capsule);
+PyAPI_FUNC(const char *) PyCapsule_GetName(PyObject *capsule) Py_NOEXCEPT;
 
-PyAPI_FUNC(void *) PyCapsule_GetContext(PyObject *capsule);
+PyAPI_FUNC(void *) PyCapsule_GetContext(PyObject *capsule) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCapsule_IsValid(PyObject *capsule, const char *name);
+PyAPI_FUNC(int) PyCapsule_IsValid(PyObject *capsule, const char *name) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCapsule_SetPointer(PyObject *capsule, void *pointer);
+PyAPI_FUNC(int) PyCapsule_SetPointer(PyObject *capsule, void *pointer) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCapsule_SetDestructor(PyObject *capsule, PyCapsule_Destructor destructor);
+PyAPI_FUNC(int) PyCapsule_SetDestructor(PyObject *capsule, PyCapsule_Destructor destructor) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCapsule_SetName(PyObject *capsule, const char *name);
+PyAPI_FUNC(int) PyCapsule_SetName(PyObject *capsule, const char *name) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyCapsule_SetContext(PyObject *capsule, void *context);
+PyAPI_FUNC(int) PyCapsule_SetContext(PyObject *capsule, void *context) Py_NOEXCEPT;
 
 PyAPI_FUNC(void *) PyCapsule_Import(
     const char *name,           /* UTF-8 encoded string */
-    int no_block);
+    int no_block) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

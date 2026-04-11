@@ -27,11 +27,11 @@ PyAPI_DATA(PyLongObject) _Py_TrueStruct;
 #endif
 
 // Test if an object is the True singleton, the same as "x is True" in Python.
-PyAPI_FUNC(int) Py_IsTrue(PyObject *x);
+PyAPI_FUNC(int) Py_IsTrue(PyObject *x) Py_NOEXCEPT;
 #define Py_IsTrue(x) Py_Is((x), Py_True)
 
 // Test if an object is the False singleton, the same as "x is False" in Python.
-PyAPI_FUNC(int) Py_IsFalse(PyObject *x);
+PyAPI_FUNC(int) Py_IsFalse(PyObject *x) Py_NOEXCEPT;
 #define Py_IsFalse(x) Py_Is((x), Py_False)
 
 /* Macros for returning Py_True or Py_False, respectively.
@@ -46,7 +46,7 @@ PyAPI_FUNC(int) Py_IsFalse(PyObject *x);
 #endif
 
 /* Function to return a bool from a C long */
-PyAPI_FUNC(PyObject *) PyBool_FromLong(long);
+PyAPI_FUNC(PyObject *) PyBool_FromLong(long) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

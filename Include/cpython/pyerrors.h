@@ -92,41 +92,41 @@ typedef PyOSErrorObject PyWindowsErrorObject;
 
 /* Context manipulation (PEP 3134) */
 
-PyAPI_FUNC(void) _PyErr_ChainExceptions1(PyObject *);
+PyAPI_FUNC(void) _PyErr_ChainExceptions1(PyObject *) Py_NOEXCEPT;
 
 /* In exceptions.c */
 
 PyAPI_FUNC(PyObject*) PyUnstable_Exc_PrepReraiseStar(
      PyObject *orig,
-     PyObject *excs);
+     PyObject *excs) Py_NOEXCEPT;
 
 /* In signalmodule.c */
 
-PyAPI_FUNC(int) PySignal_SetWakeupFd(int fd);
+PyAPI_FUNC(int) PySignal_SetWakeupFd(int fd) Py_NOEXCEPT;
 
 /* Support for adding program text to SyntaxErrors */
 
 PyAPI_FUNC(void) PyErr_SyntaxLocationObject(
     PyObject *filename,
     int lineno,
-    int col_offset);
+    int col_offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(void) PyErr_RangedSyntaxLocationObject(
     PyObject *filename,
     int lineno,
     int col_offset,
     int end_lineno,
-    int end_col_offset);
+    int end_col_offset) Py_NOEXCEPT;
 
 PyAPI_FUNC(PyObject *) PyErr_ProgramTextObject(
     PyObject *filename,
-    int lineno);
+    int lineno) Py_NOEXCEPT;
 
 PyAPI_FUNC(void) _Py_NO_RETURN _Py_FatalErrorFunc(
     const char *func,
-    const char *message);
+    const char *message) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyErr_FormatUnraisable(const char *, ...);
+PyAPI_FUNC(void) PyErr_FormatUnraisable(const char *, ...) Py_NOEXCEPT;
 
 PyAPI_DATA(PyObject *) PyExc_PythonFinalizationError;
 

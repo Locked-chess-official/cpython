@@ -21,10 +21,10 @@ PyAPI_DATA(PyTypeObject) PyMethod_Type;
 
 #define PyMethod_Check(op) Py_IS_TYPE((op), &PyMethod_Type)
 
-PyAPI_FUNC(PyObject *) PyMethod_New(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyMethod_New(PyObject *, PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyMethod_Function(PyObject *);
-PyAPI_FUNC(PyObject *) PyMethod_Self(PyObject *);
+PyAPI_FUNC(PyObject *) PyMethod_Function(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyMethod_Self(PyObject *) Py_NOEXCEPT;
 
 #define _PyMethod_CAST(meth) \
     (assert(PyMethod_Check(meth)), _Py_CAST(PyMethodObject*, meth))
@@ -50,8 +50,8 @@ PyAPI_DATA(PyTypeObject) PyInstanceMethod_Type;
 
 #define PyInstanceMethod_Check(op) Py_IS_TYPE((op), &PyInstanceMethod_Type)
 
-PyAPI_FUNC(PyObject *) PyInstanceMethod_New(PyObject *);
-PyAPI_FUNC(PyObject *) PyInstanceMethod_Function(PyObject *);
+PyAPI_FUNC(PyObject *) PyInstanceMethod_New(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyInstanceMethod_Function(PyObject *) Py_NOEXCEPT;
 
 #define _PyInstanceMethod_CAST(meth) \
     (assert(PyInstanceMethod_Check(meth)), \

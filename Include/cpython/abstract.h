@@ -9,7 +9,7 @@
 Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyObject_CallMethodId(
     PyObject *obj,
     _Py_Identifier *name,
-    const char *format, ...);
+    const char *format, ...) Py_NOEXCEPT;
 
 /* Convert keyword arguments from the FASTCALL (stack: C array, kwnames: tuple)
    format to a Python dictionary ("kwargs" dict).
@@ -21,7 +21,7 @@ Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyObject_CallMethodId(
    Duplicate keys are merged using the last value. If duplicate keys must raise
    an exception, the caller is responsible to implement an explicit keys on
    kwnames. */
-PyAPI_FUNC(PyObject*) _PyStack_AsDict(PyObject *const *values, PyObject *kwnames);
+PyAPI_FUNC(PyObject*) _PyStack_AsDict(PyObject *const *values, PyObject *kwnames) Py_NOEXCEPT;
 
 
 /* === Vectorcall protocol (PEP 590) ============================= */
@@ -36,7 +36,7 @@ _PyVectorcall_NARGS(size_t n)
 }
 #define PyVectorcall_NARGS(n) _PyVectorcall_NARGS(n)
 
-PyAPI_FUNC(vectorcallfunc) PyVectorcall_Function(PyObject *callable);
+PyAPI_FUNC(vectorcallfunc) PyVectorcall_Function(PyObject *callable) Py_NOEXCEPT;
 
 // Backwards compatibility aliases (PEP 590) for API that was provisional
 // in Python 3.8
@@ -54,9 +54,9 @@ PyAPI_FUNC(PyObject *) PyObject_VectorcallDict(
     PyObject *callable,
     PyObject *const *args,
     size_t nargsf,
-    PyObject *kwargs);
+    PyObject *kwargs) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyObject_CallOneArg(PyObject *func, PyObject *arg);
+PyAPI_FUNC(PyObject *) PyObject_CallOneArg(PyObject *func, PyObject *arg) Py_NOEXCEPT;
 
 static inline PyObject *
 PyObject_CallMethodNoArgs(PyObject *self, PyObject *name)
@@ -77,7 +77,7 @@ PyObject_CallMethodOneArg(PyObject *self, PyObject *name, PyObject *arg)
 /* Guess the size of object 'o' using len(o) or o.__length_hint__().
    If neither of those return a non-negative value, then return the default
    value.  If one of the calls fails, this function returns -1. */
-PyAPI_FUNC(Py_ssize_t) PyObject_LengthHint(PyObject *o, Py_ssize_t);
+PyAPI_FUNC(Py_ssize_t) PyObject_LengthHint(PyObject *o, Py_ssize_t) Py_NOEXCEPT;
 
 /* === Sequence protocol ================================================ */
 

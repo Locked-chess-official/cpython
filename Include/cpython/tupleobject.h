@@ -12,7 +12,7 @@ typedef struct {
     PyObject *ob_item[1];
 } PyTupleObject;
 
-PyAPI_FUNC(int) _PyTuple_Resize(PyObject **, Py_ssize_t);
+PyAPI_FUNC(int) _PyTuple_Resize(PyObject **, Py_ssize_t) Py_NOEXCEPT;
 
 /* Cast argument to PyTupleObject* type. */
 #define _PyTuple_CAST(op) \
@@ -41,4 +41,4 @@ PyTuple_SET_ITEM(PyObject *op, Py_ssize_t index, PyObject *value) {
 
 PyAPI_FUNC(PyObject*) PyTuple_FromArray(
     PyObject *const *array,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;

@@ -247,7 +247,7 @@ enum PyUnicode_Kind {
     PyUnicode_4BYTE_KIND = 4
 };
 
-PyAPI_FUNC(int) PyUnicode_KIND(PyObject *op);
+PyAPI_FUNC(int) PyUnicode_KIND(PyObject *op) Py_NOEXCEPT;
 
 // PyUnicode_KIND(): Return one of the PyUnicode_*_KIND values defined above.
 //
@@ -273,7 +273,7 @@ static inline void* _PyUnicode_NONCOMPACT_DATA(PyObject *op) {
     return data;
 }
 
-PyAPI_FUNC(void*) PyUnicode_DATA(PyObject *op);
+PyAPI_FUNC(void*) PyUnicode_DATA(PyObject *op) Py_NOEXCEPT;
 
 static inline void* _PyUnicode_DATA(PyObject *op) {
     if (PyUnicode_IS_COMPACT(op)) {
@@ -413,7 +413,7 @@ static inline Py_UCS4 PyUnicode_MAX_CHAR_VALUE(PyObject *op)
 PyAPI_FUNC(PyObject*) PyUnicode_New(
     Py_ssize_t size,            /* Number of code points in the new string */
     Py_UCS4 maxchar             /* maximum code point value in the string */
-    );
+    ) Py_NOEXCEPT;
 
 /* For backward compatibility. Soft-deprecated. */
 static inline int PyUnicode_READY(PyObject* Py_UNUSED(op))
@@ -446,7 +446,7 @@ PyAPI_FUNC(Py_ssize_t) PyUnicode_CopyCharacters(
     PyObject *from,
     Py_ssize_t from_start,
     Py_ssize_t how_many
-    );
+    ) Py_NOEXCEPT;
 
 /* Fill a string with a character: write fill_char into
    unicode[start:start+length].
@@ -461,65 +461,65 @@ PyAPI_FUNC(Py_ssize_t) PyUnicode_Fill(
     Py_ssize_t start,
     Py_ssize_t length,
     Py_UCS4 fill_char
-    );
+    ) Py_NOEXCEPT;
 
 /* Create a new string from a buffer of Py_UCS1, Py_UCS2 or Py_UCS4 characters.
    Scan the string to find the maximum character. */
 PyAPI_FUNC(PyObject*) PyUnicode_FromKindAndData(
     int kind,
     const void *buffer,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 
 
 /* --- Public PyUnicodeWriter API ----------------------------------------- */
 
 typedef struct PyUnicodeWriter PyUnicodeWriter;
 
-PyAPI_FUNC(PyUnicodeWriter*) PyUnicodeWriter_Create(Py_ssize_t length);
-PyAPI_FUNC(void) PyUnicodeWriter_Discard(PyUnicodeWriter *writer);
-PyAPI_FUNC(PyObject*) PyUnicodeWriter_Finish(PyUnicodeWriter *writer);
+PyAPI_FUNC(PyUnicodeWriter*) PyUnicodeWriter_Create(Py_ssize_t length) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyUnicodeWriter_Discard(PyUnicodeWriter *writer) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyUnicodeWriter_Finish(PyUnicodeWriter *writer) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyUnicodeWriter_WriteChar(
     PyUnicodeWriter *writer,
-    Py_UCS4 ch);
+    Py_UCS4 ch) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteUTF8(
     PyUnicodeWriter *writer,
     const char *str,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteASCII(
     PyUnicodeWriter *writer,
     const char *str,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteWideChar(
     PyUnicodeWriter *writer,
     const wchar_t *str,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteUCS4(
     PyUnicodeWriter *writer,
     const Py_UCS4 *str,
-    Py_ssize_t size);
+    Py_ssize_t size) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyUnicodeWriter_WriteStr(
     PyUnicodeWriter *writer,
-    PyObject *obj);
+    PyObject *obj) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteRepr(
     PyUnicodeWriter *writer,
-    PyObject *obj);
+    PyObject *obj) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_WriteSubstring(
     PyUnicodeWriter *writer,
     PyObject *str,
     Py_ssize_t start,
-    Py_ssize_t end);
+    Py_ssize_t end) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_Format(
     PyUnicodeWriter *writer,
     const char *format,
-    ...);
+    ...) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyUnicodeWriter_DecodeUTF8Stateful(
     PyUnicodeWriter *writer,
     const char *string,         /* UTF-8 encoded string */
     Py_ssize_t length,          /* size of string */
     const char *errors,         /* error handling */
-    Py_ssize_t *consumed);      /* bytes consumed */
+    Py_ssize_t *consumed) Py_NOEXCEPT;      /* bytes consumed */
 
 
 /* --- Private _PyUnicodeWriter API --------------------------------------- */
@@ -552,7 +552,7 @@ typedef struct {
 // disabled. Set min_length, min_char and overallocate attributes to control
 // the allocation of the buffer.
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(void) _PyUnicodeWriter_Init(
-    _PyUnicodeWriter *writer);
+    _PyUnicodeWriter *writer) Py_NOEXCEPT;
 
 /* Prepare the buffer to write 'length' characters
    with the specified maximum character.
@@ -571,7 +571,7 @@ _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(void) _PyUnicodeWriter_Init(
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_PrepareInternal(
     _PyUnicodeWriter *writer,
     Py_ssize_t length,
-    Py_UCS4 maxchar);
+    Py_UCS4 maxchar) Py_NOEXCEPT;
 
 /* Prepare the buffer to have at least the kind KIND.
    For example, kind=PyUnicode_2BYTE_KIND ensures that the writer will
@@ -587,19 +587,19 @@ _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_PrepareInternal
    macro instead. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_PrepareKindInternal(
     _PyUnicodeWriter *writer,
-    int kind);
+    int kind) Py_NOEXCEPT;
 
 /* Append a Unicode character.
    Return 0 on success, raise an exception and return -1 on error. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_WriteChar(
     _PyUnicodeWriter *writer,
-    Py_UCS4 ch);
+    Py_UCS4 ch) Py_NOEXCEPT;
 
 /* Append a Unicode string.
    Return 0 on success, raise an exception and return -1 on error. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_WriteStr(
     _PyUnicodeWriter *writer,
-    PyObject *str);               /* Unicode string */
+    PyObject *str) Py_NOEXCEPT;               /* Unicode string */
 
 /* Append a substring of a Unicode string.
    Return 0 on success, raise an exception and return -1 on error. */
@@ -607,31 +607,31 @@ _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_WriteSubstring(
     _PyUnicodeWriter *writer,
     PyObject *str,              /* Unicode string */
     Py_ssize_t start,
-    Py_ssize_t end);
+    Py_ssize_t end) Py_NOEXCEPT;
 
 /* Append an ASCII-encoded byte string.
    Return 0 on success, raise an exception and return -1 on error. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_WriteASCIIString(
     _PyUnicodeWriter *writer,
     const char *str,           /* ASCII-encoded byte string */
-    Py_ssize_t len);           /* number of bytes, or -1 if unknown */
+    Py_ssize_t len) Py_NOEXCEPT;           /* number of bytes, or -1 if unknown */
 
 /* Append a latin1-encoded byte string.
    Return 0 on success, raise an exception and return -1 on error. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(int) _PyUnicodeWriter_WriteLatin1String(
     _PyUnicodeWriter *writer,
     const char *str,           /* latin1-encoded byte string */
-    Py_ssize_t len);           /* length in bytes */
+    Py_ssize_t len) Py_NOEXCEPT;           /* length in bytes */
 
 /* Get the value of the writer as a Unicode string. Clear the
    buffer of the writer. Raise an exception and return NULL
    on error. */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(PyObject *) _PyUnicodeWriter_Finish(
-    _PyUnicodeWriter *writer);
+    _PyUnicodeWriter *writer) Py_NOEXCEPT;
 
 /* Deallocate memory of a writer (clear its internal buffer). */
 _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(void) _PyUnicodeWriter_Dealloc(
-    _PyUnicodeWriter *writer);
+    _PyUnicodeWriter *writer) Py_NOEXCEPT;
 
 
 /* --- Manage the default encoding ---------------------------------------- */
@@ -649,7 +649,7 @@ _Py_DEPRECATED_EXTERNALLY(3.14) PyAPI_FUNC(void) _PyUnicodeWriter_Dealloc(
    extracted from the returned data.
 */
 
-PyAPI_FUNC(const char *) PyUnicode_AsUTF8(PyObject *unicode);
+PyAPI_FUNC(const char *) PyUnicode_AsUTF8(PyObject *unicode) Py_NOEXCEPT;
 
 // Deprecated alias kept for backward compatibility
 Py_DEPRECATED(3.14) static inline const char*
@@ -670,67 +670,67 @@ _PyUnicode_AsString(PyObject *unicode)
 
 PyAPI_FUNC(int) _PyUnicode_IsLowercase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsUppercase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsTitlecase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsWhitespace(
     const Py_UCS4 ch         /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsLinebreak(
     const Py_UCS4 ch         /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(Py_UCS4) _PyUnicode_ToLowercase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(Py_UCS4) _PyUnicode_ToUppercase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(Py_UCS4) _PyUnicode_ToTitlecase(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_ToDecimalDigit(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_ToDigit(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(double) _PyUnicode_ToNumeric(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsDecimalDigit(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsDigit(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsNumeric(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsPrintable(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) _PyUnicode_IsAlpha(
     Py_UCS4 ch       /* Unicode character */
-    );
+    ) Py_NOEXCEPT;
 
 // Helper array used by Py_UNICODE_ISSPACE().
 PyAPI_DATA(const unsigned char) _Py_ascii_whitespace[];
@@ -778,4 +778,4 @@ static inline int Py_UNICODE_ISALNUM(Py_UCS4 ch) {
 
 // Return an interned Unicode object for an Identifier; may fail if there is no
 // memory.
-Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyUnicode_FromId(_Py_Identifier*);
+Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyUnicode_FromId(_Py_Identifier*) Py_NOEXCEPT;

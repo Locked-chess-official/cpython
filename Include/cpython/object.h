@@ -2,17 +2,17 @@
 #  error "this header file must not be included directly"
 #endif
 
-PyAPI_FUNC(void) _Py_NewReference(PyObject *op);
-PyAPI_FUNC(void) _Py_NewReferenceNoTotal(PyObject *op);
-PyAPI_FUNC(void) _Py_ResurrectReference(PyObject *op);
-PyAPI_FUNC(void) _Py_ForgetReference(PyObject *op);
+PyAPI_FUNC(void) _Py_NewReference(PyObject *op) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_NewReferenceNoTotal(PyObject *op) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_ResurrectReference(PyObject *op) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_ForgetReference(PyObject *op) Py_NOEXCEPT;
 
 #ifdef Py_REF_DEBUG
 /* These are useful as debugging aids when chasing down refleaks. */
-PyAPI_FUNC(Py_ssize_t) _Py_GetGlobalRefTotal(void);
+PyAPI_FUNC(Py_ssize_t) _Py_GetGlobalRefTotal(void) Py_NOEXCEPT;
 #  define _Py_GetRefTotal() _Py_GetGlobalRefTotal()
-PyAPI_FUNC(Py_ssize_t) _Py_GetLegacyRefTotal(void);
-PyAPI_FUNC(Py_ssize_t) _PyInterpreterState_GetRefTotal(PyInterpreterState *);
+PyAPI_FUNC(Py_ssize_t) _Py_GetLegacyRefTotal(void) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) _PyInterpreterState_GetRefTotal(PyInterpreterState *) Py_NOEXCEPT;
 #endif
 
 
@@ -288,35 +288,35 @@ typedef struct _heaptypeobject {
     /* here are optional user slots, followed by the members. */
 } PyHeapTypeObject;
 
-PyAPI_FUNC(const char *) _PyType_Name(PyTypeObject *);
-PyAPI_FUNC(PyObject *) _PyType_Lookup(PyTypeObject *, PyObject *);
-PyAPI_FUNC(PyObject *) _PyType_LookupRef(PyTypeObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyType_GetDict(PyTypeObject *);
+PyAPI_FUNC(const char *) _PyType_Name(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) _PyType_Lookup(PyTypeObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) _PyType_LookupRef(PyTypeObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyType_GetDict(PyTypeObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyObject_Print(PyObject *, FILE *, int);
-PyAPI_FUNC(void) _Py_BreakPoint(void);
-PyAPI_FUNC(void) PyObject_Dump(PyObject *);
+PyAPI_FUNC(int) PyObject_Print(PyObject *, FILE *, int) Py_NOEXCEPT;
+PyAPI_FUNC(void) _Py_BreakPoint(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyObject_Dump(PyObject *) Py_NOEXCEPT;
 
 // Alias for backward compatibility
 #define _PyObject_Dump PyObject_Dump
 
-Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyObject_GetAttrId(PyObject *, _Py_Identifier *);
+Py_DEPRECATED(3.15) PyAPI_FUNC(PyObject*) _PyObject_GetAttrId(PyObject *, _Py_Identifier *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject **) _PyObject_GetDictPtr(PyObject *);
-PyAPI_FUNC(void) PyObject_CallFinalizer(PyObject *);
-PyAPI_FUNC(int) PyObject_CallFinalizerFromDealloc(PyObject *);
+PyAPI_FUNC(PyObject **) _PyObject_GetDictPtr(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyObject_CallFinalizer(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_CallFinalizerFromDealloc(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(void) PyUnstable_Object_ClearWeakRefsNoCallbacks(PyObject *);
+PyAPI_FUNC(void) PyUnstable_Object_ClearWeakRefsNoCallbacks(PyObject *) Py_NOEXCEPT;
 
 /* Same as PyObject_Generic{Get,Set}Attr, but passing the attributes
    dict as the last parameter. */
 PyAPI_FUNC(PyObject *)
-_PyObject_GenericGetAttrWithDict(PyObject *, PyObject *, PyObject *, int);
+_PyObject_GenericGetAttrWithDict(PyObject *, PyObject *, PyObject *, int) Py_NOEXCEPT;
 PyAPI_FUNC(int)
 _PyObject_GenericSetAttrWithDict(PyObject *, PyObject *,
-                                 PyObject *, PyObject *);
+                                 PyObject *, PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) _PyObject_FunctionStr(PyObject *);
+PyAPI_FUNC(PyObject *) _PyObject_FunctionStr(PyObject *) Py_NOEXCEPT;
 
 /* Safely decref `dst` and set `dst` to `src`.
  *
@@ -430,35 +430,35 @@ PyAPI_FUNC(void) _Py_NO_RETURN _PyObject_AssertFailed(
     const char *msg,
     const char *file,
     int line,
-    const char *function);
+    const char *function) Py_NOEXCEPT;
 
 
-PyAPI_FUNC(void) _PyTrash_thread_deposit_object(PyThreadState *tstate, PyObject *op);
-PyAPI_FUNC(void) _PyTrash_thread_destroy_chain(PyThreadState *tstate);
+PyAPI_FUNC(void) _PyTrash_thread_deposit_object(PyThreadState *tstate, PyObject *op) Py_NOEXCEPT;
+PyAPI_FUNC(void) _PyTrash_thread_destroy_chain(PyThreadState *tstate) Py_NOEXCEPT;
 
 /* For backwards compatibility with the old trashcan mechanism */
 #define Py_TRASHCAN_BEGIN(op, dealloc)
 #define Py_TRASHCAN_END
 
 
-PyAPI_FUNC(void *) PyObject_GetItemData(PyObject *obj);
+PyAPI_FUNC(void *) PyObject_GetItemData(PyObject *obj) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyObject_VisitManagedDict(PyObject *obj, visitproc visit, void *arg);
-PyAPI_FUNC(void) PyObject_ClearManagedDict(PyObject *obj);
+PyAPI_FUNC(int) PyObject_VisitManagedDict(PyObject *obj, visitproc visit, void *arg) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyObject_ClearManagedDict(PyObject *obj) Py_NOEXCEPT;
 
 
 typedef int(*PyType_WatchCallback)(PyTypeObject *);
-PyAPI_FUNC(int) PyType_AddWatcher(PyType_WatchCallback callback);
-PyAPI_FUNC(int) PyType_ClearWatcher(int watcher_id);
-PyAPI_FUNC(int) PyType_Watch(int watcher_id, PyObject *type);
-PyAPI_FUNC(int) PyType_Unwatch(int watcher_id, PyObject *type);
+PyAPI_FUNC(int) PyType_AddWatcher(PyType_WatchCallback callback) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyType_ClearWatcher(int watcher_id) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyType_Watch(int watcher_id, PyObject *type) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyType_Unwatch(int watcher_id, PyObject *type) Py_NOEXCEPT;
 
 /* Attempt to assign a version tag to the given type.
  *
  * Returns 1 if the type already had a valid version tag or a new one was
  * assigned, or 0 if a new tag could not be assigned.
  */
-PyAPI_FUNC(int) PyUnstable_Type_AssignVersionTag(PyTypeObject *type);
+PyAPI_FUNC(int) PyUnstable_Type_AssignVersionTag(PyTypeObject *type) Py_NOEXCEPT;
 
 
 typedef enum {
@@ -468,30 +468,30 @@ typedef enum {
 } PyRefTracerEvent;
 
 typedef int (*PyRefTracer)(PyObject *, PyRefTracerEvent event, void *);
-PyAPI_FUNC(int) PyRefTracer_SetTracer(PyRefTracer tracer, void *data);
-PyAPI_FUNC(PyRefTracer) PyRefTracer_GetTracer(void**);
+PyAPI_FUNC(int) PyRefTracer_SetTracer(PyRefTracer tracer, void *data) Py_NOEXCEPT;
+PyAPI_FUNC(PyRefTracer) PyRefTracer_GetTracer(void**) Py_NOEXCEPT;
 
 /* Enable PEP-703 deferred reference counting on the object.
  *
  * Returns 1 if deferred reference counting was successfully enabled, and
  * 0 if the runtime ignored it. This function cannot fail.
  */
-PyAPI_FUNC(int) PyUnstable_Object_EnableDeferredRefcount(PyObject *);
+PyAPI_FUNC(int) PyUnstable_Object_EnableDeferredRefcount(PyObject *) Py_NOEXCEPT;
 
 /* Determine if the object exists as a unique temporary variable on the
  * topmost frame of the interpreter.
  */
-PyAPI_FUNC(int) PyUnstable_Object_IsUniqueReferencedTemporary(PyObject *);
+PyAPI_FUNC(int) PyUnstable_Object_IsUniqueReferencedTemporary(PyObject *) Py_NOEXCEPT;
 
 /* Check whether the object is immortal. This cannot fail. */
-PyAPI_FUNC(int) PyUnstable_IsImmortal(PyObject *);
+PyAPI_FUNC(int) PyUnstable_IsImmortal(PyObject *) Py_NOEXCEPT;
 
 // Increments the reference count of the object, if it's not zero.
 // PyUnstable_EnableTryIncRef() should be called on the object
 // before calling this function in order to avoid spurious failures.
-PyAPI_FUNC(int) PyUnstable_TryIncRef(PyObject *);
-PyAPI_FUNC(void) PyUnstable_EnableTryIncRef(PyObject *);
+PyAPI_FUNC(int) PyUnstable_TryIncRef(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyUnstable_EnableTryIncRef(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyUnstable_Object_IsUniquelyReferenced(PyObject *);
+PyAPI_FUNC(int) PyUnstable_Object_IsUniquelyReferenced(PyObject *) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyUnstable_SetImmortal(PyObject *op);
+PyAPI_FUNC(int) PyUnstable_SetImmortal(PyObject *op) Py_NOEXCEPT;

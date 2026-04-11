@@ -183,11 +183,11 @@ typedef struct PyVarObject PyVarObject;
 
 
 // Test if the 'x' object is the 'y' object, the same as "x is y" in Python.
-PyAPI_FUNC(int) Py_Is(PyObject *x, PyObject *y);
+PyAPI_FUNC(int) Py_Is(PyObject *x, PyObject *y) Py_NOEXCEPT;
 #define Py_Is(x, y) ((x) == (y))
 
 #if defined(Py_GIL_DISABLED) && !defined(Py_LIMITED_API)
-PyAPI_FUNC(uintptr_t) _Py_GetThreadLocal_Addr(void);
+PyAPI_FUNC(uintptr_t) _Py_GetThreadLocal_Addr(void) Py_NOEXCEPT;
 
 static inline uintptr_t
 _Py_ThreadId(void)
@@ -270,12 +270,12 @@ PyAPI_DATA(PyTypeObject) PyBool_Type;
 
 /* Definitions for the stable ABI */
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= _Py_PACK_VERSION(3, 14)
-PyAPI_FUNC(PyTypeObject*) Py_TYPE(PyObject *ob);
+PyAPI_FUNC(PyTypeObject*) Py_TYPE(PyObject *ob) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= _Py_PACK_VERSION(3, 15)
-PyAPI_FUNC(Py_ssize_t) Py_SIZE(PyObject *ob);
-PyAPI_FUNC(int) Py_IS_TYPE(PyObject *ob, PyTypeObject *type);
-PyAPI_FUNC(void) Py_SET_SIZE(PyVarObject *ob, Py_ssize_t size);
+PyAPI_FUNC(Py_ssize_t) Py_SIZE(PyObject *ob) Py_NOEXCEPT;
+PyAPI_FUNC(int) Py_IS_TYPE(PyObject *ob, PyTypeObject *type) Py_NOEXCEPT;
+PyAPI_FUNC(void) Py_SET_SIZE(PyVarObject *ob, Py_ssize_t size) Py_NOEXCEPT;
 #endif
 
 #ifndef _Py_OPAQUE_PYOBJECT
@@ -409,38 +409,38 @@ typedef struct{
     PyType_Slot *slots; /* terminated by slot==0. */
 } PyType_Spec;
 
-PyAPI_FUNC(PyObject*) PyType_FromSpec(PyType_Spec*);
+PyAPI_FUNC(PyObject*) PyType_FromSpec(PyType_Spec*) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03030000
-PyAPI_FUNC(PyObject*) PyType_FromSpecWithBases(PyType_Spec*, PyObject*);
+PyAPI_FUNC(PyObject*) PyType_FromSpecWithBases(PyType_Spec*, PyObject*) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03040000
-PyAPI_FUNC(void*) PyType_GetSlot(PyTypeObject*, int);
+PyAPI_FUNC(void*) PyType_GetSlot(PyTypeObject*, int) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03090000
-PyAPI_FUNC(PyObject*) PyType_FromModuleAndSpec(PyObject *, PyType_Spec *, PyObject *);
-PyAPI_FUNC(PyObject *) PyType_GetModule(PyTypeObject *);
-PyAPI_FUNC(void *) PyType_GetModuleState(PyTypeObject *);
+PyAPI_FUNC(PyObject*) PyType_FromModuleAndSpec(PyObject *, PyType_Spec *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyType_GetModule(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyType_GetModuleState(PyTypeObject *) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030B0000
-PyAPI_FUNC(PyObject *) PyType_GetName(PyTypeObject *);
-PyAPI_FUNC(PyObject *) PyType_GetQualName(PyTypeObject *);
+PyAPI_FUNC(PyObject *) PyType_GetName(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyType_GetQualName(PyTypeObject *) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030D0000
-PyAPI_FUNC(PyObject *) PyType_GetFullyQualifiedName(PyTypeObject *type);
-PyAPI_FUNC(PyObject *) PyType_GetModuleName(PyTypeObject *type);
+PyAPI_FUNC(PyObject *) PyType_GetFullyQualifiedName(PyTypeObject *type) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyType_GetModuleName(PyTypeObject *type) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030C0000
-PyAPI_FUNC(PyObject *) PyType_FromMetaclass(PyTypeObject*, PyObject*, PyType_Spec*, PyObject*);
-PyAPI_FUNC(void *) PyObject_GetTypeData(PyObject *obj, PyTypeObject *cls);
-PyAPI_FUNC(Py_ssize_t) PyType_GetTypeDataSize(PyTypeObject *cls);
+PyAPI_FUNC(PyObject *) PyType_FromMetaclass(PyTypeObject*, PyObject*, PyType_Spec*, PyObject*) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyObject_GetTypeData(PyObject *obj, PyTypeObject *cls) Py_NOEXCEPT;
+PyAPI_FUNC(Py_ssize_t) PyType_GetTypeDataSize(PyTypeObject *cls) Py_NOEXCEPT;
 #endif
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030E0000
-PyAPI_FUNC(int) PyType_GetBaseByToken(PyTypeObject *, void *, PyTypeObject **);
+PyAPI_FUNC(int) PyType_GetBaseByToken(PyTypeObject *, void *, PyTypeObject **) Py_NOEXCEPT;
 #define Py_TP_USE_SPEC NULL
 #endif
 
 /* Generic type check */
-PyAPI_FUNC(int) PyType_IsSubtype(PyTypeObject *, PyTypeObject *);
+PyAPI_FUNC(int) PyType_IsSubtype(PyTypeObject *, PyTypeObject *) Py_NOEXCEPT;
 
 static inline int PyObject_TypeCheck(PyObject *ob, PyTypeObject *type) {
     return Py_IS_TYPE(ob, type) || PyType_IsSubtype(Py_TYPE(ob), type);
@@ -453,61 +453,61 @@ PyAPI_DATA(PyTypeObject) PyType_Type; /* built-in 'type' */
 PyAPI_DATA(PyTypeObject) PyBaseObject_Type; /* built-in 'object' */
 PyAPI_DATA(PyTypeObject) PySuper_Type; /* built-in 'super' */
 
-PyAPI_FUNC(unsigned long) PyType_GetFlags(PyTypeObject*);
+PyAPI_FUNC(unsigned long) PyType_GetFlags(PyTypeObject*) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyType_Ready(PyTypeObject *);
-PyAPI_FUNC(PyObject *) PyType_GenericAlloc(PyTypeObject *, Py_ssize_t);
+PyAPI_FUNC(int) PyType_Ready(PyTypeObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyType_GenericAlloc(PyTypeObject *, Py_ssize_t) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyType_GenericNew(PyTypeObject *,
-                                               PyObject *, PyObject *);
-PyAPI_FUNC(unsigned int) PyType_ClearCache(void);
-PyAPI_FUNC(void) PyType_Modified(PyTypeObject *);
+                                               PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(unsigned int) PyType_ClearCache(void) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyType_Modified(PyTypeObject *) Py_NOEXCEPT;
 
 /* Generic operations on objects */
-PyAPI_FUNC(PyObject *) PyObject_Repr(PyObject *);
-PyAPI_FUNC(PyObject *) PyObject_Str(PyObject *);
-PyAPI_FUNC(PyObject *) PyObject_ASCII(PyObject *);
-PyAPI_FUNC(PyObject *) PyObject_Bytes(PyObject *);
-PyAPI_FUNC(PyObject *) PyObject_RichCompare(PyObject *, PyObject *, int);
-PyAPI_FUNC(int) PyObject_RichCompareBool(PyObject *, PyObject *, int);
-PyAPI_FUNC(PyObject *) PyObject_GetAttrString(PyObject *, const char *);
-PyAPI_FUNC(int) PyObject_SetAttrString(PyObject *, const char *, PyObject *);
-PyAPI_FUNC(int) PyObject_DelAttrString(PyObject *v, const char *name);
-PyAPI_FUNC(int) PyObject_HasAttrString(PyObject *, const char *);
-PyAPI_FUNC(PyObject *) PyObject_GetAttr(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyObject_Repr(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_Str(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_ASCII(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_Bytes(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_RichCompare(PyObject *, PyObject *, int) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_RichCompareBool(PyObject *, PyObject *, int) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_GetAttrString(PyObject *, const char *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_SetAttrString(PyObject *, const char *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_DelAttrString(PyObject *v, const char *name) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_HasAttrString(PyObject *, const char *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_GetAttr(PyObject *, PyObject *) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
-PyAPI_FUNC(int) PyObject_GetOptionalAttr(PyObject *, PyObject *, PyObject **);
-PyAPI_FUNC(int) PyObject_GetOptionalAttrString(PyObject *, const char *, PyObject **);
+PyAPI_FUNC(int) PyObject_GetOptionalAttr(PyObject *, PyObject *, PyObject **) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_GetOptionalAttrString(PyObject *, const char *, PyObject **) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(int) PyObject_SetAttr(PyObject *, PyObject *, PyObject *);
-PyAPI_FUNC(int) PyObject_DelAttr(PyObject *v, PyObject *name);
-PyAPI_FUNC(int) PyObject_HasAttr(PyObject *, PyObject *);
+PyAPI_FUNC(int) PyObject_SetAttr(PyObject *, PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_DelAttr(PyObject *v, PyObject *name) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_HasAttr(PyObject *, PyObject *) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
-PyAPI_FUNC(int) PyObject_HasAttrWithError(PyObject *, PyObject *);
-PyAPI_FUNC(int) PyObject_HasAttrStringWithError(PyObject *, const char *);
+PyAPI_FUNC(int) PyObject_HasAttrWithError(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_HasAttrStringWithError(PyObject *, const char *) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(PyObject *) PyObject_SelfIter(PyObject *);
-PyAPI_FUNC(PyObject *) PyObject_GenericGetAttr(PyObject *, PyObject *);
-PyAPI_FUNC(int) PyObject_GenericSetAttr(PyObject *, PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyObject_SelfIter(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyObject_GenericGetAttr(PyObject *, PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_GenericSetAttr(PyObject *, PyObject *, PyObject *) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03030000
-PyAPI_FUNC(int) PyObject_GenericSetDict(PyObject *, PyObject *, void *);
+PyAPI_FUNC(int) PyObject_GenericSetDict(PyObject *, PyObject *, void *) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(Py_hash_t) PyObject_Hash(PyObject *);
-PyAPI_FUNC(Py_hash_t) PyObject_HashNotImplemented(PyObject *);
-PyAPI_FUNC(int) PyObject_IsTrue(PyObject *);
-PyAPI_FUNC(int) PyObject_Not(PyObject *);
-PyAPI_FUNC(int) PyCallable_Check(PyObject *);
-PyAPI_FUNC(void) PyObject_ClearWeakRefs(PyObject *);
+PyAPI_FUNC(Py_hash_t) PyObject_Hash(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(Py_hash_t) PyObject_HashNotImplemented(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_IsTrue(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyObject_Not(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyCallable_Check(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyObject_ClearWeakRefs(PyObject *) Py_NOEXCEPT;
 
 /* PyObject_Dir(obj) acts like Python builtins.dir(obj), returning a
    list of strings.  PyObject_Dir(NULL) is like builtins.dir(),
    returning the names of the current locals.  In this case, if there are
    no current locals, NULL is returned, and PyErr_Occurred() is false.
 */
-PyAPI_FUNC(PyObject *) PyObject_Dir(PyObject *);
+PyAPI_FUNC(PyObject *) PyObject_Dir(PyObject *) Py_NOEXCEPT;
 
 /* Helpers for printing recursive container types */
-PyAPI_FUNC(int) Py_ReprEnter(PyObject *);
-PyAPI_FUNC(void) Py_ReprLeave(PyObject *);
+PyAPI_FUNC(int) Py_ReprEnter(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(void) Py_ReprLeave(PyObject *) Py_NOEXCEPT;
 
 /* Flag bits for printing: */
 #define Py_PRINT_RAW    1       /* No string quotes etc. */
@@ -668,8 +668,8 @@ given type object has a specified feature.
 #define Py_CONSTANT_EMPTY_TUPLE 9
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
-PyAPI_FUNC(PyObject*) Py_GetConstant(unsigned int constant_id);
-PyAPI_FUNC(PyObject*) Py_GetConstantBorrowed(unsigned int constant_id);
+PyAPI_FUNC(PyObject*) Py_GetConstant(unsigned int constant_id) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) Py_GetConstantBorrowed(unsigned int constant_id) Py_NOEXCEPT;
 #endif
 
 
@@ -686,7 +686,7 @@ PyAPI_DATA(PyObject) _Py_NoneStruct; /* Don't use this directly */
 #endif
 
 // Test if an object is the None singleton, the same as "x is None" in Python.
-PyAPI_FUNC(int) Py_IsNone(PyObject *x);
+PyAPI_FUNC(int) Py_IsNone(PyObject *x) Py_NOEXCEPT;
 #define Py_IsNone(x) Py_Is((x), Py_None)
 
 /* Macro for returning Py_None from a function.
@@ -846,16 +846,16 @@ static inline int PyType_CheckExact(PyObject *op) {
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030d0000
-PyAPI_FUNC(PyObject *) PyType_GetModuleByDef(PyTypeObject *, PyModuleDef *);
+PyAPI_FUNC(PyObject *) PyType_GetModuleByDef(PyTypeObject *, PyModuleDef *) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030e0000
-PyAPI_FUNC(int) PyType_Freeze(PyTypeObject *type);
+PyAPI_FUNC(int) PyType_Freeze(PyTypeObject *type) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= _Py_PACK_VERSION(3, 15)
 PyAPI_FUNC(PyObject *) PyType_GetModuleByToken(PyTypeObject *type,
-                                               const void *token);
+                                               const void *token) Py_NOEXCEPT;
 #endif
 
 #ifdef __cplusplus

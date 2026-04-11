@@ -24,13 +24,13 @@ PyAPI_DATA(PyTypeObject) PyWrapperDescr_Type;
 PyAPI_DATA(PyTypeObject) PyDictProxy_Type;
 PyAPI_DATA(PyTypeObject) PyProperty_Type;
 
-PyAPI_FUNC(PyObject *) PyDescr_NewMethod(PyTypeObject *, PyMethodDef *);
-PyAPI_FUNC(PyObject *) PyDescr_NewClassMethod(PyTypeObject *, PyMethodDef *);
-PyAPI_FUNC(PyObject *) PyDescr_NewMember(PyTypeObject *, PyMemberDef *);
-PyAPI_FUNC(PyObject *) PyDescr_NewGetSet(PyTypeObject *, PyGetSetDef *);
+PyAPI_FUNC(PyObject *) PyDescr_NewMethod(PyTypeObject *, PyMethodDef *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDescr_NewClassMethod(PyTypeObject *, PyMethodDef *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDescr_NewMember(PyTypeObject *, PyMemberDef *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyDescr_NewGetSet(PyTypeObject *, PyGetSetDef *) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) PyDictProxy_New(PyObject *);
-PyAPI_FUNC(PyObject *) PyWrapper_New(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyDictProxy_New(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyWrapper_New(PyObject *, PyObject *) Py_NOEXCEPT;
 
 
 /* An array of PyMemberDef structures defines the name, type and offset
@@ -89,8 +89,8 @@ struct PyMemberDef {
 #  define _Py_AFTER_ITEMS      (1 << 4) // For internal use.
 #endif
 
-PyAPI_FUNC(PyObject *) PyMember_GetOne(const char *, PyMemberDef *);
-PyAPI_FUNC(int) PyMember_SetOne(char *, PyMemberDef *, PyObject *);
+PyAPI_FUNC(PyObject *) PyMember_GetOne(const char *, PyMemberDef *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyMember_SetOne(char *, PyMemberDef *, PyObject *) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_DESCROBJECT_H

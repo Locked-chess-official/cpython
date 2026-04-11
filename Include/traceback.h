@@ -6,8 +6,8 @@ extern "C" {
 
 /* Traceback interface */
 
-PyAPI_FUNC(int) PyTraceBack_Here(PyFrameObject *);
-PyAPI_FUNC(int) PyTraceBack_Print(PyObject *, PyObject *);
+PyAPI_FUNC(int) PyTraceBack_Here(PyFrameObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyTraceBack_Print(PyObject *, PyObject *) Py_NOEXCEPT;
 
 /* Reveal traceback type so we can typecheck traceback objects */
 PyAPI_DATA(PyTypeObject) PyTraceBack_Type;

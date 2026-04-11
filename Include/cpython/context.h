@@ -20,12 +20,12 @@ typedef struct _pycontexttokenobject PyContextToken;
 #define PyContextToken_CheckExact(o) Py_IS_TYPE((o), &PyContextToken_Type)
 
 
-PyAPI_FUNC(PyObject *) PyContext_New(void);
-PyAPI_FUNC(PyObject *) PyContext_Copy(PyObject *);
-PyAPI_FUNC(PyObject *) PyContext_CopyCurrent(void);
+PyAPI_FUNC(PyObject *) PyContext_New(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyContext_Copy(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyContext_CopyCurrent(void) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyContext_Enter(PyObject *);
-PyAPI_FUNC(int) PyContext_Exit(PyObject *);
+PyAPI_FUNC(int) PyContext_Enter(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyContext_Exit(PyObject *) Py_NOEXCEPT;
 
 typedef enum {
     /*
@@ -52,21 +52,21 @@ typedef int (*PyContext_WatchCallback)(PyContextEvent, PyObject *);
  * Returns a handle that may be passed to PyContext_ClearWatcher on success,
  * or -1 and sets and error if no more handles are available.
  */
-PyAPI_FUNC(int) PyContext_AddWatcher(PyContext_WatchCallback callback);
+PyAPI_FUNC(int) PyContext_AddWatcher(PyContext_WatchCallback callback) Py_NOEXCEPT;
 
 /*
  * Clear the watcher associated with the watcher_id handle.
  *
  * Returns 0 on success or -1 if no watcher exists for the provided id.
  */
-PyAPI_FUNC(int) PyContext_ClearWatcher(int watcher_id);
+PyAPI_FUNC(int) PyContext_ClearWatcher(int watcher_id) Py_NOEXCEPT;
 
 /* Create a new context variable.
 
    default_value can be NULL.
 */
 PyAPI_FUNC(PyObject *) PyContextVar_New(
-    const char *name, PyObject *default_value);
+    const char *name, PyObject *default_value) Py_NOEXCEPT;
 
 
 /* Get a value for the variable.
@@ -85,19 +85,19 @@ PyAPI_FUNC(PyObject *) PyContextVar_New(
    '*value' will be a new ref, if not NULL.
 */
 PyAPI_FUNC(int) PyContextVar_Get(
-    PyObject *var, PyObject *default_value, PyObject **value);
+    PyObject *var, PyObject *default_value, PyObject **value) Py_NOEXCEPT;
 
 
 /* Set a new value for the variable.
    Returns NULL if an error occurs.
 */
-PyAPI_FUNC(PyObject *) PyContextVar_Set(PyObject *var, PyObject *value);
+PyAPI_FUNC(PyObject *) PyContextVar_Set(PyObject *var, PyObject *value) Py_NOEXCEPT;
 
 
 /* Reset a variable to its previous value.
    Returns 0 on success, -1 on error.
 */
-PyAPI_FUNC(int) PyContextVar_Reset(PyObject *var, PyObject *token);
+PyAPI_FUNC(int) PyContextVar_Reset(PyObject *var, PyObject *token) Py_NOEXCEPT;
 
 
 #ifdef __cplusplus

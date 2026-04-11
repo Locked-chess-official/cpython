@@ -6,14 +6,14 @@ PyAPI_FUNC(int) PyArg_ParseArray(
     PyObject *const *args,
     Py_ssize_t nargs,
     const char *format,
-    ...);
+    ...) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyArg_ParseArrayAndKeywords(
     PyObject *const *args,
     Py_ssize_t nargs,
     PyObject *kwnames,
     const char *format,
     const char * const *kwlist,
-    ...);
+    ...) Py_NOEXCEPT;
 
 // A data structure that can be used to run initialization code once in a
 // thread-safe manner. The C++11 equivalent is std::call_once.
@@ -36,7 +36,7 @@ typedef struct _PyArg_Parser {
 } _PyArg_Parser;
 
 PyAPI_FUNC(int) _PyArg_ParseTupleAndKeywordsFast(PyObject *, PyObject *,
-                                                 struct _PyArg_Parser *, ...);
+                                                 struct _PyArg_Parser *, ...) Py_NOEXCEPT;
 
 #ifdef Py_BUILD_CORE
 // For internal use in stdlib. Needs C99 compound literals.

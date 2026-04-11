@@ -28,19 +28,19 @@ PyAPI_DATA(PyTypeObject) PyFloat_Type;
         }                                         \
     } while(0)
 
-PyAPI_FUNC(double) PyFloat_GetMax(void);
-PyAPI_FUNC(double) PyFloat_GetMin(void);
-PyAPI_FUNC(PyObject*) PyFloat_GetInfo(void);
+PyAPI_FUNC(double) PyFloat_GetMax(void) Py_NOEXCEPT;
+PyAPI_FUNC(double) PyFloat_GetMin(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject*) PyFloat_GetInfo(void) Py_NOEXCEPT;
 
 /* Return Python float from string PyObject. */
-PyAPI_FUNC(PyObject*) PyFloat_FromString(PyObject*);
+PyAPI_FUNC(PyObject*) PyFloat_FromString(PyObject*) Py_NOEXCEPT;
 
 /* Return Python float from C double. */
-PyAPI_FUNC(PyObject*) PyFloat_FromDouble(double);
+PyAPI_FUNC(PyObject*) PyFloat_FromDouble(double) Py_NOEXCEPT;
 
 /* Extract C double from Python float.  The macro version trades safety for
    speed. */
-PyAPI_FUNC(double) PyFloat_AsDouble(PyObject*);
+PyAPI_FUNC(double) PyFloat_AsDouble(PyObject*) Py_NOEXCEPT;
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_FLOATOBJECT_H

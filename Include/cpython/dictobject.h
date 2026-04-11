@@ -43,11 +43,11 @@ PyAPI_DATA(PyTypeObject) PyFrozenDict_Type;
     (PyDict_Check(ob) || PyFrozenDict_Check(ob))
 
 PyAPI_FUNC(PyObject *) _PyDict_GetItem_KnownHash(PyObject *mp, PyObject *key,
-                                                 Py_hash_t hash);
+                                                 Py_hash_t hash) Py_NOEXCEPT;
 // PyDict_GetItemStringRef() can be used instead
-Py_DEPRECATED(3.14) PyAPI_FUNC(PyObject *) _PyDict_GetItemStringWithError(PyObject *, const char *);
+Py_DEPRECATED(3.14) PyAPI_FUNC(PyObject *) _PyDict_GetItemStringWithError(PyObject *, const char *) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) PyDict_SetDefault(
-    PyObject *mp, PyObject *key, PyObject *defaultobj);
+    PyObject *mp, PyObject *key, PyObject *defaultobj) Py_NOEXCEPT;
 
 /* Get the number of items of a dictionary. */
 static inline Py_ssize_t PyDict_GET_SIZE(PyObject *op) {
@@ -62,18 +62,18 @@ static inline Py_ssize_t PyDict_GET_SIZE(PyObject *op) {
 }
 #define PyDict_GET_SIZE(op) PyDict_GET_SIZE(_PyObject_CAST(op))
 
-PyAPI_FUNC(int) PyDict_ContainsString(PyObject *mp, const char *key);
+PyAPI_FUNC(int) PyDict_ContainsString(PyObject *mp, const char *key) Py_NOEXCEPT;
 
-PyAPI_FUNC(PyObject *) _PyDict_NewPresized(Py_ssize_t minused);
+PyAPI_FUNC(PyObject *) _PyDict_NewPresized(Py_ssize_t minused) Py_NOEXCEPT;
 
-PyAPI_FUNC(int) PyDict_Pop(PyObject *dict, PyObject *key, PyObject **result);
-PyAPI_FUNC(int) PyDict_PopString(PyObject *dict, const char *key, PyObject **result);
+PyAPI_FUNC(int) PyDict_Pop(PyObject *dict, PyObject *key, PyObject **result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_PopString(PyObject *dict, const char *key, PyObject **result) Py_NOEXCEPT;
 
 // Use PyDict_Pop() instead
 Py_DEPRECATED(3.14) PyAPI_FUNC(PyObject *) _PyDict_Pop(
     PyObject *dict,
     PyObject *key,
-    PyObject *default_value);
+    PyObject *default_value) Py_NOEXCEPT;
 
 /* Dictionary watchers */
 
@@ -97,12 +97,12 @@ typedef enum {
 typedef int(*PyDict_WatchCallback)(PyDict_WatchEvent event, PyObject* dict, PyObject* key, PyObject* new_value);
 
 // Register/unregister a dict-watcher callback
-PyAPI_FUNC(int) PyDict_AddWatcher(PyDict_WatchCallback callback);
-PyAPI_FUNC(int) PyDict_ClearWatcher(int watcher_id);
+PyAPI_FUNC(int) PyDict_AddWatcher(PyDict_WatchCallback callback) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_ClearWatcher(int watcher_id) Py_NOEXCEPT;
 
 // Mark given dictionary as "watched" (callback will be called if it is modified)
-PyAPI_FUNC(int) PyDict_Watch(int watcher_id, PyObject* dict);
-PyAPI_FUNC(int) PyDict_Unwatch(int watcher_id, PyObject* dict);
+PyAPI_FUNC(int) PyDict_Watch(int watcher_id, PyObject* dict) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyDict_Unwatch(int watcher_id, PyObject* dict) Py_NOEXCEPT;
 
 // Create a frozendict. Create an empty dictionary if iterable is NULL.
-PyAPI_FUNC(PyObject*) PyFrozenDict_New(PyObject *iterable);
+PyAPI_FUNC(PyObject*) PyFrozenDict_New(PyObject *iterable) Py_NOEXCEPT;

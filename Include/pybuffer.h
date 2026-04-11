@@ -36,7 +36,7 @@ typedef int (*getbufferproc)(PyObject *, Py_buffer *, int);
 typedef void (*releasebufferproc)(PyObject *, Py_buffer *);
 
 /* Return 1 if the getbuffer function is available, otherwise return 0. */
-PyAPI_FUNC(int) PyObject_CheckBuffer(PyObject *obj);
+PyAPI_FUNC(int) PyObject_CheckBuffer(PyObject *obj) Py_NOEXCEPT;
 
 /* This is a C-API version of the getbuffer function call.  It checks
    to make sure object has the required function pointer and issues the
@@ -44,22 +44,22 @@ PyAPI_FUNC(int) PyObject_CheckBuffer(PyObject *obj);
 
    Returns -1 and raises an error on failure and returns 0 on success. */
 PyAPI_FUNC(int) PyObject_GetBuffer(PyObject *obj, Py_buffer *view,
-                                   int flags);
+                                   int flags) Py_NOEXCEPT;
 
 /* Get the memory area pointed to by the indices for the buffer given.
    Note that view->ndim is the assumed size of indices. */
-PyAPI_FUNC(void *) PyBuffer_GetPointer(const Py_buffer *view, const Py_ssize_t *indices);
+PyAPI_FUNC(void *) PyBuffer_GetPointer(const Py_buffer *view, const Py_ssize_t *indices) Py_NOEXCEPT;
 
 /* Return the implied itemsize of the data-format area from a
    struct-style description. */
-PyAPI_FUNC(Py_ssize_t) PyBuffer_SizeFromFormat(const char *format);
+PyAPI_FUNC(Py_ssize_t) PyBuffer_SizeFromFormat(const char *format) Py_NOEXCEPT;
 
 /* Implementation in memoryobject.c */
 PyAPI_FUNC(int) PyBuffer_ToContiguous(void *buf, const Py_buffer *view,
-                                      Py_ssize_t len, char order);
+                                      Py_ssize_t len, char order) Py_NOEXCEPT;
 
 PyAPI_FUNC(int) PyBuffer_FromContiguous(const Py_buffer *view, const void *buf,
-                                        Py_ssize_t len, char order);
+                                        Py_ssize_t len, char order) Py_NOEXCEPT;
 
 /* Copy len bytes of data from the contiguous chunk of memory
    pointed to by buf into the buffer exported by obj.  Return
@@ -74,10 +74,10 @@ PyAPI_FUNC(int) PyBuffer_FromContiguous(const Py_buffer *view, const void *buf,
    in C-style (last dimension varies the fastest).  If order
    is 'A', then it does not matter and the copy will be made
    in whatever way is more efficient. */
-PyAPI_FUNC(int) PyObject_CopyData(PyObject *dest, PyObject *src);
+PyAPI_FUNC(int) PyObject_CopyData(PyObject *dest, PyObject *src) Py_NOEXCEPT;
 
 /* Copy the data from the src buffer to the buffer of destination. */
-PyAPI_FUNC(int) PyBuffer_IsContiguous(const Py_buffer *view, char order);
+PyAPI_FUNC(int) PyBuffer_IsContiguous(const Py_buffer *view, char order) Py_NOEXCEPT;
 
 /*Fill the strides array with byte-strides of a contiguous
   (Fortran-style if order is 'F' or C-style otherwise)
@@ -87,7 +87,7 @@ PyAPI_FUNC(void) PyBuffer_FillContiguousStrides(int ndims,
                                                Py_ssize_t *shape,
                                                Py_ssize_t *strides,
                                                int itemsize,
-                                               char order);
+                                               char order) Py_NOEXCEPT;
 
 /* Fills in a buffer-info structure correctly for an exporter
    that can only share a contiguous chunk of memory of
@@ -96,10 +96,10 @@ PyAPI_FUNC(void) PyBuffer_FillContiguousStrides(int ndims,
    Returns 0 on success and -1 (with raising an error) on error. */
 PyAPI_FUNC(int) PyBuffer_FillInfo(Py_buffer *view, PyObject *o, void *buf,
                                   Py_ssize_t len, int readonly,
-                                  int flags);
+                                  int flags) Py_NOEXCEPT;
 
 /* Releases a Py_buffer obtained from getbuffer ParseTuple's "s*". */
-PyAPI_FUNC(void) PyBuffer_Release(Py_buffer *view);
+PyAPI_FUNC(void) PyBuffer_Release(Py_buffer *view) Py_NOEXCEPT;
 
 /* Maximum number of dimensions */
 #define PyBUF_MAX_NDIM 64

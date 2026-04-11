@@ -2,33 +2,33 @@
 #  error "this header file must not be included directly"
 #endif
 
-PyAPI_FUNC(int) PyRun_SimpleStringFlags(const char *, PyCompilerFlags *);
+PyAPI_FUNC(int) PyRun_SimpleStringFlags(const char *, PyCompilerFlags *) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyRun_AnyFileExFlags(
     FILE *fp,
     const char *filename,       /* decoded from the filesystem encoding */
     int closeit,
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyRun_SimpleFileExFlags(
     FILE *fp,
     const char *filename,       /* decoded from the filesystem encoding */
     int closeit,
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyRun_InteractiveOneFlags(
     FILE *fp,
     const char *filename,       /* decoded from the filesystem encoding */
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyRun_InteractiveOneObject(
     FILE *fp,
     PyObject *filename,
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 PyAPI_FUNC(int) PyRun_InteractiveLoopFlags(
     FILE *fp,
     const char *filename,       /* decoded from the filesystem encoding */
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 
 
 PyAPI_FUNC(PyObject *) PyRun_StringFlags(const char *, int, PyObject *,
-                                         PyObject *, PyCompilerFlags *);
+                                         PyObject *, PyCompilerFlags *) Py_NOEXCEPT;
 
 PyAPI_FUNC(PyObject *) PyRun_FileExFlags(
     FILE *fp,
@@ -37,7 +37,7 @@ PyAPI_FUNC(PyObject *) PyRun_FileExFlags(
     PyObject *globals,
     PyObject *locals,
     int closeit,
-    PyCompilerFlags *flags);
+    PyCompilerFlags *flags) Py_NOEXCEPT;
 
 
 PyAPI_FUNC(PyObject *) Py_CompileStringExFlags(
@@ -45,12 +45,12 @@ PyAPI_FUNC(PyObject *) Py_CompileStringExFlags(
     const char *filename,       /* decoded from the filesystem encoding */
     int start,
     PyCompilerFlags *flags,
-    int optimize);
+    int optimize) Py_NOEXCEPT;
 PyAPI_FUNC(PyObject *) Py_CompileStringObject(
     const char *str,
     PyObject *filename, int start,
     PyCompilerFlags *flags,
-    int optimize);
+    int optimize) Py_NOEXCEPT;
 
 #define Py_CompileString(str, p, s) Py_CompileStringExFlags((str), (p), (s), NULL, -1)
 #define Py_CompileStringFlags(str, p, s, f) Py_CompileStringExFlags((str), (p), (s), (f), -1)
@@ -59,18 +59,18 @@ PyAPI_FUNC(PyObject *) Py_CompileStringObject(
     libpython is accessed directly rather than using header files which defines
     macros below. On Windows, for example, PyAPI_FUNC() uses dllexport to
     export functions in pythonXX.dll. */
-PyAPI_FUNC(PyObject *) PyRun_String(const char *str, int s, PyObject *g, PyObject *l);
-PyAPI_FUNC(int) PyRun_AnyFile(FILE *fp, const char *name);
-PyAPI_FUNC(int) PyRun_AnyFileEx(FILE *fp, const char *name, int closeit);
-PyAPI_FUNC(int) PyRun_AnyFileFlags(FILE *, const char *, PyCompilerFlags *);
-PyAPI_FUNC(int) PyRun_SimpleString(const char *s);
-PyAPI_FUNC(int) PyRun_SimpleFile(FILE *f, const char *p);
-PyAPI_FUNC(int) PyRun_SimpleFileEx(FILE *f, const char *p, int c);
-PyAPI_FUNC(int) PyRun_InteractiveOne(FILE *f, const char *p);
-PyAPI_FUNC(int) PyRun_InteractiveLoop(FILE *f, const char *p);
-PyAPI_FUNC(PyObject *) PyRun_File(FILE *fp, const char *p, int s, PyObject *g, PyObject *l);
-PyAPI_FUNC(PyObject *) PyRun_FileEx(FILE *fp, const char *p, int s, PyObject *g, PyObject *l, int c);
-PyAPI_FUNC(PyObject *) PyRun_FileFlags(FILE *fp, const char *p, int s, PyObject *g, PyObject *l, PyCompilerFlags *flags);
+PyAPI_FUNC(PyObject *) PyRun_String(const char *str, int s, PyObject *g, PyObject *l) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_AnyFile(FILE *fp, const char *name) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_AnyFileEx(FILE *fp, const char *name, int closeit) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_AnyFileFlags(FILE *, const char *, PyCompilerFlags *) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_SimpleString(const char *s) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_SimpleFile(FILE *f, const char *p) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_SimpleFileEx(FILE *f, const char *p, int c) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_InteractiveOne(FILE *f, const char *p) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyRun_InteractiveLoop(FILE *f, const char *p) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyRun_File(FILE *fp, const char *p, int s, PyObject *g, PyObject *l) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyRun_FileEx(FILE *fp, const char *p, int s, PyObject *g, PyObject *l, int c) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyRun_FileFlags(FILE *fp, const char *p, int s, PyObject *g, PyObject *l, PyCompilerFlags *flags) Py_NOEXCEPT;
 
 /* Use macros for a bunch of old variants */
 #define PyRun_String(str, s, g, l) PyRun_StringFlags((str), (s), (g), (l), NULL)
@@ -92,5 +92,5 @@ PyAPI_FUNC(PyObject *) PyRun_FileFlags(FILE *fp, const char *p, int s, PyObject 
     PyRun_FileExFlags((fp), (p), (s), (g), (l), 0, (flags))
 
 /* Stuff with no proper home (yet) */
-PyAPI_FUNC(char *) PyOS_Readline(FILE *, FILE *, const char *);
+PyAPI_FUNC(char *) PyOS_Readline(FILE *, FILE *, const char *) Py_NOEXCEPT;
 PyAPI_DATA(char) *(*PyOS_ReadlineFunctionPointer)(FILE *, FILE *, const char *);

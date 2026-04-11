@@ -10,12 +10,12 @@ PyAPI_DATA(PyTypeObject) PyCallIter_Type;
 
 #define PySeqIter_Check(op) Py_IS_TYPE((op), &PySeqIter_Type)
 
-PyAPI_FUNC(PyObject *) PySeqIter_New(PyObject *);
+PyAPI_FUNC(PyObject *) PySeqIter_New(PyObject *) Py_NOEXCEPT;
 
 
 #define PyCallIter_Check(op) Py_IS_TYPE((op), &PyCallIter_Type)
 
-PyAPI_FUNC(PyObject *) PyCallIter_New(PyObject *, PyObject *);
+PyAPI_FUNC(PyObject *) PyCallIter_New(PyObject *, PyObject *) Py_NOEXCEPT;
 
 #ifdef __cplusplus
 }

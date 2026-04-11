@@ -8,7 +8,7 @@ extern "C" {
 
 PyAPI_FUNC(double) PyOS_string_to_double(const char *str,
                                          char **endptr,
-                                         PyObject *overflow_exception);
+                                         PyObject *overflow_exception) Py_NOEXCEPT;
 
 /* The caller is responsible for calling PyMem_Free to free the buffer
    that's is returned. */
@@ -16,7 +16,7 @@ PyAPI_FUNC(char *) PyOS_double_to_string(double val,
                                          char format_code,
                                          int precision,
                                          int flags,
-                                         int *type);
+                                         int *type) Py_NOEXCEPT;
 
 /* PyOS_double_to_string's "flags" parameter can be set to 0 or more of: */
 #define Py_DTSF_SIGN      0x01 /* always add the sign */

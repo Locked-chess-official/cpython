@@ -35,13 +35,13 @@ typedef struct PyMutex {
 } PyMutex;
 
 // exported function for locking the mutex
-PyAPI_FUNC(void) PyMutex_Lock(PyMutex *m);
+PyAPI_FUNC(void) PyMutex_Lock(PyMutex *m) Py_NOEXCEPT;
 
 // exported function for unlocking the mutex
-PyAPI_FUNC(void) PyMutex_Unlock(PyMutex *m);
+PyAPI_FUNC(void) PyMutex_Unlock(PyMutex *m) Py_NOEXCEPT;
 
 // exported function for checking if the mutex is locked
-PyAPI_FUNC(int) PyMutex_IsLocked(PyMutex *m);
+PyAPI_FUNC(int) PyMutex_IsLocked(PyMutex *m) Py_NOEXCEPT;
 
 // Locks the mutex.
 //

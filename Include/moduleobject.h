@@ -15,24 +15,24 @@ PyAPI_DATA(PyTypeObject) PyModule_Type;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03030000
 PyAPI_FUNC(PyObject *) PyModule_NewObject(
     PyObject *name
-    );
+    ) Py_NOEXCEPT;
 #endif
 PyAPI_FUNC(PyObject *) PyModule_New(
     const char *name            /* UTF-8 encoded string */
-    );
-PyAPI_FUNC(PyObject *) PyModule_GetDict(PyObject *);
+    ) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyModule_GetDict(PyObject *) Py_NOEXCEPT;
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03030000
-PyAPI_FUNC(PyObject *) PyModule_GetNameObject(PyObject *);
+PyAPI_FUNC(PyObject *) PyModule_GetNameObject(PyObject *) Py_NOEXCEPT;
 #endif
-PyAPI_FUNC(const char *) PyModule_GetName(PyObject *);
-Py_DEPRECATED(3.2) PyAPI_FUNC(const char *) PyModule_GetFilename(PyObject *);
-PyAPI_FUNC(PyObject *) PyModule_GetFilenameObject(PyObject *);
-PyAPI_FUNC(PyModuleDef*) PyModule_GetDef(PyObject*);
-PyAPI_FUNC(void*) PyModule_GetState(PyObject*);
+PyAPI_FUNC(const char *) PyModule_GetName(PyObject *) Py_NOEXCEPT;
+Py_DEPRECATED(3.2) PyAPI_FUNC(const char *) PyModule_GetFilename(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyObject *) PyModule_GetFilenameObject(PyObject *) Py_NOEXCEPT;
+PyAPI_FUNC(PyModuleDef*) PyModule_GetDef(PyObject*) Py_NOEXCEPT;
+PyAPI_FUNC(void*) PyModule_GetState(PyObject*) Py_NOEXCEPT;
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
 /* New in 3.5 */
-PyAPI_FUNC(PyObject *) PyModuleDef_Init(PyModuleDef*);
+PyAPI_FUNC(PyObject *) PyModuleDef_Init(PyModuleDef*) Py_NOEXCEPT;
 PyAPI_DATA(PyTypeObject) PyModuleDef_Type;
 #endif
 
@@ -114,15 +114,15 @@ struct PyModuleDef_Slot {
 #endif
 
 #if !defined(Py_LIMITED_API) && defined(Py_GIL_DISABLED)
-PyAPI_FUNC(int) PyUnstable_Module_SetGIL(PyObject *module, void *gil);
+PyAPI_FUNC(int) PyUnstable_Module_SetGIL(PyObject *module, void *gil) Py_NOEXCEPT;
 #endif
 
 #if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= _Py_PACK_VERSION(3, 15)
 PyAPI_FUNC(PyObject *) PyModule_FromSlotsAndSpec(const PyModuleDef_Slot *slots,
-                                                 PyObject *spec);
-PyAPI_FUNC(int) PyModule_Exec(PyObject *module);
-PyAPI_FUNC(int) PyModule_GetStateSize(PyObject *module, Py_ssize_t *result);
-PyAPI_FUNC(int) PyModule_GetToken(PyObject *module, void **result);
+                                                 PyObject *spec) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_Exec(PyObject *module) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_GetStateSize(PyObject *module, Py_ssize_t *result) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyModule_GetToken(PyObject *module, void **result) Py_NOEXCEPT;
 #endif
 
 #ifndef _Py_OPAQUE_PYOBJECT

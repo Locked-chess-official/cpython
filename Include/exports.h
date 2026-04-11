@@ -106,4 +106,10 @@
     #define PyMODEXPORT_FUNC _PyINIT_FUNC_DECLSPEC PyModuleDef_Slot*
 #endif
 
+#ifdef __cplusplus
+#define Py_NOEXCEPT noexcept
+#else
+#define Py_NOEXCEPT
+#endif
+
 #endif /* Py_EXPORTS_H */

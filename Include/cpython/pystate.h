@@ -5,8 +5,8 @@
 
 /* private interpreter helpers */
 
-PyAPI_FUNC(int) _PyInterpreterState_RequiresIDRef(PyInterpreterState *);
-PyAPI_FUNC(void) _PyInterpreterState_RequireIDRef(PyInterpreterState *, int);
+PyAPI_FUNC(int) _PyInterpreterState_RequiresIDRef(PyInterpreterState *) Py_NOEXCEPT;
+PyAPI_FUNC(void) _PyInterpreterState_RequireIDRef(PyInterpreterState *, int) Py_NOEXCEPT;
 
 /* State unique per thread */
 
@@ -245,7 +245,7 @@ struct _ts {
 
 /* Similar to PyThreadState_Get(), but don't issue a fatal error
  * if it is NULL. */
-PyAPI_FUNC(PyThreadState *) PyThreadState_GetUnchecked(void);
+PyAPI_FUNC(PyThreadState *) PyThreadState_GetUnchecked(void) Py_NOEXCEPT;
 
 // Deprecated alias kept for backward compatibility
 Py_DEPRECATED(3.14) static inline PyThreadState*
@@ -255,11 +255,11 @@ _PyThreadState_UncheckedGet(void)
 }
 
 // Disable tracing and profiling.
-PyAPI_FUNC(void) PyThreadState_EnterTracing(PyThreadState *tstate);
+PyAPI_FUNC(void) PyThreadState_EnterTracing(PyThreadState *tstate) Py_NOEXCEPT;
 
 // Reset tracing and profiling: enable them if a trace function or a profile
 // function is set, otherwise disable them.
-PyAPI_FUNC(void) PyThreadState_LeaveTracing(PyThreadState *tstate);
+PyAPI_FUNC(void) PyThreadState_LeaveTracing(PyThreadState *tstate) Py_NOEXCEPT;
 
 #ifdef Py_STATS
 #if defined(HAVE_THREAD_LOCAL) && !defined(Py_BUILD_CORE_MODULE)
@@ -282,40 +282,40 @@ _PyThreadState_GetStatsFast(void)
    currently holds the GIL, 0 otherwise.
 
    The function returns 1 if _PyGILState_check_enabled is non-zero. */
-PyAPI_FUNC(int) PyGILState_Check(void);
+PyAPI_FUNC(int) PyGILState_Check(void) Py_NOEXCEPT;
 
 /* The implementation of sys._current_frames()  Returns a dict mapping
    thread id to that thread's current frame.
 */
-PyAPI_FUNC(PyObject*) _PyThread_CurrentFrames(void);
+PyAPI_FUNC(PyObject*) _PyThread_CurrentFrames(void) Py_NOEXCEPT;
 
 // Set the stack protection start address and stack protection size
 // of a Python thread state
 PyAPI_FUNC(int) PyUnstable_ThreadState_SetStackProtection(
     PyThreadState *tstate,
     void *stack_start_addr,  // Stack start address
-    size_t stack_size);      // Stack size (in bytes)
+    size_t stack_size) Py_NOEXCEPT;      // Stack size (in bytes)
 
 // Reset the stack protection start address and stack protection size
 // of a Python thread state
 PyAPI_FUNC(void) PyUnstable_ThreadState_ResetStackProtection(
-    PyThreadState *tstate);
+    PyThreadState *tstate) Py_NOEXCEPT;
 
 /* Routines for advanced debuggers, requested by David Beazley.
    Don't use unless you know what you are doing! */
-PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Main(void);
-PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Head(void);
-PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Next(PyInterpreterState *);
-PyAPI_FUNC(PyThreadState *) PyInterpreterState_ThreadHead(PyInterpreterState *);
-PyAPI_FUNC(PyThreadState *) PyThreadState_Next(PyThreadState *);
-PyAPI_FUNC(void) PyThreadState_DeleteCurrent(void);
+PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Main(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Head(void) Py_NOEXCEPT;
+PyAPI_FUNC(PyInterpreterState *) PyInterpreterState_Next(PyInterpreterState *) Py_NOEXCEPT;
+PyAPI_FUNC(PyThreadState *) PyInterpreterState_ThreadHead(PyInterpreterState *) Py_NOEXCEPT;
+PyAPI_FUNC(PyThreadState *) PyThreadState_Next(PyThreadState *) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyThreadState_DeleteCurrent(void) Py_NOEXCEPT;
 
 /* Frame evaluation API */
 
 typedef PyObject* (*_PyFrameEvalFunction)(PyThreadState *tstate, struct _PyInterpreterFrame *, int);
 
 PyAPI_FUNC(_PyFrameEvalFunction) _PyInterpreterState_GetEvalFrameFunc(
-    PyInterpreterState *interp);
+    PyInterpreterState *interp) Py_NOEXCEPT;
 PyAPI_FUNC(void) _PyInterpreterState_SetEvalFrameFunc(
     PyInterpreterState *interp,
-    _PyFrameEvalFunction eval_frame);
+    _PyFrameEvalFunction eval_frame) Py_NOEXCEPT;

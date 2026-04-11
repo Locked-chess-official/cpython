@@ -22,9 +22,9 @@ PyAPI_DATA(PyTypeObject) PyODictValues_Type;
 #define PyODict_CheckExact(op) Py_IS_TYPE((op), &PyODict_Type)
 #define PyODict_SIZE(op) PyDict_GET_SIZE((op))
 
-PyAPI_FUNC(PyObject *) PyODict_New(void);
-PyAPI_FUNC(int) PyODict_SetItem(PyObject *od, PyObject *key, PyObject *item);
-PyAPI_FUNC(int) PyODict_DelItem(PyObject *od, PyObject *key);
+PyAPI_FUNC(PyObject *) PyODict_New(void) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyODict_SetItem(PyObject *od, PyObject *key, PyObject *item) Py_NOEXCEPT;
+PyAPI_FUNC(int) PyODict_DelItem(PyObject *od, PyObject *key) Py_NOEXCEPT;
 
 /* wrappers around PyDict* functions */
 #define PyODict_GetItem(od, key) PyDict_GetItem(_PyObject_CAST(od), (key))

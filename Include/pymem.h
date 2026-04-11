@@ -45,10 +45,10 @@ extern "C" {
    performed on failure (no exception is set, no warning is printed, etc).
 */
 
-PyAPI_FUNC(void *) PyMem_Malloc(size_t size);
-PyAPI_FUNC(void *) PyMem_Calloc(size_t nelem, size_t elsize);
-PyAPI_FUNC(void *) PyMem_Realloc(void *ptr, size_t new_size);
-PyAPI_FUNC(void) PyMem_Free(void *ptr);
+PyAPI_FUNC(void *) PyMem_Malloc(size_t size) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyMem_Calloc(size_t nelem, size_t elsize) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyMem_Realloc(void *ptr, size_t new_size) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyMem_Free(void *ptr) Py_NOEXCEPT;
 
 /*
  * Type-oriented memory interface
@@ -92,10 +92,10 @@ PyAPI_FUNC(void) PyMem_Free(void *ptr);
 // Usually, it's just a thin wrapper to functions of the standard C library:
 // malloc(), calloc(), realloc() and free(). The difference is that
 // tracemalloc can track these memory allocations.
-PyAPI_FUNC(void *) PyMem_RawMalloc(size_t size);
-PyAPI_FUNC(void *) PyMem_RawCalloc(size_t nelem, size_t elsize);
-PyAPI_FUNC(void *) PyMem_RawRealloc(void *ptr, size_t new_size);
-PyAPI_FUNC(void) PyMem_RawFree(void *ptr);
+PyAPI_FUNC(void *) PyMem_RawMalloc(size_t size) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyMem_RawCalloc(size_t nelem, size_t elsize) Py_NOEXCEPT;
+PyAPI_FUNC(void *) PyMem_RawRealloc(void *ptr, size_t new_size) Py_NOEXCEPT;
+PyAPI_FUNC(void) PyMem_RawFree(void *ptr) Py_NOEXCEPT;
 #endif
 
 #ifndef Py_LIMITED_API

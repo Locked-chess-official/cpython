@@ -14,7 +14,7 @@ typedef struct {
     PyObject *start, *stop, *step;      /* not NULL */
 } PySliceObject;
 
-PyAPI_FUNC(PyObject *) _PySlice_FromIndices(Py_ssize_t start, Py_ssize_t stop);
+PyAPI_FUNC(PyObject *) _PySlice_FromIndices(Py_ssize_t start, Py_ssize_t stop) Py_NOEXCEPT;
 PyAPI_FUNC(int) _PySlice_GetLongIndices(PySliceObject *self, PyObject *length,
                                  PyObject **start_ptr, PyObject **stop_ptr,
-                                 PyObject **step_ptr);
+                                 PyObject **step_ptr) Py_NOEXCEPT;
