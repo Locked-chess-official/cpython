@@ -101,6 +101,7 @@ typedef struct {
     PyObject *co_qualname;        /* unicode (qualname, for reference) */      \
     PyObject *co_linetable;       /* bytes object that holds location info */  \
     PyObject *co_weakreflist;     /* to support weakrefs to code objects */    \
+    PyObject *co_owner_types;     /* list of weakrefs to owning types (NULL if none; not in hash/eq) */ \
     _PyExecutorArray *co_executors;      /* executors from optimizer */        \
     _PyCoCached *_co_cached;      /* cached co_* attributes */                 \
     uintptr_t _co_instrumentation_version; /* current instrumentation version */ \

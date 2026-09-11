@@ -273,6 +273,14 @@ extern PyObject* _PyCode_GetCellvars(PyCodeObject *);
 extern PyObject* _PyCode_GetFreevars(PyCodeObject *);
 extern PyObject* _PyCode_GetCode(PyCodeObject *);
 
+/* Private attributes: each code object records (in a private list slot)
+   weak references to the types in whose class body it was defined.  This
+   is filled in only when __build_class__ creates the type; normally NULL.
+   There is no public C API for it and it is not visible from Python. */
+PyAPI_FUNC(int) _PyCode_AddOwnerType(PyCodeObject *co, PyTypeObject *owner);
+PyAPI_FUNC(PyTypeObject *) _PyCode_FindOwnerType(PyCodeObject *co,
+                                                 PyObject *obj);
+
 /** API for initializing the line number tables. */
 PyAPI_FUNC(int) _PyCode_InitAddressRange(PyCodeObject* co, PyCodeAddressRange *bounds);
 

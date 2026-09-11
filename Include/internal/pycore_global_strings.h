@@ -203,6 +203,8 @@ struct _Py_global_strings {
         STRUCT_FOR_ID(__pos__)
         STRUCT_FOR_ID(__pow__)
         STRUCT_FOR_ID(__prepare__)
+        STRUCT_FOR_ID(__private_attributes__)
+        STRUCT_FOR_ID(__private_codes__)
         STRUCT_FOR_ID(__qualname__)
         STRUCT_FOR_ID(__radd__)
         STRUCT_FOR_ID(__rand__)

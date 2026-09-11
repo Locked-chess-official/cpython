@@ -996,6 +996,7 @@ static int
 codegen_make_closure(compiler *c, location loc,
                      PyCodeObject *co, Py_ssize_t flags)
 {
+    RETURN_IF_ERROR(_PyCompile_MaybeAddCodeToClass(c, co));
     if (co->co_nfreevars) {
         int i = PyUnstable_Code_GetFirstFree(co);
         for (; i < co->co_nlocalsplus; ++i) {
@@ -1653,6 +1654,9 @@ codegen_class_body(compiler *c, stmt_ty s, int firstlineno)
     ADDOP_LOAD_CONST_NEW_IN_SCOPE(c, NO_LOCATION, _PyCompile_StaticAttributesAsTuple(c));
     RETURN_IF_ERROR_IN_SCOPE(
         c, codegen_nameop(c, NO_LOCATION, &_Py_ID(__static_attributes__), Store));
+    ADDOP_LOAD_CONST_NEW_IN_SCOPE(c, NO_LOCATION, _PyCompile_CodesAsTuple(c));
+    RETURN_IF_ERROR_IN_SCOPE(
+        c, codegen_nameop(c, NO_LOCATION, &_Py_ID(__private_codes__), Store));
     /* The following code is artificial */
     /* Set __classdictcell__ if necessary */
     if (SYMTABLE_ENTRY(c)->ste_needs_classdict) {

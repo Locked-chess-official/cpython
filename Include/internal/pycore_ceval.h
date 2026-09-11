@@ -482,6 +482,28 @@ _Py_LoadAttr_StackRefSteal(
     PyThreadState *tstate, _PyStackRef owner,
     PyObject *name, _PyStackRef *self_or_null);
 
+/* Private attribute helpers used by the LOAD_ATTR/STORE_ATTR/LOAD_SUPER_ATTR
+   bytecodes.  They manage the StackRef lifetime themselves and leave the op
+   bodies branch-free.  `method` mirrors the LOAD_ATTR method-mode bit
+   (oparg & 1): when set, the public fallback performs a method lookup and
+   fills *self_or_null; otherwise it is a plain attribute lookup. */
+PyAPI_FUNC(_PyStackRef)
+_PyEval_LoadAttrStackRef(PyThreadState *tstate, _PyInterpreterFrame *frame,
+                         _PyStackRef owner, PyObject *name, int method,
+                         _PyStackRef *self_or_null);
+PyAPI_FUNC(int)
+_PyEval_StoreAttrStackRef(PyThreadState *tstate, _PyInterpreterFrame *frame,
+                          _PyStackRef owner, PyObject *name, _PyStackRef v);
+PyAPI_FUNC(_PyStackRef)
+_PyEval_SuperLoadAttrStackRef(PyThreadState *tstate,
+                              _PyInterpreterFrame *frame, PyObject *cls,
+                              PyObject *self, PyObject *name, PyObject *super);
+PyAPI_FUNC(PyObject *)
+_PyEval_SuperMethodAttr(PyThreadState *tstate,
+                        _PyInterpreterFrame *frame, PyObject *cls,
+                        PyObject *self, PyObject *name,
+                        _PyStackRef self_st, _PyStackRef *self_or_null);
+
 // Like PyMapping_GetOptionalItem, but returns the PyObject* instead of taking
 // it as an out parameter. This helps MSVC's escape analysis when used with
 // tail calling.

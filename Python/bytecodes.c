@@ -2141,9 +2141,18 @@ dummy_func(
             if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                 if (!PyStackRef_IsNull(v)) {
                     PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
-                    next_instr = this_instr;
-                    _Py_Specialize_StoreAttr(owner, next_instr, name);
-                    DISPATCH_SAME_OPARG();
+                    /* Do not specialize private attribute stores (see
+                       _SPECIALIZE_LOAD_ATTR). */
+                    PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                                     PyStackRef_AsPyObjectBorrow(owner));
+                    int private = owner_type != NULL &&
+                                  _PyType_IsPrivateName(owner_type, name);
+                    Py_XDECREF(owner_type);
+                    if (!private) {
+                        next_instr = this_instr;
+                        _Py_Specialize_StoreAttr(owner, next_instr, name);
+                        DISPATCH_SAME_OPARG();
+                    }
                 }
             }
             OPCODE_DEFERRED_INC(STORE_ATTR);
@@ -2153,8 +2162,9 @@ dummy_func(
 
         op(_STORE_ATTR, (v, owner --)) {
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
-            int err = PyObject_SetAttr(PyStackRef_AsPyObjectBorrow(owner),
-                                       name, PyStackRef_AsPyObjectBorrow(v));
+            /* Private attribute fast path is handled inside (covers both
+               store and delete: a NULL v means delattr). */
+            int err = _PyEval_StoreAttrStackRef(tstate, frame, owner, name, v);
             PyStackRef_CLOSE(owner);
             PyStackRef_XCLOSE(v);
             ERROR_IF(err);
@@ -2739,13 +2749,43 @@ dummy_func(
                     }
                 }
             }
-            DECREF_INPUTS();
-            ERROR_IF(super == NULL);
-            PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
-            PyObject *attr_o = PyObject_GetAttr(super, name);
-            Py_DECREF(super);
-            ERROR_IF(attr_o == NULL);
-            attr = PyStackRef_FromPyObjectSteal(attr_o);
+            if (super != NULL) {
+                PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
+                /* Private attribute fast path: super()._secret from code owned
+                   by a matching type looks in the private namespaces starting
+                   after `class` in the MRO.  class/self are still alive here
+                   (DECREF_INPUTS runs below). */
+                PyObject *private_attr = NULL;
+                PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame), self);
+                if (owner_type != NULL && _PyType_IsPrivateName(owner_type, name)) {
+                    private_attr = _PyType_PrivateSuperLookUp((PyTypeObject *)class,
+                                                              self, name);
+                    Py_DECREF(owner_type);
+                    if (private_attr == NULL) {
+                        PyErr_Format(PyExc_AttributeError,
+                                     "'%.100s' object has no private attribute '%U'",
+                                     Py_TYPE(self)->tp_name, name);
+                        Py_DECREF(super);
+                        DECREF_INPUTS();
+                        ERROR_NO_POP();
+                    }
+                    Py_DECREF(super);
+                    DECREF_INPUTS();
+                    attr = PyStackRef_FromPyObjectSteal(private_attr);
+                }
+                else {
+                    Py_XDECREF(owner_type);
+                    PyObject *attr_o = PyObject_GetAttr(super, name);
+                    Py_DECREF(super);
+                    DECREF_INPUTS();
+                    ERROR_IF(attr_o == NULL);
+                    attr = PyStackRef_FromPyObjectSteal(attr_o);
+                }
+            }
+            else {
+                DECREF_INPUTS();
+                ERROR_NO_POP();
+            }
         }
 
         macro(LOAD_SUPER_ATTR) =
@@ -2763,10 +2803,14 @@ dummy_func(
             EXIT_IF(!PyType_Check(class));
             STAT_INC(LOAD_SUPER_ATTR, hit);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
-            PyObject *attr = _PySuper_Lookup((PyTypeObject *)class, self, name, NULL);
+            /* Private attribute fast path is handled inside (super()._secret
+               looks in the private namespaces starting after `class` in the
+               MRO, mirroring normal super lookup). */
+            attr_st = _PyEval_SuperLoadAttrStackRef(tstate, frame,
+                                                    (PyObject *)class, self,
+                                                    name, NULL);
             DECREF_INPUTS();
-            ERROR_IF(attr == NULL);
-            attr_st = PyStackRef_FromPyObjectSteal(attr);
+            ERROR_IF(PyStackRef_IsNull(attr_st));
         }
 
         macro(LOAD_SUPER_ATTR_METHOD) =
@@ -2796,27 +2840,17 @@ dummy_func(
 
             STAT_INC(LOAD_SUPER_ATTR, hit);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
-            PyTypeObject *cls = (PyTypeObject *)class;
-            int method_found = 0;
-            PyObject *attr_o;
-            {
-                // scope to tell MSVC that method_found_ptr is not escaping
-                int *method_found_ptr = &method_found;
-                attr_o = _PySuper_Lookup(cls, self, name,
-                    Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? method_found_ptr : NULL);
-            }
-            if (attr_o == NULL) {
-                ERROR_NO_POP();
-            }
-            if (method_found) {
-                self_or_null = self_st; // transfer ownership
-                DEAD(self_st);
-            } else {
-                PyStackRef_CLOSE(self_st);
-                self_or_null = PyStackRef_NULL;
-            }
+            /* Private attribute fast path is handled inside; falls back to
+               the regular super method lookup with binding. */
+            _PyStackRef self_ref;
+            PyObject *attr_o = _PyEval_SuperMethodAttr(tstate, frame,
+                                                       (PyObject *)class, self,
+                                                       name, self_st,
+                                                       &self_ref);
+            DEAD(self_st);
+            self_or_null = self_ref;
             DECREF_INPUTS();
-
+            ERROR_IF(attr_o == NULL);
             attr = PyStackRef_FromPyObjectSteal(attr_o);
         }
 
@@ -2840,9 +2874,21 @@ dummy_func(
             #if ENABLE_SPECIALIZATION
             if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                 PyObject *name = GETITEM(FRAME_CO_NAMES, oparg>>1);
-                next_instr = this_instr;
-                _Py_Specialize_LoadAttr(owner, next_instr, name);
-                DISPATCH_SAME_OPARG();
+                /* Do not specialize private attribute loads: the specialized
+                   LOAD_ATTR_* ops read the public instance namespace and would
+                   bypass the private lookup.  Detect this by checking whether
+                   the currently executing code belongs to a type that declares
+                   `name` private. */
+                PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                                 PyStackRef_AsPyObjectBorrow(owner));
+                int private = owner_type != NULL &&
+                              _PyType_IsPrivateName(owner_type, name);
+                Py_XDECREF(owner_type);
+                if (!private) {
+                    next_instr = this_instr;
+                    _Py_Specialize_LoadAttr(owner, next_instr, name);
+                    DISPATCH_SAME_OPARG();
+                }
             }
             OPCODE_DEFERRED_INC(LOAD_ATTR);
             ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
@@ -2851,18 +2897,13 @@ dummy_func(
 
         op(_LOAD_ATTR, (owner -- attr, self_or_null[oparg&1])) {
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 1);
-            if (oparg & 1) {
-                /* Designed to work in tandem with CALL, pushes two values. */
-                attr = _Py_LoadAttr_StackRefSteal(tstate, owner, name, self_or_null);
-                DEAD(owner);
-                ERROR_IF(PyStackRef_IsNull(attr));
-            }
-            else {
-                /* Classic, pushes one value. */
-                attr = _PyObject_GetAttrStackRef(PyStackRef_AsPyObjectBorrow(owner), name);
-                PyStackRef_CLOSE(owner);
-                ERROR_IF(PyStackRef_IsNull(attr));
-            }
+            /* Private attribute fast path is handled inside; falls back to
+               the regular method/attribute machinery when the executing code
+               is not owned by a matching type or the name is not private. */
+            attr = _PyEval_LoadAttrStackRef(tstate, frame, owner, name,
+                                            oparg & 1, self_or_null);
+            DEAD(owner);
+            ERROR_IF(PyStackRef_IsNull(attr));
         }
 
         macro(LOAD_ATTR) =

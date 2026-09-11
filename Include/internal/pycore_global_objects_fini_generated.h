@@ -1480,6 +1480,8 @@ _PyStaticObjects_CheckRefcnt(PyInterpreterState *interp) {
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__pos__));
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__pow__));
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__prepare__));
+    _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__private_attributes__));
+    _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__private_codes__));
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__qualname__));
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__radd__));
     _PyStaticObject_CheckRefcnt((PyObject *)&_Py_ID(__rand__));

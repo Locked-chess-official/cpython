@@ -560,6 +560,7 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
     co->_co_instrumentation_version = 0;
     /* not set */
     co->co_weakreflist = NULL;
+    co->co_owner_types = NULL;
     co->co_extra = NULL;
     co->_co_cached = NULL;
     co->co_executors = NULL;
@@ -2441,6 +2442,7 @@ code_dealloc(PyObject *self)
     Py_XDECREF(co->co_qualname);
     Py_XDECREF(co->co_linetable);
     Py_XDECREF(co->co_exceptiontable);
+    Py_XDECREF(co->co_owner_types);
 #ifdef Py_GIL_DISABLED
     assert(co->_co_unique_id == _Py_INVALID_UNIQUE_ID);
 #endif
@@ -2475,9 +2477,135 @@ code_traverse(PyObject *self, visitproc visit, void *arg)
 {
     PyCodeObject *co = _PyCodeObject_CAST(self);
     Py_VISIT(co->co_consts);
+    Py_VISIT(co->co_owner_types);
     return 0;
 }
 #endif
+
+/* ------------------------------------------------------------------ */
+/* Private attributes: owner-type weakref slot. */
+
+/* Weakref callback for owner-type references.
+
+   The capsule passed as `self` holds a *strong* reference to the code object
+   (the reference is taken in _PyCode_AddOwnerType).  This keeps the code
+   object alive until every type that owns it has died: an owner type's
+   weakref fires this callback when the type is collected, we drop the dead
+   weakref from co_owner_types, and the capsule -- released together with the
+   weakref -- DECREFs the code object in its destructor. */
+
+static void
+code_owner_capsule_destructor(PyObject *capsule)
+{
+    PyCodeObject *co = (PyCodeObject *)PyCapsule_GetPointer(capsule,
+                                                            "code.owner_types");
+    if (co != NULL) {
+        PyErr_Clear();
+        Py_DECREF(co);
+    }
+}
+
+static PyObject *
+code_owner_weakref_callback(PyObject *self, PyObject *ref)
+{
+    PyCodeObject *co = (PyCodeObject *)PyCapsule_GetPointer(self,
+                                                            "code.owner_types");
+    if (co == NULL) {
+        return NULL;
+    }
+    PyObject *list = co->co_owner_types;
+    if (list != NULL) {
+        Py_ssize_t n = PyList_GET_SIZE(list);
+        for (Py_ssize_t i = 0; i < n; i++) {
+            if (PyList_GET_ITEM(list, i) == ref) {
+                if (PyList_SetSlice(list, i, i + 1, NULL) < 0) {
+                    return NULL;
+                }
+                break;
+            }
+        }
+    }
+    Py_RETURN_NONE;
+}
+
+static PyMethodDef code_owner_weakref_callback_method = {
+    "code_owner_weakref_callback",
+    (PyCFunction)code_owner_weakref_callback,
+    METH_O,
+    PyDoc_STR("remove a dead owner-type weakref from a code object"),
+};
+
+int
+_PyCode_AddOwnerType(PyCodeObject *co, PyTypeObject *owner)
+{
+    if (co->co_owner_types == NULL) {
+        co->co_owner_types = PyList_New(0);
+        if (co->co_owner_types == NULL) {
+            return -1;
+        }
+    }
+    /* Take a strong reference to the code object and stash it in the
+       capsule.  The code object may therefore not die before all of its
+       owner types do; the weakref callback + capsule destructor release
+       this reference when the owner type is collected. */
+    Py_INCREF(co);
+    PyObject *capsule = PyCapsule_New(co, "code.owner_types",
+                                      code_owner_capsule_destructor);
+    if (capsule == NULL) {
+        Py_DECREF(co);
+        return -1;
+    }
+    PyObject *callback = PyCFunction_New(&code_owner_weakref_callback_method,
+                                         capsule);
+    Py_DECREF(capsule);
+    if (callback == NULL) {
+        return -1;
+    }
+    PyObject *ref = PyWeakref_NewRef((PyObject *)owner, callback);
+    Py_DECREF(callback);
+    if (ref == NULL) {
+        return -1;
+    }
+    int res = PyList_Append(co->co_owner_types, ref);
+    Py_DECREF(ref);
+    return res;
+}
+
+PyTypeObject *
+_PyCode_FindOwnerType(PyCodeObject *co, PyObject *obj)
+{
+    if (co->co_owner_types == NULL) {
+        return NULL;
+    }
+    /* 判断与执行分离：先实例判断，再子类判断（两条道路不混淆）。
+       实例道路：obj 是 owner 的实例（含“obj 是某元类的实例”这一情况，
+       即 obj 本身是类对象但实际作为元类实例）；子类道路：obj 本身是
+       owner 的子类（classmethod 场景）。 */
+    int obj_is_type = PyType_Check(obj);
+    PyTypeObject *obj_runtime_type = Py_TYPE(obj);
+    Py_ssize_t n = PyList_GET_SIZE(co->co_owner_types);
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyObject *ref = PyList_GET_ITEM(co->co_owner_types, i);
+        PyObject *owner = NULL;
+        int alive = PyWeakref_GetRef(ref, &owner);
+        if (alive < 0) {
+            return NULL;
+        }
+        if (alive == 0) {
+            continue;
+        }
+        assert(PyType_Check(owner));
+        PyTypeObject *owner_type = (PyTypeObject *)owner;
+        int match = PyType_IsSubtype(obj_runtime_type, owner_type) ||
+                    (obj_is_type &&
+                     PyType_IsSubtype((PyTypeObject *)obj, owner_type));
+        if (match) {
+            return owner_type;  /* new strong reference */
+        }
+        Py_DECREF(owner);
+    }
+    return NULL;
+}
 
 static PyObject *
 code_repr(PyObject *self)

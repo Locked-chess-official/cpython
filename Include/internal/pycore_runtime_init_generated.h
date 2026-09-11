@@ -1478,6 +1478,8 @@ extern "C" {
     INIT_ID(__pos__), \
     INIT_ID(__pow__), \
     INIT_ID(__prepare__), \
+    INIT_ID(__private_attributes__), \
+    INIT_ID(__private_codes__), \
     INIT_ID(__qualname__), \
     INIT_ID(__radd__), \
     INIT_ID(__rand__), \

@@ -60,6 +60,7 @@ struct compiler_unit {
 
     PyObject *u_private;            /* for private name mangling */
     PyObject *u_static_attributes;  /* for class: attributes accessed via self.X */
+    PyObject *u_codes;              /* for class: code objects defined in the class body */
     PyObject *u_deferred_annotations; /* AnnAssign nodes deferred to the end of compilation */
     PyObject *u_conditional_annotation_indices;  /* indices of annotations that are conditionally executed (or -1 for unconditional annotations) */
     long u_next_conditional_annotation_index;  /* index of the next conditional annotation */
@@ -200,6 +201,7 @@ compiler_unit_free(struct compiler_unit *u)
     Py_CLEAR(u->u_metadata.u_fasthidden);
     Py_CLEAR(u->u_private);
     Py_CLEAR(u->u_static_attributes);
+    Py_CLEAR(u->u_codes);
     Py_CLEAR(u->u_deferred_annotations);
     Py_CLEAR(u->u_conditional_annotation_indices);
     PyMem_Free(u);
@@ -699,9 +701,15 @@ _PyCompile_EnterScope(compiler *c, identifier name, int scope_type,
             compiler_unit_free(u);
             return ERROR;
         }
+        u->u_codes = PyList_New(0);
+        if (!u->u_codes) {
+            compiler_unit_free(u);
+            return ERROR;
+        }
     }
     else {
         u->u_static_attributes = NULL;
+        u->u_codes = NULL;
     }
 
     u->u_instr_sequence = (instr_sequence*)_PyInstructionSequence_New();
@@ -987,6 +995,50 @@ _PyCompile_LookupArg(compiler *c, PyCodeObject *co, PyObject *name)
         return ERROR;
     }
     return arg;
+}
+
+/* Find the nearest enclosing class scope among the current unit and the
+   enclosing units on the compiler stack.  Returns NULL when there is no
+   enclosing class. */
+static struct compiler_unit *
+nearest_class_unit(compiler *c)
+{
+    if (c->u && c->u->u_scope_type == COMPILE_SCOPE_CLASS) {
+        return c->u;
+    }
+    Py_ssize_t stack_size = PyList_GET_SIZE(c->c_stack);
+    for (Py_ssize_t i = stack_size - 1; i >= 0; i--) {
+        PyObject *capsule = PyList_GET_ITEM(c->c_stack, i);
+        struct compiler_unit *u = (struct compiler_unit *)PyCapsule_GetPointer(
+                                                          capsule, CAPSULE_NAME);
+        assert(u);
+        if (u->u_scope_type == COMPILE_SCOPE_CLASS) {
+            return u;
+        }
+    }
+    return NULL;
+}
+
+/* Register a code object created within a class body with the nearest
+   enclosing class scope.  This lets the class recognize, at runtime, which
+   code objects were lexically defined inside it (mirroring the collection
+   performed for __static_attributes__). */
+int
+_PyCompile_MaybeAddCodeToClass(compiler *c, PyCodeObject *co)
+{
+    struct compiler_unit *cls = nearest_class_unit(c);
+    if (cls == NULL) {
+        return SUCCESS;
+    }
+    assert(cls->u_codes != NULL);
+    return PyList_Append(cls->u_codes, (PyObject *)co);
+}
+
+PyObject *
+_PyCompile_CodesAsTuple(compiler *c)
+{
+    assert(c->u->u_codes != NULL);
+    return PyList_AsTuple(c->u->u_codes);
 }
 
 PyObject *

@@ -149,6 +149,7 @@ void _PyCompile_DeferredAnnotations(
 PyObject *_PyCompile_Mangle(struct _PyCompiler *c, PyObject *name);
 PyObject *_PyCompile_MaybeMangle(struct _PyCompiler *c, PyObject *name);
 int _PyCompile_MaybeAddStaticAttributeToClass(struct _PyCompiler *c, expr_ty e);
+int _PyCompile_MaybeAddCodeToClass(struct _PyCompiler *c, PyCodeObject *co);
 int _PyCompile_GetRefType(struct _PyCompiler *c, PyObject *name);
 int _PyCompile_LookupCellvar(struct _PyCompiler *c, PyObject *name);
 int _PyCompile_ResolveNameop(struct _PyCompiler *c, PyObject *mangled, int scope,
@@ -162,6 +163,7 @@ int _PyCompile_LookupArg(struct _PyCompiler *c, PyCodeObject *co, PyObject *name
 PyObject *_PyCompile_Qualname(struct _PyCompiler *c);
 _PyCompile_CodeUnitMetadata *_PyCompile_Metadata(struct _PyCompiler *c);
 PyObject *_PyCompile_StaticAttributesAsTuple(struct _PyCompiler *c);
+PyObject *_PyCompile_CodesAsTuple(struct _PyCompiler *c);
 
 struct symtable *_PyCompile_Symtable(struct _PyCompiler *c);
 PySTEntryObject *_PyCompile_SymtableEntry(struct _PyCompiler *c);

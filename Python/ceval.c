@@ -2,6 +2,7 @@
 
 #include "ceval.h"
 #include "pycore_long.h"
+#include "pycore_typeobject.h"   // _PyType_PrivateLookUp()
 
 int
 Py_GetRecursionLimit(void)
@@ -975,6 +976,167 @@ _Py_LoadAttr_StackRefSteal(
     _PyObject_GetMethodStackRef(tstate, &self.ref, name, &method.ref);
     *self_or_null = _PyThreadState_PopCStackRefSteal(tstate, &self);
     return _PyThreadState_PopCStackRefSteal(tstate, &method);
+}
+
+/* ------------------------------------------------------------------ */
+/* Private attribute fast paths (see pycore_ceval.h). */
+
+_PyStackRef
+_PyEval_LoadAttrStackRef(PyThreadState *tstate, _PyInterpreterFrame *frame,
+                         _PyStackRef owner, PyObject *name, int method,
+                         _PyStackRef *self_or_null)
+{
+    PyObject *obj = PyStackRef_AsPyObjectBorrow(owner);
+    PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                     obj);
+    if (owner_type != NULL) {
+        /* 先判断：这个属性是否就是该类型的私有属性。是 → 走私有路径，
+           找不到直接报错；否 → 直接走公共路径，不先试私有。 */
+        if (_PyType_IsPrivateName(owner_type, name)) {
+            PyObject *res = _PyType_PrivateLookUp(owner_type, name, obj);
+            Py_DECREF(owner_type);
+            if (res != NULL) {
+                /* Private attributes are plain values: no method binding. */
+                if (method) {
+                    self_or_null[0] = PyStackRef_NULL;
+                }
+                PyStackRef_CLOSE(owner);
+                return PyStackRef_FromPyObjectSteal(res);
+            }
+            /* Declared private but not found: report AttributeError. */
+            PyErr_Format(PyExc_AttributeError,
+                         "'%.100s' object has no private attribute '%U'",
+                         Py_TYPE(obj)->tp_name, name);
+            _PyObject_SetAttributeErrorContext(obj, name);
+            if (method) {
+                self_or_null[0] = PyStackRef_NULL;
+            }
+            PyStackRef_CLOSE(owner);
+            return PyStackRef_NULL;
+        }
+        Py_DECREF(owner_type);
+    }
+    if (method) {
+        return _Py_LoadAttr_StackRefSteal(tstate, owner, name, self_or_null);
+    }
+    /* Plain attribute lookup: no method binding, single value pushed. */
+    _PyStackRef attr = _PyObject_GetAttrStackRef(obj, name);
+    PyStackRef_CLOSE(owner);
+    return attr;
+}
+
+int
+_PyEval_StoreAttrStackRef(PyThreadState *tstate, _PyInterpreterFrame *frame,
+                          _PyStackRef owner, PyObject *name, _PyStackRef v)
+{
+    PyObject *obj = PyStackRef_AsPyObjectBorrow(owner);
+    PyObject *value = PyStackRef_IsNull(v) ? NULL : PyStackRef_AsPyObjectBorrow(v);
+    PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                     obj);
+    if (owner_type != NULL) {
+        /* 先判断：私有属性 → 只走私有路径（存储/删除），失败即报错；
+           非私有 → 直接走公共路径。 */
+        if (_PyType_IsPrivateName(owner_type, name)) {
+            int err = _PyType_PrivateStoreAttr(owner_type, obj, name, value);
+            Py_DECREF(owner_type);
+            if (err < 0) {
+                return -1;
+            }
+            return 0;
+        }
+        Py_DECREF(owner_type);
+    }
+    return PyObject_SetAttr(obj, name, value);
+}
+
+/* Load a super attribute (plain mode, no method binding).  `super` is the
+   super object already built by the tier-1 op (may be NULL for the
+   specialized ATTR path, which calls _PySuper_Lookup directly).  The caller
+   keeps ownership of `super` and DECREFs it afterwards. */
+_PyStackRef
+_PyEval_SuperLoadAttrStackRef(PyThreadState *tstate,
+                              _PyInterpreterFrame *frame, PyObject *cls,
+                              PyObject *self, PyObject *name, PyObject *super)
+{
+    PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                     self);
+    if (owner_type != NULL) {
+        /* 先判断：私有属性 → 只走私有 super 查找，找不到即报错；
+           非私有 → 直接走公共 super 路径。 */
+        if (_PyType_IsPrivateName(owner_type, name)) {
+            PyObject *res = _PyType_PrivateSuperLookUp((PyTypeObject *)cls,
+                                                       self, name);
+            Py_DECREF(owner_type);
+            if (res != NULL) {
+                return PyStackRef_FromPyObjectSteal(res);
+            }
+            PyErr_Format(PyExc_AttributeError,
+                         "'%.100s' object has no private attribute '%U'",
+                         Py_TYPE(self)->tp_name, name);
+            return PyStackRef_NULL;
+        }
+        Py_DECREF(owner_type);
+    }
+    if (super != NULL) {
+        return PyStackRef_FromPyObjectSteal(PyObject_GetAttr(super, name));
+    }
+    return PyStackRef_FromPyObjectSteal(_PySuper_Lookup((PyTypeObject *)cls,
+                                                        self, name, NULL));
+}
+
+/* Load a super attribute in method mode.  `self_st` is the StackRef of the
+   instance (or class) on the stack; on a private hit it is closed and
+   *self_or_null is set to NULL (private attributes are plain values).  On a
+   public method hit, self_st's ownership is transferred to *self_or_null.
+   Returns a new reference to the attribute, or NULL with an exception set.
+   The op body declares self_st dead afterwards. */
+PyObject *
+_PyEval_SuperMethodAttr(PyThreadState *tstate,
+                        _PyInterpreterFrame *frame, PyObject *cls,
+                        PyObject *self, PyObject *name,
+                        _PyStackRef self_st, _PyStackRef *self_or_null)
+{
+    PyTypeObject *owner_type = _PyCode_FindOwnerType(_PyFrame_GetCode(frame),
+                                                     self);
+    if (owner_type != NULL) {
+        /* 先判断：私有属性 → 只走私有 super 查找，找不到即报错；
+           非私有 → 直接走公共 super 方法查找。 */
+        if (_PyType_IsPrivateName(owner_type, name)) {
+            PyObject *res = _PyType_PrivateSuperLookUp((PyTypeObject *)cls,
+                                                       self, name);
+            Py_DECREF(owner_type);
+            if (res != NULL) {
+                /* Private attributes are plain values: no method binding. */
+                PyStackRef_CLOSE(self_st);
+                self_or_null[0] = PyStackRef_NULL;
+                return res;
+            }
+            PyErr_Format(PyExc_AttributeError,
+                         "'%.100s' object has no private attribute '%U'",
+                         Py_TYPE(self)->tp_name, name);
+            PyStackRef_CLOSE(self_st);
+            self_or_null[0] = PyStackRef_NULL;
+            return NULL;
+        }
+        Py_DECREF(owner_type);
+    }
+    int method_found = 0;
+    int *method_found_ptr = &method_found;
+    PyObject *attr_o = _PySuper_Lookup((PyTypeObject *)cls, self, name,
+        Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? method_found_ptr : NULL);
+    if (attr_o == NULL) {
+        PyStackRef_CLOSE(self_st);
+        self_or_null[0] = PyStackRef_NULL;
+        return NULL;
+    }
+    if (method_found) {
+        self_or_null[0] = self_st;  // transfer ownership
+    }
+    else {
+        PyStackRef_CLOSE(self_st);
+        self_or_null[0] = PyStackRef_NULL;
+    }
+    return attr_o;
 }
 
 #ifdef Py_DEBUG

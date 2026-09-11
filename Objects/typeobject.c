@@ -2013,6 +2013,40 @@ type_dict(PyObject *tp, void *Py_UNUSED(closure))
     return PyDictProxy_New(dict);
 }
 
+/* The class-level namespace of private attributes declared with
+   __private_attributes__, keyed by subclass id (including this type itself),
+   exposed as a read-only mappingproxy. */
+static PyObject *
+type_get_private_type_dict(PyObject *tp, void *Py_UNUSED(closure))
+{
+    PyTypeObject *type = PyTypeObject_CAST(tp);
+    PyObject *typedict = NULL;
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        typedict = ((PyHeapTypeObject *)type)->ht_privatetypedict;
+    }
+    if (typedict == NULL) {
+        Py_RETURN_NONE;
+    }
+    return PyDictProxy_New(typedict);
+}
+
+/* The per-instance namespace of private attributes, keyed by id(instance),
+   exposed as a mutable mapping. */
+static PyObject *
+type_get_private_attributes_dict(PyObject *tp, void *Py_UNUSED(closure))
+{
+    PyTypeObject *type = PyTypeObject_CAST(tp);
+    PyObject *privatedict = NULL;
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        privatedict = ((PyHeapTypeObject *)type)->ht_privatedict;
+    }
+    if (privatedict == NULL) {
+        Py_RETURN_NONE;
+    }
+    /* Read-only view, mirroring __private_type_dict__. */
+    return PyDictProxy_New(privatedict);
+}
+
 static PyObject *
 type_get_doc(PyObject *tp, void *Py_UNUSED(closure))
 {
@@ -2349,6 +2383,8 @@ static PyGetSetDef type_getsets[] = {
     {"__abstractmethods__", type_abstractmethods,
      type_set_abstractmethods, NULL},
     {"__dict__",  type_dict,  NULL, NULL},
+    {"__private_type_dict__",  type_get_private_type_dict,  NULL, NULL},
+    {"__private_attributes_dict__",  type_get_private_attributes_dict,  NULL, NULL},
     {"__doc__", type_get_doc, type_set_doc, NULL},
     {"__text_signature__", type_get_text_signature, NULL, NULL},
     {"__annotations__", type_get_annotations, type_set_annotations, NULL},
@@ -2570,6 +2606,85 @@ traverse_slots(PyTypeObject *type, PyObject *self, visitproc visit, void *arg)
     return 0;
 }
 
+/* Traverse the per-instance private namespaces (the inner {name: value} dicts
+   stored in each MRO class's ht_privatedict under key id(self)).  Without
+   this, a cycle through instance private attributes (e.g. a._p = b;
+   b._p = a) would be invisible to the cycle collector: the values live in the
+   *defining class*'s ht_privatedict, not in the instance's own __dict__. */
+static int
+traverse_private_instances(PyTypeObject *type, PyObject *self,
+                           visitproc visit, void *arg)
+{
+    PyObject *mro = lookup_tp_mro(type);
+    if (mro == NULL) {
+        return 0;
+    }
+    PyObject *id = PyLong_FromVoidPtr(self);
+    if (id == NULL) {
+        PyErr_Clear();
+        return 0;
+    }
+    Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(mro, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        PyHeapTypeObject *hb = (PyHeapTypeObject *)base;
+        if (hb->ht_privatedict == NULL) {
+            continue;
+        }
+        /* Borrowed reference: Py_VISIT must not own it. */
+        PyObject *inst = PyDict_GetItemWithError(hb->ht_privatedict, id);
+        if (inst == NULL) {
+            if (PyErr_Occurred()) {
+                PyErr_Clear();
+            }
+            continue;
+        }
+        Py_VISIT(inst);
+    }
+    Py_DECREF(id);
+    return 0;
+}
+
+/* Clear (break) the per-instance private namespaces for `self`, so that a
+   cycle through instance private attributes can be collected.  Mirrors
+   traverse_private_instances: it walks the MRO and pops the inner dict of
+   each class's ht_privatedict slot for id(self). */
+static void
+clear_private_instances(PyTypeObject *type, PyObject *self)
+{
+    PyObject *mro = lookup_tp_mro(type);
+    if (mro == NULL) {
+        return;
+    }
+    PyObject *id = PyLong_FromVoidPtr(self);
+    if (id == NULL) {
+        PyErr_Clear();
+        return;
+    }
+    Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(mro, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        PyHeapTypeObject *hb = (PyHeapTypeObject *)base;
+        if (hb->ht_privatedict == NULL) {
+            continue;
+        }
+        /* PyDict_Pop returns a new reference (out-param); remove the slot to
+           break the cycle, then drop the returned reference. */
+        PyObject *val = NULL;
+        if (PyDict_Pop(hb->ht_privatedict, id, &val) < 0) {
+            PyErr_Clear();
+        }
+        Py_XDECREF(val);
+    }
+    Py_DECREF(id);
+}
+
 static int
 subtype_traverse(PyObject *self, visitproc visit, void *arg)
 {
@@ -2604,6 +2719,16 @@ subtype_traverse(PyObject *self, visitproc visit, void *arg)
             if (dictptr && *dictptr) {
                 Py_VISIT(*dictptr);
             }
+        }
+    }
+
+    /* Traverse the per-instance private namespaces (stored on the defining
+       classes' ht_privatedict), so cycles through instance private attributes
+       are visible to the collector. */
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        int err = traverse_private_instances(type, self, visit, arg);
+        if (err) {
+            return err;
         }
     }
 
@@ -2677,6 +2802,12 @@ subtype_clear(PyObject *self)
             Py_CLEAR(*dictptr);
     }
 
+    /* Clear the per-instance private namespaces so that a cycle through
+       instance private attributes is broken and can be collected. */
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        clear_private_instances(type, self);
+    }
+
     if (baseclear)
         return baseclear(self);
     return 0;
@@ -2721,6 +2852,10 @@ subtype_dealloc(PyObject *self)
 
         /* Extract the type again; tp_del may have changed it */
         type = Py_TYPE(self);
+
+        /* Drop this instance's per-instance private storage slots from every
+           class in its MRO before the memory goes away. */
+        _PyType_PrivateInstanceDeallocCleanup(type, self);
 
         // Don't read type memory after calling basedealloc() since basedealloc()
         // can deallocate the type and free its memory.
@@ -2826,6 +2961,10 @@ subtype_dealloc(PyObject *self)
 
     /* Extract the type again; tp_del may have changed it */
     type = Py_TYPE(self);
+
+    /* Drop this instance's per-instance private storage slots from every
+       class in its MRO before the memory goes away. */
+    _PyType_PrivateInstanceDeallocCleanup(type, self);
 
     /* Call the base tp_dealloc(); first retrack self if
      * basedealloc knows about gc.
@@ -4419,6 +4558,9 @@ type_new_alloc(type_new_ctx *ctx)
     et->ht_module = NULL;
     et->_ht_tpname = NULL;
     et->ht_token = NULL;
+    et->ht_privatenames = NULL;
+    et->ht_privatedict = NULL;
+    et->ht_privatetypedict = NULL;
 
 #ifdef Py_GIL_DISABLED
     et->unique_id = _PyObject_AssignUniqueId((PyObject *)et);
@@ -4773,6 +4915,262 @@ type_new_set_classdictcell(PyObject *dict)
     return 0;
 }
 
+/* Process the __private_attributes__ declaration for a newly created class.
+
+   Private attribute names declared on this class are collected into
+   et->ht_privatenames (a frozenset of names, merged from all base classes in
+   MRO order plus this class's own declaration).  Class-level values for those
+   names are moved out of the public class namespace into et->ht_privatetypedict
+   (exposed as __private_type_dict__, a read-only mappingproxy), which is keyed
+   by subclass id (including this class itself): the entry under id(self) holds
+   this class's own class-level values.  Base classes' values are deliberately
+   NOT merged here; lookup resolves the target type's full MRO (see
+   _PyType_PrivateLookUp). */
+static int
+type_new_set_private_attrs(const type_new_ctx *ctx, PyTypeObject *type)
+{
+    PyHeapTypeObject *et = (PyHeapTypeObject *)type;
+    PyObject *dict = lookup_tp_dict(type);
+    assert(dict != NULL);
+
+    /* Collect all private names from bases and this class into a list
+       first (duplicates are fine; frozenset dedups at the end). */
+    PyObject *names_list = PyList_New(0);
+    if (names_list == NULL) {
+        return -1;
+    }
+    PyObject *typedict = NULL;
+    PyObject *inner = NULL;
+
+    Py_ssize_t nbases = PyTuple_GET_SIZE(ctx->bases);
+    for (Py_ssize_t i = 0; i < nbases; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(ctx->bases, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        PyHeapTypeObject *eb = (PyHeapTypeObject *)base;
+        if (eb->ht_privatenames == NULL) {
+            continue;
+        }
+        PyObject *iter = PyObject_GetIter(eb->ht_privatenames);
+        if (iter == NULL) {
+            goto error;
+        }
+        PyObject *item;
+        while ((item = PyIter_Next(iter)) != NULL) {
+            if (PyList_Append(names_list, item) < 0) {
+                Py_DECREF(item);
+                Py_DECREF(iter);
+                goto error;
+            }
+            Py_DECREF(item);
+        }
+        Py_DECREF(iter);
+        if (PyErr_Occurred()) {
+            goto error;
+        }
+    }
+
+    /* Apply this class's own declaration. */
+    PyObject *decl = PyDict_GetItemWithError(dict, &_Py_ID(__private_attributes__));
+    if (decl == NULL && PyErr_Occurred()) {
+        goto error;
+    }
+    if (decl != NULL) {
+        PyObject *own_names;
+        if (PyUnicode_Check(decl)) {
+            own_names = PyTuple_Pack(1, decl);
+        }
+        else {
+            own_names = PySequence_Tuple(decl);
+        }
+        if (own_names == NULL) {
+            goto error;
+        }
+        Py_ssize_t n = PyTuple_GET_SIZE(own_names);
+
+        /* Name-mangle each declared name, mirroring the compiler's mangling
+           of identifiers inside the class body (see _Py_Mangle).  A declared
+           private name like "__x" must resolve to the same key ("_Class__x")
+           the code actually stores the attribute under. */
+        PyObject *mangled_list = PyList_New(0);
+        if (mangled_list == NULL) {
+            Py_DECREF(own_names);
+            goto error;
+        }
+        for (Py_ssize_t i = 0; i < n; i++) {
+            PyObject *name = PyTuple_GET_ITEM(own_names, i);
+            if (!PyUnicode_Check(name)) {
+                PyErr_Format(PyExc_TypeError,
+                             "__private_attributes__ items must be strings, "
+                             "not '%.200s'", Py_TYPE(name)->tp_name);
+                Py_DECREF(mangled_list);
+                Py_DECREF(own_names);
+                goto error;
+            }
+            PyObject *mangled = _Py_Mangle(ctx->name, name);
+            if (mangled == NULL) {
+                Py_DECREF(mangled_list);
+                Py_DECREF(own_names);
+                goto error;
+            }
+            if (PyList_Append(mangled_list, mangled) < 0) {
+                Py_DECREF(mangled);
+                Py_DECREF(mangled_list);
+                Py_DECREF(own_names);
+                goto error;
+            }
+            if (PyList_Append(names_list, mangled) < 0) {
+                Py_DECREF(mangled);
+                Py_DECREF(mangled_list);
+                Py_DECREF(own_names);
+                goto error;
+            }
+            Py_DECREF(mangled);
+        }
+
+        for (Py_ssize_t i = 0; i < n; i++) {
+            PyObject *name = PyList_GET_ITEM(mangled_list, i);
+            PyObject *value = NULL;
+            /* Move the class-level value out of the public class namespace
+               into the private type-level namespace: a name declared private
+               must not be visible through the public __dict__. */
+            if (PyDict_GetItemRef(dict, name, &value) < 0) {
+                Py_DECREF(mangled_list);
+                Py_DECREF(own_names);
+                goto error;
+            }
+            if (value != NULL) {
+                if (inner == NULL) {
+                    inner = PyDict_New();
+                    if (inner == NULL) {
+                        Py_DECREF(value);
+                        Py_DECREF(mangled_list);
+                        Py_DECREF(own_names);
+                        goto error;
+                    }
+                }
+                if (PyDict_SetItem(inner, name, value) < 0) {
+                    Py_DECREF(value);
+                    Py_DECREF(mangled_list);
+                    Py_DECREF(own_names);
+                    goto error;
+                }
+                Py_DECREF(value);
+                if (PyDict_DelItem(dict, name) < 0) {
+                    Py_DECREF(mangled_list);
+                    Py_DECREF(own_names);
+                    goto error;
+                }
+            }
+        }
+        Py_DECREF(mangled_list);
+        Py_DECREF(own_names);
+
+        /* Store this class's own class-level values under id(self).  Base
+           classes' values are deliberately NOT merged: lookup resolves the
+           target type's MRO (see _PyType_PrivateLookUp). */
+        if (inner != NULL) {
+            if (typedict == NULL) {
+                typedict = PyDict_New();
+                if (typedict == NULL) {
+                    goto error;
+                }
+            }
+            PyObject *self_id = PyLong_FromVoidPtr(type);
+            if (self_id == NULL) {
+                goto error;
+            }
+            int r = PyDict_SetItem(typedict, self_id, inner);
+            Py_DECREF(self_id);
+            if (r < 0) {
+                goto error;
+            }
+            Py_DECREF(inner);
+            inner = NULL;
+        }
+    }
+
+    /* Keep an empty type-level dict so __private_type_dict__ is always a
+       mappingproxy for heap types created here. */
+    if (typedict == NULL) {
+        typedict = PyDict_New();
+        if (typedict == NULL) {
+            goto error;
+        }
+    }
+
+    /* Convert the collected names to a frozenset: O(1) membership tests and
+       deduplication across merged bases. */
+    PyObject *names = PyFrozenSet_New(names_list);
+    if (names == NULL) {
+        goto error;
+    }
+    Py_DECREF(names_list);
+
+    et->ht_privatenames = names;
+    et->ht_privatetypedict = typedict;
+    return 0;
+
+error:
+    Py_XDECREF(names_list);
+    Py_XDECREF(typedict);
+    Py_XDECREF(inner);
+    return -1;
+}
+
+
+/* Bind the code objects lexically defined inside the class body to the
+   newly created type.  The compiler emits these as a __private_codes__
+   tuple into the class namespace (see codegen_class_body).
+
+   New architecture: the type no longer stores the codes.  Instead, each
+   code object gets a weak reference to this type appended to its private
+   owner-types slot (see _PyCode_AddOwnerType).  This is the only place
+   that slot is ever written; it stays NULL otherwise.
+
+   The __private_codes__ tuple is deliberately left in the class namespace:
+   it is a harmless key/value pair (custom metaclasses that observe the
+   namespace see it, which is fine), and popping it here would not help
+   anyway since a custom metaclass bypasses type_new entirely. */
+static int
+type_new_set_private_codes(const type_new_ctx *ctx, PyTypeObject *type)
+{
+    PyObject *dict = lookup_tp_dict(type);
+    assert(dict != NULL);
+
+    PyObject *codes = NULL;
+    if (PyDict_GetItemRef(dict, &_Py_ID(__private_codes__), &codes) < 0) {
+        return -1;
+    }
+    if (codes == NULL) {
+        return 0;
+    }
+    if (!PyTuple_CheckExact(codes)) {
+        PyErr_SetString(PyExc_TypeError, "__private_codes__ must be a tuple");
+        Py_DECREF(codes);
+        return -1;
+    }
+    /* Leave __private_codes__ in the class dict (see comment above). */
+    Py_ssize_t n = PyTuple_GET_SIZE(codes);
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyObject *co = PyTuple_GET_ITEM(codes, i);
+        if (!PyCode_Check(co)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "__private_codes__ must contain only code objects");
+            Py_DECREF(codes);
+            return -1;
+        }
+        if (_PyCode_AddOwnerType((PyCodeObject *)co, type) < 0) {
+            Py_DECREF(codes);
+            return -1;
+        }
+    }
+    Py_DECREF(codes);
+    return 0;
+}
+
+
 static int
 type_new_set_attrs(const type_new_ctx *ctx, PyTypeObject *type)
 {
@@ -4792,6 +5190,14 @@ type_new_set_attrs(const type_new_ctx *ctx, PyTypeObject *type)
     }
 
     if (type_new_set_doc(type, dict) < 0) {
+        return -1;
+    }
+
+    if (type_new_set_private_attrs(ctx, type) < 0) {
+        return -1;
+    }
+
+    if (type_new_set_private_codes(ctx, type) < 0) {
         return -1;
     }
 
@@ -6275,6 +6681,502 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
     return res;
 }
 
+/* Resolve the target type against whose MRO a private type-level lookup is
+   performed: the instance's runtime type for the instance road, or the class
+   object itself for the subclass road (classmethod-style access). */
+static PyTypeObject *
+private_target_type(PyObject *obj)
+{
+    if (PyType_Check(obj)) {
+        return (PyTypeObject *)obj;
+    }
+    return Py_TYPE(obj);
+}
+
+/* Look up `name` in `owner`'s type-level private namespace under the key
+   id(`target`).  Returns a new reference, or NULL without an exception when
+   there is no such entry. */
+static PyObject *
+private_type_lookup_in_owner(PyTypeObject *owner, PyTypeObject *target,
+                             PyObject *name)
+{
+    PyHeapTypeObject *ht = (PyHeapTypeObject *)owner;
+    if (ht->ht_privatetypedict == NULL) {
+        return NULL;
+    }
+    PyObject *id = PyLong_FromVoidPtr(target);
+    if (id == NULL) {
+        PyErr_Clear();
+        return NULL;
+    }
+    PyObject *inner = NULL;
+    int r = PyDict_GetItemRef(ht->ht_privatetypedict, id, &inner);
+    Py_DECREF(id);
+    if (r < 0) {
+        PyErr_Clear();
+        return NULL;
+    }
+    if (inner == NULL) {
+        return NULL;
+    }
+    PyObject *res = NULL;
+    int r2 = PyDict_GetItemRef(inner, name, &res);
+    Py_DECREF(inner);
+    if (r2 < 0) {
+        PyErr_Clear();
+        return NULL;
+    }
+    return res;
+}
+
+/* Look up a private attribute for an instance, consulting the type-level
+   namespace (__private_type_dict__, keyed by subclass id) and the per-instance
+   namespace (__private_attributes_dict__).  Mirrors the precedence of
+   obj.__dict__ over type.__dict__: the per-instance value wins when present.
+   Returns a new reference, or NULL without setting an exception when the
+   attribute is not found. */
+PyObject *
+_PyType_PrivateLookUp(PyTypeObject *type, PyObject *name, PyObject *obj)
+{
+    assert(PyType_Check(type));
+    assert(name != NULL);
+
+    /* Per-instance namespace first.  The per-instance private storage lives
+       on the *defining* class `type` (see private_instance_dict), so each
+       class sees its own slot for the same instance: a subclass's writes do
+       not clobber the parent's values. */
+    if (obj != NULL && (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        PyHeapTypeObject *ht = (PyHeapTypeObject *)type;
+        if (ht->ht_privatedict != NULL) {
+            PyObject *id = PyLong_FromVoidPtr(obj);
+            if (id == NULL) {
+                PyErr_Clear();
+                return NULL;
+            }
+            PyObject *inst = NULL;
+            int r = PyDict_GetItemRef(ht->ht_privatedict, id, &inst);
+            Py_DECREF(id);
+            if (r < 0) {
+                PyErr_Clear();
+                return NULL;
+            }
+            if (inst != NULL) {
+                PyObject *res = NULL;
+                int r2 = PyDict_GetItemRef(inst, name, &res);
+                Py_DECREF(inst);
+                if (r2 < 0) {
+                    PyErr_Clear();
+                    return NULL;
+                }
+                if (res != NULL) {
+                    return res;
+                }
+            }
+        }
+    }
+
+    /* Type-level namespace, keyed by subclass id.  Start from the owner type
+       `type` (the class whose code is executing) and walk the *target* type's
+       full MRO (derived first).  For each owner in `type`'s MRO and each
+       target in the target's MRO, consult the owner's ht_privatetypedict under
+       key id(target).  A value declared on a subclass is thus seen only by
+       that subclass's own code (or by an ancestor that explicitly stored into
+       the subclass via _PyType_PrivateStoreAttr); otherwise a subclass falls
+       back to the ancestor that declared the value. */
+    PyTypeObject *target = (obj == NULL) ? type : private_target_type(obj);
+    if (target == NULL) {
+        return NULL;
+    }
+    PyObject *owner_mro = lookup_tp_mro(type);
+    if (owner_mro == NULL) {
+        return NULL;
+    }
+    PyObject *target_mro = lookup_tp_mro(target);
+    if (target_mro == NULL) {
+        return NULL;
+    }
+    Py_ssize_t om = PyTuple_GET_SIZE(owner_mro);
+    Py_ssize_t tm = PyTuple_GET_SIZE(target_mro);
+    for (Py_ssize_t i = 0; i < om; i++) {
+        PyTypeObject *owner_base = _PyType_CAST(PyTuple_GET_ITEM(owner_mro, i));
+        if (!(owner_base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        for (Py_ssize_t j = 0; j < tm; j++) {
+            PyTypeObject *target_base =
+                _PyType_CAST(PyTuple_GET_ITEM(target_mro, j));
+            if (!(target_base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+                continue;
+            }
+            PyObject *res = private_type_lookup_in_owner(owner_base, target_base,
+                                                         name);
+            if (res != NULL) {
+                return res;
+            }
+        }
+    }
+    return NULL;
+}
+
+/* Get the per-instance private dict ({name: value}) for `obj` as seen from
+   `type`, creating it if `create` is true.  The storage is ht_privatedict on
+   the *defining* class `type` (not on the instance's type), keyed by
+   id(obj); each value is the per-instance private namespace.  This gives
+   each class its own per-instance private slot: a subclass writing
+   self._a stores into the subclass's ht_privatedict while the parent's
+   ht_privatedict keeps its own value, so super()._a sees the parent's.
+   Returns a new reference, or NULL with an exception set. */
+static PyObject *
+private_instance_dict(PyTypeObject *type, PyObject *obj, int create)
+{
+    assert(PyType_Check(type));
+    assert(obj != NULL);
+
+    if (!(type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        if (create) {
+            PyErr_Format(PyExc_TypeError,
+                         "cannot store private attributes on '%.100s' objects",
+                         type->tp_name);
+            return NULL;
+        }
+        return NULL;
+    }
+    PyHeapTypeObject *ht = (PyHeapTypeObject *)type;
+
+    PyObject *id = PyLong_FromVoidPtr(obj);
+    if (id == NULL) {
+        return NULL;
+    }
+    PyObject *inst = NULL;
+    int r = 0;
+    if (ht->ht_privatedict != NULL) {
+        r = PyDict_GetItemRef(ht->ht_privatedict, id, &inst);
+    }
+    Py_DECREF(id);
+    if (r < 0) {
+        return NULL;
+    }
+    if (inst != NULL) {
+        return inst;
+    }
+    if (!create) {
+        return NULL;
+    }
+
+    if (ht->ht_privatedict == NULL) {
+        ht->ht_privatedict = PyDict_New();
+        if (ht->ht_privatedict == NULL) {
+            return NULL;
+        }
+        /* The per-instance private namespaces are owned by their instances,
+           not by the class: the type side must not keep them reachable (see
+           the comment in type_traverse).  A plain PyDict_New() yields a
+           GC-tracked dict, which the collector would traverse on its own,
+           subtracting the very inner dicts that subtype_traverse ->
+           traverse_private_instances also visits -- a double decref that
+           trips gc_decref's "refcount is too small" assertion.  Untracking
+           the outer dict makes it invisible to the collector; the inner
+           namespaces stay tracked and are reached from their instances. */
+        PyObject_GC_UnTrack(ht->ht_privatedict);
+    }
+    PyObject *dict = PyDict_New();
+    if (dict == NULL) {
+        return NULL;
+    }
+    PyObject *id2 = PyLong_FromVoidPtr(obj);
+    if (id2 == NULL) {
+        Py_DECREF(dict);
+        return NULL;
+    }
+    int res = PyDict_SetItem(ht->ht_privatedict, id2, dict);
+    Py_DECREF(id2);
+    Py_DECREF(dict);
+    if (res < 0) {
+        return NULL;
+    }
+    return Py_NewRef(dict);
+}
+
+/* Store/delete `name` in `owner`'s type-level private namespace under the key
+   id(`target`).  Used when code belonging to `owner` assigns to a class object
+   (e.g. B._x = v inside A's method), which creates the subclass entry on
+   demand.  `value == NULL` deletes.  Returns 0 on success, -1 with an
+   exception set on failure. */
+static int
+private_type_store_in_owner(PyTypeObject *owner, PyTypeObject *target,
+                            PyObject *name, PyObject *value)
+{
+    PyHeapTypeObject *ht = (PyHeapTypeObject *)owner;
+    if (ht->ht_privatetypedict == NULL) {
+        ht->ht_privatetypedict = PyDict_New();
+        if (ht->ht_privatetypedict == NULL) {
+            return -1;
+        }
+    }
+    PyObject *id = PyLong_FromVoidPtr(target);
+    if (id == NULL) {
+        return -1;
+    }
+    PyObject *inner = NULL;
+    int r = PyDict_GetItemRef(ht->ht_privatetypedict, id, &inner);
+    Py_DECREF(id);
+    if (r < 0) {
+        return -1;
+    }
+    if (inner == NULL) {
+        if (value == NULL) {
+            PyErr_Format(PyExc_AttributeError,
+                         "'%.100s' has no private attribute '%U'",
+                         target->tp_name, name);
+            return -1;
+        }
+        inner = PyDict_New();
+        if (inner == NULL) {
+            return -1;
+        }
+        PyObject *id2 = PyLong_FromVoidPtr(target);
+        if (id2 == NULL) {
+            Py_DECREF(inner);
+            return -1;
+        }
+        int r2 = PyDict_SetItem(ht->ht_privatetypedict, id2, inner);
+        Py_DECREF(id2);
+        if (r2 < 0) {
+            Py_DECREF(inner);
+            return -1;
+        }
+    }
+    int res;
+    if (value == NULL) {
+        res = PyDict_DelItem(inner, name);
+        if (res < 0) {
+            if (PyErr_ExceptionMatches(PyExc_KeyError)) {
+                PyErr_Format(PyExc_AttributeError,
+                             "'%.100s' has no private attribute '%U'",
+                             target->tp_name, name);
+            }
+        }
+    }
+    else {
+        res = PyDict_SetItem(inner, name, value);
+    }
+    Py_DECREF(inner);
+    return res;
+}
+
+int
+_PyType_PrivateStoreAttr(PyTypeObject *type, PyObject *obj,
+                         PyObject *name, PyObject *value)
+{
+    assert(PyType_Check(type));
+    assert(name != NULL);
+
+    /* Subclass road: assigning to a class object (e.g. B._x = v inside A's
+       code) stores into the owner's type-level private namespace under key
+       id(obj), creating the entry on demand. */
+    if (PyType_Check(obj)) {
+        if (!(type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            PyErr_Format(PyExc_TypeError,
+                         "cannot store private attributes on '%.100s'",
+                         type->tp_name);
+            return -1;
+        }
+        return private_type_store_in_owner(type, (PyTypeObject *)obj,
+                                           name, value);
+    }
+
+    /* Instance road: per-instance private storage (unchanged). */
+    PyObject *dict = private_instance_dict(type, obj, 1);
+    if (dict == NULL) {
+        return -1;
+    }
+    int res;
+    if (value == NULL) {
+        res = PyDict_DelItem(dict, name);
+        if (res < 0) {
+            if (PyErr_ExceptionMatches(PyExc_KeyError)) {
+                PyErr_Format(PyExc_AttributeError,
+                             "'%.100s' object has no private attribute '%U'",
+                             Py_TYPE(obj)->tp_name, name);
+            }
+        }
+    }
+    else {
+        res = PyDict_SetItem(dict, name, value);
+    }
+    Py_DECREF(dict);
+    return res;
+}
+/* Called from subtype_dealloc right before the instance memory is released.
+   Removes the {id(obj): {...}} slot for `obj` from the ht_privatedict of
+   every class in the instance's MRO that has one.  Without this the slots
+   would leak the private values forever and a later object allocated at the
+   same address would observe the dead instance's private state.
+   Must never raise (dealloc path): lookups that can fail are guarded and
+   exceptions are cleared. */
+void
+_PyType_PrivateInstanceDeallocCleanup(PyTypeObject *type, PyObject *obj)
+{
+    assert(PyType_Check(type));
+    assert(obj != NULL);
+
+    /* Fast path: only heap types can own per-instance private storage.  Static
+       builtins (int, str, ...) are never heap types, so they exit here in
+       O(1); this also avoids touching their tp_mro, which may already be
+       cleared during interpreter shutdown.  Heap types fall through to the
+       MRO walk, where each class's ht_privatedict slot is checked before use. */
+    if (!(type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        return;
+    }
+
+    PyObject *mro = lookup_tp_mro(type);
+    if (mro == NULL) {
+        PyErr_Clear();
+        return;
+    }
+    PyObject *id = PyLong_FromVoidPtr(obj);
+    if (id == NULL) {
+        PyErr_Clear();
+        return;
+    }
+    Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(mro, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        PyHeapTypeObject *hb = (PyHeapTypeObject *)base;
+        if (hb->ht_privatedict == NULL) {
+            continue;
+        }
+        /* Remove the slot.  PyDict_Pop's third argument is an out-parameter
+           (int return, *result = NULL when absent): do not pass NULL or the
+           value pointer gets written to address 0.  Errors (unlikely here)
+           must not propagate out of a dealloc. */
+        PyObject *val = NULL;
+        if (PyDict_Pop(hb->ht_privatedict, id, &val) < 0) {
+            PyErr_Clear();
+        }
+        Py_XDECREF(val);
+    }
+    Py_DECREF(id);
+}
+
+
+/* Private lookup through a super() object.  The private type-level namespace
+   is searched starting after `su_type` in the MRO of the instance's class
+   (mirroring _PySuper_LookupDescr's skip of su->type), and the per-instance
+   private namespace of `su_obj` is consulted as a fallback. */
+PyObject *
+_PyType_PrivateSuperLookUp(PyTypeObject *su_type, PyObject *su_obj,
+                           PyObject *name)
+{
+    assert(PyType_Check(su_type));
+    assert(name != NULL);
+
+    /* 判断与执行分离：先实例判断，再子类判断（两条道路不混淆）。
+       实例道路：su_obj 是 su_type 的实例；子类道路：su_obj 本身是
+       su_type 的子类（classmethod 场景）；两条都不满足时退化为按
+       实例类型查找（与原逻辑保持一致）。 */
+    PyTypeObject *objtype;
+    if (PyType_IsSubtype(Py_TYPE(su_obj), su_type)) {
+        /* 实例道路：su_obj 是 su_type 的实例。 */
+        objtype = Py_TYPE(su_obj);
+    }
+    else if (PyType_Check(su_obj) &&
+             PyType_IsSubtype((PyTypeObject *)su_obj, su_type)) {
+        /* 子类道路：su_obj 本身是 su_type 的子类。 */
+        objtype = (PyTypeObject *)su_obj;
+    }
+    else {
+        /* 退化：非实例也非子类时按实例类型查找（与原逻辑保持一致）。 */
+        objtype = Py_TYPE(su_obj);
+    }
+    PyObject *mro = lookup_tp_mro(objtype);
+    if (mro == NULL) {
+        return NULL;
+    }
+    Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    Py_ssize_t start = 0;
+    for (Py_ssize_t i = 0; i < n; i++) {
+        if ((PyObject *)su_type == PyTuple_GET_ITEM(mro, i)) {
+            start = i + 1;
+            break;
+        }
+    }
+    for (Py_ssize_t i = start; i < n; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(mro, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        /* Each base class's own class-level value lives under key id(base). */
+        PyObject *res = private_type_lookup_in_owner(base, base, name);
+        if (res != NULL) {
+            return res;
+        }
+    }
+
+    /* Fall back to the per-instance private namespace.  super() semantics:
+       this code belongs to `su_type`; look in the parent's per-instance
+       slot, i.e. the first class after `su_type` in the MRO that declares
+       `name` private (the parent that owns this private attribute). */
+    for (Py_ssize_t i = start; i < n; i++) {
+        PyTypeObject *base = _PyType_CAST(PyTuple_GET_ITEM(mro, i));
+        if (!(base->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+            continue;
+        }
+        PyHeapTypeObject *hb = (PyHeapTypeObject *)base;
+        if (hb->ht_privatenames == NULL) {
+            continue;
+        }
+        int is_priv = PySet_Contains(hb->ht_privatenames, name);
+        if (is_priv < 0) {
+            PyErr_Clear();
+            return NULL;
+        }
+        if (!is_priv) {
+            continue;
+        }
+        /* Found the declaring parent class; read its per-instance slot. */
+        PyObject *dict = private_instance_dict(base, su_obj, 0);
+        if (dict == NULL) {
+            return NULL;
+        }
+        PyObject *res = NULL;
+        int r = PyDict_GetItemRef(dict, name, &res);
+        Py_DECREF(dict);
+        if (r < 0) {
+            PyErr_Clear();
+            return NULL;
+        }
+        return res;
+    }
+    return NULL;
+}
+
+int
+_PyType_IsPrivateName(PyTypeObject *type, PyObject *name)
+{
+    if (type == NULL) {
+        return 0;
+    }
+    assert(PyType_Check(type));
+    /* ht_privatenames is a frozenset already merged from all bases, so a
+       single membership test on the type's own set suffices. */
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        PyHeapTypeObject *ht = (PyHeapTypeObject *)type;
+        if (ht->ht_privatenames != NULL) {
+            int r = PySet_Contains(ht->ht_privatenames, name);
+            if (r < 0) {
+                PyErr_Clear();
+                return 0;
+            }
+            return r;
+        }
+    }
+    return 0;
+}
+
 int
 _PyType_CacheInitForSpecialization(PyHeapTypeObject *type, PyObject *init,
                                    unsigned int tp_version)
@@ -6920,6 +7822,9 @@ type_dealloc(PyObject *self)
         _PyDict_RemoveKeysForClass(et);
     }
     Py_XDECREF(et->ht_module);
+    Py_XDECREF(et->ht_privatenames);
+    Py_XDECREF(et->ht_privatedict);
+    Py_XDECREF(et->ht_privatetypedict);
     PyMem_Free(et->_ht_tpname);
 #ifdef Py_GIL_DISABLED
     assert(et->unique_id == _Py_INVALID_UNIQUE_ID);
@@ -7098,6 +8003,16 @@ type_traverse(PyObject *self, visitproc visit, void *arg)
     Py_VISIT(type->tp_bases);
     Py_VISIT(type->tp_base);
     Py_VISIT(((PyHeapTypeObject *)type)->ht_module);
+    /* ht_privatedict is deliberately NOT visited here: its content is fully
+       determined by the live instances (each entry is removed when its
+       instance dies), so an empty dict implies no reachable data.  The
+       per-instance private values are traversed from the instance side
+       (subtype_traverse -> traverse_private_instances), which makes cycles
+       through instance private attributes visible to the collector.  For
+       this to be consistent, ht_privatedict itself is created untracked (see
+       private_instance_dict): otherwise the collector would traverse it too
+       and subtract the inner namespaces a second time. */
+    Py_VISIT(((PyHeapTypeObject *)type)->ht_privatetypedict);
 
     /* There's no need to visit others because they can't be involved
        in cycles:
@@ -7153,6 +8068,8 @@ type_clear(PyObject *self)
         PyDict_Clear(dict);
     }
     Py_CLEAR(((PyHeapTypeObject *)type)->ht_module);
+    Py_CLEAR(((PyHeapTypeObject *)type)->ht_privatedict);
+    Py_CLEAR(((PyHeapTypeObject *)type)->ht_privatetypedict);
 
     Py_CLEAR(type->tp_mro);
 

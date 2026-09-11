@@ -92,6 +92,54 @@ _PyType_GetModuleState(PyTypeObject *type)
 // function
 PyAPI_FUNC(PyObject *) _PyType_GetDict(PyTypeObject *);
 
+// Look up a private attribute (as declared via __private_attributes__) for an
+// instance.  The class-level private values live in each type's
+// ht_privatetypedict (exposed as __private_type_dict__, a mappingproxy keyed by
+// subclass id including the type itself), and the per-instance private
+// attributes live in ht_privatedict (exposed as __private_attributes_dict__).
+// `type` is the class in whose code the lookup happens.  Lookup first checks
+// the per-instance namespace, then walks the *target* type's full MRO (the
+// instance's runtime type, or the class object for classmethod-style access)
+// consulting each owner in `type`'s MRO under key id(target).  Returns a new
+// reference, or NULL (without setting an exception) when not found.
+PyAPI_FUNC(PyObject *) _PyType_PrivateLookUp(PyTypeObject *type,
+                                             PyObject *name, PyObject *obj);
+
+// Store or delete a private attribute (as declared via __private_attributes__)
+// for an instance, from code that lexically belongs to `type` (see
+// _PyCode_FindOwnerType).  If `obj` is a class object (classmethod-style
+// access, e.g. B._x = v inside A's code), the write goes into `type`'s
+// type-level private namespace under key id(obj); otherwise it goes into the
+// per-instance private namespace (ht_privatedict, keyed by id(obj)).  A NULL
+// `value` deletes the attribute.  Mirrors _PyObject_GenericSetAttrWithDict's
+// contract: returns 0 on success, -1 with an exception set on failure.
+PyAPI_FUNC(int) _PyType_PrivateStoreAttr(PyTypeObject *type, PyObject *obj,
+                                         PyObject *name, PyObject *value);
+
+// Look up a private attribute through a super() object.  `su_type` is the
+// class in whose code super() appears (skipped, like normal super lookup),
+// `su_obj` the instance or class the super was called with, and `name` the
+// attribute.  Returns a new reference, or NULL without setting an exception
+// when not found.
+PyAPI_FUNC(PyObject *) _PyType_PrivateSuperLookUp(PyTypeObject *su_type,
+                                                  PyObject *su_obj,
+                                                  PyObject *name);
+
+// Return true if `name` is declared private on `type` or any of its bases
+// (i.e. it appears in some ht_privatenames).  Used by the specializer to
+// avoid specializing LOAD_ATTR/STORE_ATTR away from the private-attribute
+// path when the executing code belongs to a type that declares the name
+// private.  `type` may be NULL (no owner type): returns 0.
+PyAPI_FUNC(int) _PyType_IsPrivateName(PyTypeObject *type, PyObject *name);
+
+// Drop the per-instance private storage slot for `obj` from every class in
+// its MRO that has an ht_privatedict.  Called from subtype_dealloc right
+// before the object's memory is released so that {id(obj): {name: value}}
+// slots do not leak and do not get recycled to a later object allocated at
+// the same address.  Must never raise: dealloc paths swallow exceptions.
+PyAPI_FUNC(void) _PyType_PrivateInstanceDeallocCleanup(PyTypeObject *type,
+                                                       PyObject *obj);
+
 PyAPI_FUNC(PyObject *) _PyType_LookupSubclasses(PyTypeObject *);
 PyAPI_FUNC(PyObject *) _PyType_InitSubclasses(PyTypeObject *);
 
