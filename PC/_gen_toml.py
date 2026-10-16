@@ -60,7 +60,7 @@ FUNCS = [
     ("HAVE_GETPID", "process.h", "unistd.h", None, None),
     ("HAVE_DUP", "io.h", "unistd.h", None, None),
     ("HAVE_PUTENV", None, "stdlib.h", None, None),
-    ("HAVE_UMASK", None, "sys/stat.h", None, None),
+    ("HAVE_UMASK", "io.h", "sys/stat.h", None, None),
     ("HAVE_MKTIME", None, "time.h", None, None),
     ("HAVE_SETVBUF", None, "stdio.h", None, None),
     ("HAVE_FTIME", None, "sys/timeb.h", None, None),

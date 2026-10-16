@@ -446,7 +446,7 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_UMASK"
 comment = "Define to 1 if you have the `umask' function."
-header = ["sys/stat.h"]
+pre = ["#ifdef _WIN32", "#include <io.h>", "#else", "#include <sys/stat.h>", "#endif"]
 code = '''
 int main(void) {
     volatile void *p = (void *)&umask;
