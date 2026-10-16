@@ -151,6 +151,15 @@ call "%dir%find_python.bat" %PYTHON%
 if ERRORLEVEL 1 (echo Cannot locate python.exe on PATH or as PYTHON variable & exit /b 3)
 set PythonForBuild=%PYTHON%
 
+rem Regenerate PC\pyconfig.h from PC\configure.toml before building. This
+rem needs both Python (above) and the VC toolset (configure.bat initializes it
+rem via vcvarsall.bat), so run it here, ahead of MSBuild. Clean/CleanAll do not
+rem need it.
+if "%clean%"=="false" (
+    call "%dir%configure.bat" %platf%
+)
+if "%clean%"=="false" if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+
 if "%kill%"=="true" call :Kill
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 

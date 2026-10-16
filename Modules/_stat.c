@@ -29,7 +29,9 @@
 
 #ifdef MS_WINDOWS
 #include <windows.h>
+#ifndef mode_t
 typedef unsigned short mode_t;
+#endif
 
 /* FILE_ATTRIBUTE_INTEGRITY_STREAM and FILE_ATTRIBUTE_NO_SCRUB_DATA
    are not present in VC2010, so define them manually */
