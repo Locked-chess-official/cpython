@@ -15,7 +15,6 @@ import glob
 import os.path
 import re
 import sys
-import tomllib
 
 EXCLUDE_HEADERS = {
     # Header files not included by Python.h and ignored by this script

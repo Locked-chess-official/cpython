@@ -3,7 +3,7 @@ Quick Start Guide
 
 1.  Install Microsoft Visual Studio 2017 or later with Python workload and
     Python native development component.
-1a. Optionally install Python 3.10 or later.  If not installed,
+1a. Optionally install Python 3.11 or later.  If not installed,
     get_externals.bat (via build.bat) will download and use Python via
     NuGet.
 2.  Run "build.bat" to build Python in 64-bit Release configuration.

@@ -12,8 +12,11 @@ names declared in <process.h>/<io.h>) and POSIX (<unistd.h>/<sys/...>) are both
 detected correctly.
 """
 from pathlib import Path
+import os
 
-OUT = Path("PC/configure.toml")
+SRC_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+OUT = SRC_DIR / "PC" / "pyconfig.h"
 
 
 def lit(s):
