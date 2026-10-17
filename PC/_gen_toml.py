@@ -186,16 +186,16 @@ LITERALS = [
     ("WITH_MIMALLOC", "true", "", "Define to 1 to compile in mimalloc as the pymalloc backend."),
     ("WITH_THREAD", "false", "", "Define to 1 if you want native threads. (Windows uses NT_THREADS in the static head)"),
     ("WITH_READLINE", "false", "", "Define if you want to build the readline module. (external dep)"),
-    ("HAVE_CLOCK", "false", "", "Define to 1 if you have the `clock' function. (see static head)"),
+    ("HAVE_CLOCK", "false", "", "Define to 1 if you have the 'clock' function. (see static head)"),
     # external library dependencies (not detected by a bare probe)
-    ("HAVE_LIBSOCKET", "true", "", "Define if you have the `socket' library. (Windows: winsock)"),
-    ("HAVE_LIBDL", "false", "", "Define if you have the `dl' library."),
-    ("HAVE_LIBMPC", "false", "", "Define if you have the `mpc' library."),
-    ("HAVE_LIBSEQ", "false", "", "Define if you have the `seq' library."),
-    ("HAVE_LIBSUN", "false", "", "Define if you have the `sun' library."),
-    ("HAVE_LIBTERMCAP", "false", "", "Define if you have the `termcap' library."),
-    ("HAVE_LIBTERMLIB", "false", "", "Define if you have the `termlib' library."),
-    ("HAVE_LIBTHREAD", "false", "", "Define if you have the `thread' library."),
+    ("HAVE_LIBSOCKET", "true", "", "Define if you have the 'socket' library. (Windows: winsock)"),
+    ("HAVE_LIBDL", "false", "", "Define if you have the 'dl' library."),
+    ("HAVE_LIBMPC", "false", "", "Define if you have the 'mpc' library."),
+    ("HAVE_LIBSEQ", "false", "", "Define if you have the 'seq' library."),
+    ("HAVE_LIBSUN", "false", "", "Define if you have the 'sun' library."),
+    ("HAVE_LIBTERMCAP", "false", "", "Define if you have the 'termcap' library."),
+    ("HAVE_LIBTERMLIB", "false", "", "Define if you have the 'termlib' library."),
+    ("HAVE_LIBTHREAD", "false", "", "Define if you have the 'thread' library."),
     # OpenSSL / zlib features (present because PC/pyconfig.h hardcodes them)
     ("HAVE_ZLIB_COPY", "true", "", "Define if the zlib library has inflateCopy."),
     ("HAVE_X509_VERIFY_PARAM_SET1_HOST", "true", "", "Define if OpenSSL has X509_VERIFY_PARAM_set1_host."),
@@ -247,7 +247,7 @@ def func_entry(macro, func, win_headers, posix_headers, win_libs, unix_libs, ext
     out = (
         f"[[analyse.bool]]\n"
         f'macro = "{macro}"\n'
-        f'comment = "Define to 1 if you have the `{func}\' function."\n'
+        f'comment = "Define to 1 if you have the \'{func}\' function."\n'
     )
     out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
     code = (
@@ -274,7 +274,7 @@ def size_entry(macro, typ, win_headers, posix_headers, win_libs, unix_libs, extr
     out = (
         f"[[analyse.number]]\n"
         f'macro = "{macro}"\n'
-        f'comment = "The size of `{typ}\', as computed by sizeof."\n'
+        f'comment = "The size of \'{typ}\', as computed by sizeof."\n'
     )
     out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
     out += f"code = {lit(code)}\n\n"
@@ -283,7 +283,7 @@ def size_entry(macro, typ, win_headers, posix_headers, win_libs, unix_libs, extr
 
 def type_fallback_entry(macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd, val):
     hdr = posix_headers[0]
-    comment = f"Define to `{val}' if <{hdr}> doesn't define."
+    comment = f"Define to '{val}' if <{hdr}> doesn't define."
     code = (
         "int main(void) {\n"
         f"    (void)sizeof({macro});\n"
@@ -367,7 +367,7 @@ def main():
     parts.append(
         "[[analyse.number]]\n"
         'macro = "SIZEOF_PID_T"\n'
-        'comment = "The size of `pid_t\', as computed by sizeof."\n'
+        'comment = "The size of \'pid_t\', as computed by sizeof."\n'
         'header = ["stdio.h"]\n'
         f"code = {lit(code_pid)}\n\n"
     )
@@ -381,7 +381,7 @@ def main():
     parts.append(
         "[[analyse.bool]]\n"
         'macro = "GETGROUPS_T"\n'
-        'comment = "Define to the type of elements in the array set by `getgroups\'. Usually `int\' or `gid_t\'."\n'
+        'comment = "Define to the type of elements in the array set by \'getgroups\'. Usually \'int\' or \'gid_t\'."\n'
         'header = ["unistd.h", "sys/types.h"]\n'
         "code = '''\n"
         "int main(void) {\n"
@@ -397,7 +397,7 @@ def main():
     parts.append(
         "[[analyse.bool]]\n"
         'macro = "RETSIGTYPE"\n'
-        'comment = "Define as the return type of signal handlers (`int\' or `void\')."\n'
+        'comment = "Define as the return type of signal handlers (\'int\' or \'void\')."\n'
         'header = ["signal.h"]\n'
         "code = '''\n"
         "static void handler(int sig) { (void)sig; }\n"
@@ -423,7 +423,7 @@ def main():
         "[[analyse.literal]]\n"
         'macro = "HAVE_DECL_TZNAME"\n'
         'value = true\n'
-        'comment = "Define to 1 if you have the declaration of `tzname\'. (Windows: CRT provides _tzname)"\n\n'
+        'comment = "Define to 1 if you have the declaration of \'tzname\'. (Windows: CRT provides _tzname)"\n\n'
     )
     parts.append(
         "[[analyse.literal]]\n"
@@ -434,7 +434,7 @@ def main():
     parts.append(
         "[[analyse.bool]]\n"
         'macro = "HAVE_STRUCT_TM_TM_ZONE"\n'
-        'comment = "Define to 1 if your `struct tm\' has a `tm_zone\' member."\n'
+        'comment = "Define to 1 if your \'struct tm\' has a \'tm_zone\' member."\n'
         'header = ["time.h"]\n'
         "code = '''\n"
         "#include <time.h>\n"
@@ -449,7 +449,7 @@ def main():
         "[[analyse.literal]]\n"
         'macro = "HAVE_ALTZONE"\n'
         'value = false\n'
-        'comment = "Define to 1 if the `altzone\' variable is declared. (not in MSVC <time.h>)"\n\n'
+        'comment = "Define to 1 if the \'altzone\' variable is declared. (not in MSVC <time.h>)"\n\n'
     )
 
     # NOTE: HAVE_TM_ZONE is the deprecated autoheader alias for
