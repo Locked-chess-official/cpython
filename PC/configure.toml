@@ -122,7 +122,8 @@ header = ["wchar.h"]
 [[analyse.bool]]
 macro = "HAVE_SOCKET"
 comment = "Define to 1 if you have the `socket' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -137,7 +138,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_ACCEPT"
 comment = "Define to 1 if you have the `accept' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -152,7 +154,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_BIND"
 comment = "Define to 1 if you have the `bind' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -167,7 +170,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_CONNECT"
 comment = "Define to 1 if you have the `connect' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -182,7 +186,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETSOCKNAME"
 comment = "Define to 1 if you have the `getsockname' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -197,7 +202,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_LISTEN"
 comment = "Define to 1 if you have the `listen' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -212,7 +218,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_RECVFROM"
 comment = "Define to 1 if you have the `recvfrom' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -227,7 +234,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_SENDTO"
 comment = "Define to 1 if you have the `sendto' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -242,7 +250,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_SETSOCKOPT"
 comment = "Define to 1 if you have the `setsockopt' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -257,7 +266,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_SHUTDOWN"
 comment = "Define to 1 if you have the `shutdown' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -272,7 +282,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETPEERNAME"
 comment = "Define to 1 if you have the `getpeername' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <sys/socket.h>", "#endif"]
+header = ["sys/socket.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -287,7 +298,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETHOSTNAME"
 comment = "Define to 1 if you have the `gethostname' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <unistd.h>", "#endif"]
+header = ["unistd.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -302,7 +314,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETHOSTBYADDR"
 comment = "Define to 1 if you have the `gethostbyaddr' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <netdb.h>", "#endif"]
+header = ["netdb.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -317,7 +330,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETHOSTBYNAME"
 comment = "Define to 1 if you have the `gethostbyname' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <netdb.h>", "#endif"]
+header = ["netdb.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -332,7 +346,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETPROTOBYNAME"
 comment = "Define to 1 if you have the `getprotobyname' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <netdb.h>", "#endif"]
+header = ["netdb.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -347,7 +362,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETSERVBYNAME"
 comment = "Define to 1 if you have the `getservbyname' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <netdb.h>", "#endif"]
+header = ["netdb.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -362,7 +378,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETSERVBYPORT"
 comment = "Define to 1 if you have the `getservbyport' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <netdb.h>", "#endif"]
+header = ["netdb.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -377,7 +394,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_INET_PTON"
 comment = "Define to 1 if you have the `inet_pton' function."
-pre = ["#ifdef _WIN32", "#include <ws2tcpip.h>", "#else", "#include <arpa/inet.h>", "#endif"]
+header = ["arpa/inet.h"]
+win_header = ["ws2tcpip.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -392,7 +410,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_INET_NTOA"
 comment = "Define to 1 if you have the `inet_ntoa' function."
-pre = ["#ifdef _WIN32", "#include <winsock2.h>", "#else", "#include <arpa/inet.h>", "#endif"]
+header = ["arpa/inet.h"]
+win_header = ["winsock2.h"]
 libs = ["ws2_32"]
 unix_libs = []
 code = '''
@@ -407,7 +426,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_GETPID"
 comment = "Define to 1 if you have the `getpid' function."
-pre = ["#ifdef _WIN32", "#include <process.h>", "#else", "#include <unistd.h>", "#endif"]
+header = ["unistd.h"]
+win_header = ["process.h"]
 code = '''
 int main(void) {
     volatile void *p = (void *)&getpid;
@@ -420,7 +440,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_DUP"
 comment = "Define to 1 if you have the `dup' function."
-pre = ["#ifdef _WIN32", "#include <io.h>", "#else", "#include <unistd.h>", "#endif"]
+header = ["unistd.h"]
+win_header = ["io.h"]
 code = '''
 int main(void) {
     volatile void *p = (void *)&dup;
@@ -446,7 +467,8 @@ int main(void) {
 [[analyse.bool]]
 macro = "HAVE_UMASK"
 comment = "Define to 1 if you have the `umask' function."
-pre = ["#ifdef _WIN32", "#include <io.h>", "#else", "#include <sys/stat.h>", "#endif"]
+header = ["sys/stat.h"]
+win_header = ["io.h"]
 code = '''
 int main(void) {
     volatile void *p = (void *)&umask;
@@ -774,10 +796,9 @@ int main(void) {
 [[analyse.number]]
 macro = "SIZEOF_WCHAR_T"
 comment = "The size of `wchar_t', as computed by sizeof."
-header = ["stdio.h", "stddef.h"]
+header = ["stddef.h"]
 code = '''
 #include <stdio.h>
-#include <stddef.h>
 int main(void) {
     printf("%d\n", (int)sizeof(wchar_t));
     return 0;
@@ -788,10 +809,9 @@ int main(void) {
 [[analyse.number]]
 macro = "SIZEOF__BOOL"
 comment = "The size of `_Bool', as computed by sizeof."
-header = ["stdio.h", "stddef.h"]
+header = ["stddef.h"]
 code = '''
 #include <stdio.h>
-#include <stddef.h>
 int main(void) {
     printf("%d\n", (int)sizeof(_Bool));
     return 0;
@@ -823,7 +843,6 @@ macro = "pid_t"
 comment = "Define to `int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
-#include <sys/types.h>
 int main(void) {
     (void)sizeof(pid_t);
     return 0;
@@ -838,7 +857,6 @@ macro = "mode_t"
 comment = "Define to `int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
-#include <sys/types.h>
 int main(void) {
     (void)sizeof(mode_t);
     return 0;
@@ -853,7 +871,6 @@ macro = "off_t"
 comment = "Define to `long' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
-#include <sys/types.h>
 int main(void) {
     (void)sizeof(off_t);
     return 0;
@@ -868,7 +885,6 @@ macro = "gid_t"
 comment = "Define to `int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
-#include <sys/types.h>
 int main(void) {
     (void)sizeof(gid_t);
     return 0;
@@ -883,7 +899,6 @@ macro = "uid_t"
 comment = "Define to `int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
-#include <sys/types.h>
 int main(void) {
     (void)sizeof(uid_t);
     return 0;
@@ -898,7 +913,6 @@ macro = "size_t"
 comment = "Define to `unsigned int' if <stddef.h> doesn't define."
 header = ["stddef.h"]
 code = '''
-#include <stddef.h>
 int main(void) {
     (void)sizeof(size_t);
     return 0;
@@ -996,7 +1010,8 @@ int add(int a, int b) { return a + b; }
 [[analyse.bool]]
 macro = "HAVE_DYNAMIC_LOADING"
 comment = "Define to 1 if you want support for dynamic loading of modules."
-pre = ["#ifdef _WIN32", "#include <windows.h>", "#else", "#include <dlfcn.h>", "#endif"]
+header = ["dlfcn.h"]
+win_header = ["windows.h"]
 code = '''
 #ifdef _WIN32
 int main(void) {

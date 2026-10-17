@@ -50,10 +50,12 @@ boilerplate kept for shape parity (`const`, `_POSIX_*`, `DIRENT`, etc.).
 
 ## Fields
 
-`macro`, `comment`, `header` (list), `pre` (raw lines before includes),
-`code` (probe main-body, TOML literal string), `libs` (MSVC `.lib`),
-`unix_libs` (POSIX `-l`), `guard` (`#if` wrapper), `run` (bool, execute probe),
-`invert` (bool, define on probe failure), `value` (bool/literal token).
+`macro`, `comment`, `header` (list, POSIX/non-Windows), `win_header` (list,
+Windows-specific, wrapped in `#ifdef _WIN32`), `code` (probe main-body, TOML
+literal string), `libs` (MSVC `.lib`), `unix_libs` (POSIX `-l`),
+`extra_cmd` (list, extra compile flags/commands), `guard` (`#if` wrapper),
+`run` (bool, execute probe), `invert` (bool, define on probe failure),
+`value` (bool/literal token).
 
 Function probes use **per-platform headers** so MSVC and POSIX both resolve:
 e.g. `HAVE_SOCKET` probes `<winsock2.h>` on `_WIN32` and `<sys/socket.h>`

@@ -155,6 +155,7 @@ Tools/unicode/data/
 /pybuilddir.txt
 /pyconfig.h
 /PC/pyconfig.h
+/PC/configure.toml.hash
 /python-config
 /python-config.py
 /python.bat

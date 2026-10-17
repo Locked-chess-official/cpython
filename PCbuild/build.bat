@@ -43,6 +43,10 @@ echo.  --pystats      Enable PyStats collection.
 echo.  --tail-call-interp  Enable tail-calling interpreter (requires LLVM 19 or higher).
 echo.  --enable-stackref-debug  Enable stackref debugging mode.
 echo.  --pymalloc-hugepages  Enable huge page support for pymalloc arenas.
+echo.  --force-run-configure  Always run configure.bat to regenerate
+echo.                         PC\pyconfig.h from PC\configure.toml.
+echo.  --force-no-configure   Skip configure.bat and copy PC\pyconfig.h.copy
+echo.                         to PC\pyconfig.h instead.
 echo.
 echo.Available flags to avoid building certain modules.
 echo.These flags have no effect if '-e' is not given:
@@ -103,6 +107,8 @@ if "%~1"=="--pystats" (set PyStats=1) & shift & goto CheckOpts
 if "%~1"=="--tail-call-interp" (set UseTailCallInterp=true) & shift & goto CheckOpts
 if "%~1"=="--enable-stackref-debug" (set StackRefDebug=true) & shift & goto CheckOpts
 if "%~1"=="--pymalloc-hugepages" (set UsePymallocHugepages=true) & shift & goto CheckOpts
+if "%~1"=="--force-run-configure" (set ForceRunConfigure=true) & shift & goto CheckOpts
+if "%~1"=="--force-no-configure" (set ForceNoConfigure=true) & shift & goto CheckOpts
 rem These use the actual property names used by MSBuild.  We could just let
 rem them in through the environment, but we specify them on the command line
 rem anyway for visibility so set defaults after this
@@ -154,10 +160,9 @@ set PythonForBuild=%PYTHON%
 rem Regenerate PC\pyconfig.h from PC\configure.toml before building. This
 rem needs both Python (above) and the VC toolset (configure.bat initializes it
 rem via vcvarsall.bat), so run it here, ahead of MSBuild. Clean/CleanAll do not
-rem need it.
-if "%clean%"=="false" (
-    call "%dir%configure.bat" %platf%
-)
+rem need it. By default it runs only on the first build, or when PC\configure.toml
+rem has changed; --force-run-configure / --force-no-configure override this.
+if "%clean%"=="false" call :Configure
 if "%clean%"=="false" if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 if "%kill%"=="true" call :Kill
@@ -192,6 +197,82 @@ call :Kill
 if %pgo_errorlevel% NEQ 0 exit /B %pgo_errorlevel%
 set target=Build
 goto :Build
+
+:Configure
+rem Decide whether and how to (re)generate PC\pyconfig.h.
+rem
+rem   --force-run-configure   always run configure.bat
+rem   --force-no-configure    copy PC\pyconfig.h.copy to PC\pyconfig.h and
+rem                           skip configure.bat entirely
+rem   (default)               run configure.bat on the first build, and again
+rem                           on later builds only if PC\configure.toml changed
+rem                           since the last successful configure
+set "_Py_Root=%dir%.."
+set "_Py_Toml=%_Py_Root%\PC\configure.toml"
+set "_Py_PyCfg=%_Py_Root%\PC\pyconfig.h"
+set "_Py_TomlHash=%_Py_Root%\PC\configure.toml.hash"
+set "_Py_PyCfgCopy=%_Py_Root%\PC\pyconfig.h.copy"
+
+if "%ForceRunConfigure%"=="true" goto :ConfigureRun
+if "%ForceNoConfigure%"=="true" goto :ConfigureCopy
+
+rem Default path: skip when the generated header is already up to date.
+if not exist "%_Py_PyCfg%" goto :ConfigureRun
+if not exist "%_Py_TomlHash%" goto :ConfigureRun
+
+call :ComputeHash "%_Py_Toml%" _Py_CurrentHash
+if errorlevel 1 goto :ConfigureRun
+
+set /P _Py_SavedHash= < "%_Py_TomlHash%"
+if /I "%_Py_CurrentHash%" NEQ "%_Py_SavedHash%" goto :ConfigureRun
+
+rem Header exists and configure.toml is unchanged; nothing to do.
+exit /b 0
+
+:ConfigureCopy
+rem Force the static header: copy PC\pyconfig.h.copy over PC\pyconfig.h, but
+rem only when they differ so an unchanged file keeps its timestamp. Drop the
+rem configure.toml hash so the next default run re-runs configure.
+if not exist "%_Py_PyCfgCopy%" (
+    echo ERROR: %_Py_PyCfgCopy% not found 1>&2
+    exit /b 1
+)
+set "_Py_CopyNeeded=1"
+if exist "%_Py_PyCfg%" (
+    fc /b "%_Py_PyCfg%" "%_Py_PyCfgCopy%" >nul 2>&1
+    if not errorlevel 1 set "_Py_CopyNeeded="
+)
+if defined _Py_CopyNeeded (
+    copy /Y "%_Py_PyCfgCopy%" "%_Py_PyCfg%" >nul
+    if errorlevel 1 exit /b 1
+    echo Copied %_Py_PyCfgCopy% to %_Py_PyCfg% --force-no-configure
+) else (
+    echo %_Py_PyCfg% already matches %_Py_PyCfgCopy% --force-no-configure
+)
+if exist "%_Py_TomlHash%" (
+    del "%_Py_TomlHash%" >nul
+    echo Removed %_Py_TomlHash% --force-no-configure
+)
+exit /b 0
+
+:ConfigureRun
+rem Pass the Python interpreter detected above directly to configure.bat.
+set "_Py_CfgPython=%PYTHON%"
+set "_Py_CfgPython=%_Py_CfgPython:"=%"
+call "%dir%configure.bat" %platf% --python "%_Py_CfgPython%"
+if errorlevel 1 exit /b 1
+
+call :ComputeHash "%_Py_Toml%" _Py_CurrentHash
+if errorlevel 1 exit /b 0
+> "%_Py_TomlHash%" echo(%_Py_CurrentHash%
+exit /b 0
+
+:ComputeHash
+rem Compute the SHA256 hash of %1 (via certutil) and store it in %2.
+set "%~2="
+for /F "skip=1 delims=" %%i in ('certutil -hashfile "%~1" SHA256 2^>nul') do if not defined %~2 set "%~2=%%i"
+if not defined %~2 exit /b 1
+exit /b 0
 
 :Kill
 echo on

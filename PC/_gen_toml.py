@@ -22,93 +22,228 @@ def lit(s):
     return "'''\n" + s + "\n'''"
 
 
-def header_entry(macro, hdr):
-    return (
-        f"[[analyse.bool]]\n"
-        f'macro = "{macro}"\n'
-        f'comment = "Define to 1 if you have the <{hdr}> header file."\n'
-        f'header = ["{hdr}"]\n\n'
-    )
+def _toml_list(items):
+    """Render a Python sequence of strings as a TOML array literal."""
+    return "[" + ", ".join(f'"{x}"' for x in items) + "]"
 
 
-# (macro, win_header_or_None, posix_header, win_lib, unix_lib)
-# win_header None => posix_header is used unconditionally on all platforms.
-# win_lib None   => no extra link library on Windows.
+# =============================================================================
+# Macro inventory — add new macros here.
+#
+# Each section below is a list of tuples with a fixed, documented shape. The
+# generator functions (`*_entry`, defined further down) turn each tuple into a
+# single [[analyse.*]] entry in configure.toml. If you add a macro, pick the
+# matching section and follow that section's tuple shape; the one-off probes
+# that don't fit any recurring shape are written directly in main().
+#
+# Headers and libraries are ALWAYS lists (even a single item), so a new macro
+# is added the same way regardless of how many headers/libraries it needs.
+# Use None for "not applicable on this platform / no such field".
+# =============================================================================
+
+# Header existence: (macro, [headers])
+#   A plain existence check — "can the compiler find this header?". Unlike
+#   FUNCS/SIZES/TYPE_FALLBACKS there is deliberately no win/posix split: a
+#   header either exists on the active toolchain or it doesn't.
+HEADERS = [
+    ("HAVE_CONIO_H", ["conio.h"]),
+    ("HAVE_DIRECT_H", ["direct.h"]),
+    ("HAVE_DLFCN_H", ["dlfcn.h"]),
+    ("HAVE_ERRNO_H", ["errno.h"]),
+    ("HAVE_FCNTL_H", ["fcntl.h"]),
+    ("HAVE_PROCESS_H", ["process.h"]),
+    ("HAVE_SIGNAL_H", ["signal.h"]),
+    ("HAVE_STDDEF_H", ["stddef.h"]),
+    ("HAVE_SYS_AUDIOIO_H", ["sys/audioio.h"]),
+    ("HAVE_SYS_PARAM_H", ["sys/param.h"]),
+    ("HAVE_SYS_SELECT_H", ["sys/select.h"]),
+    ("HAVE_SYS_STAT_H", ["sys/stat.h"]),
+    ("HAVE_SYS_TIME_H", ["sys/time.h"]),
+    ("HAVE_SYS_TIMES_H", ["sys/times.h"]),
+    ("HAVE_SYS_TYPES_H", ["sys/types.h"]),
+    ("HAVE_SYS_UN_H", ["sys/un.h"]),
+    ("HAVE_SYS_UTSNAME_H", ["sys/utsname.h"]),
+    ("HAVE_UNISTD_H", ["unistd.h"]),
+    ("HAVE_UTIME_H", ["utime.h"]),
+    ("HAVE_WCHAR_H", ["wchar.h"]),
+]
+
+# Function existence:
+#   (macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
+#     macro          "HAVE_..." macro name
+#     win_headers    headers included under `#ifdef _WIN32` (None if none)
+#     posix_headers  headers included on other platforms; always emitted as
+#                    `header` (required)
+#     win_libs       MSVC link libraries -> `libs` (None if none)
+#     unix_libs      POSIX `-l` libraries -> `unix_libs` (None if none)
+#     extra_cmd      extra compiler flags/commands -> `extra_cmd` (None if none)
+#   win_headers None => posix_headers are included unconditionally.
 FUNCS = [
     # --- socket family ---
-    ("HAVE_SOCKET", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_ACCEPT", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_BIND", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_CONNECT", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_GETSOCKNAME", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_LISTEN", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_RECVFROM", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_SENDTO", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_SETSOCKOPT", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_SHUTDOWN", "winsock2.h", "sys/socket.h", "ws2_32", None),
-    ("HAVE_GETPEERNAME", "winsock2.h", "sys/socket.h", "ws2_32", None),
+    ("HAVE_SOCKET", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_ACCEPT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_BIND", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_CONNECT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSOCKNAME", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_LISTEN", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_RECVFROM", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SENDTO", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SETSOCKOPT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SHUTDOWN", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_GETPEERNAME", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
     # --- network info ---
-    ("HAVE_GETHOSTNAME", "winsock2.h", "unistd.h", "ws2_32", None),
-    ("HAVE_GETHOSTBYADDR", "winsock2.h", "netdb.h", "ws2_32", None),
-    ("HAVE_GETHOSTBYNAME", "winsock2.h", "netdb.h", "ws2_32", None),
-    ("HAVE_GETPROTOBYNAME", "winsock2.h", "netdb.h", "ws2_32", None),
-    ("HAVE_GETSERVBYNAME", "winsock2.h", "netdb.h", "ws2_32", None),
-    ("HAVE_GETSERVBYPORT", "winsock2.h", "netdb.h", "ws2_32", None),
-    ("HAVE_INET_PTON", "ws2tcpip.h", "arpa/inet.h", "ws2_32", None),
-    ("HAVE_INET_NTOA", "winsock2.h", "arpa/inet.h", "ws2_32", None),
+    ("HAVE_GETHOSTNAME", ["winsock2.h"], ["unistd.h"], ["ws2_32"], None, None),
+    ("HAVE_GETHOSTBYADDR", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETHOSTBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETPROTOBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSERVBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSERVBYPORT", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_INET_PTON", ["ws2tcpip.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
+    ("HAVE_INET_NTOA", ["winsock2.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
     # --- process / file (CRT: underscore names on MSVC) ---
-    ("HAVE_GETPID", "process.h", "unistd.h", None, None),
-    ("HAVE_DUP", "io.h", "unistd.h", None, None),
-    ("HAVE_PUTENV", None, "stdlib.h", None, None),
-    ("HAVE_UMASK", "io.h", "sys/stat.h", None, None),
-    ("HAVE_MKTIME", None, "time.h", None, None),
-    ("HAVE_SETVBUF", None, "stdio.h", None, None),
-    ("HAVE_FTIME", None, "sys/timeb.h", None, None),
+    ("HAVE_GETPID", ["process.h"], ["unistd.h"], None, None, None),
+    ("HAVE_DUP", ["io.h"], ["unistd.h"], None, None, None),
+    ("HAVE_PUTENV", None, ["stdlib.h"], None, None, None),
+    ("HAVE_UMASK", ["io.h"], ["sys/stat.h"], None, None, None),
+    ("HAVE_MKTIME", None, ["time.h"], None, None, None),
+    ("HAVE_SETVBUF", None, ["stdio.h"], None, None, None),
+    ("HAVE_FTIME", None, ["sys/timeb.h"], None, None, None),
     # --- unix-only (probe fails on MSVC -> /* #undef */) ---
-    ("HAVE_GETPGRP", None, "unistd.h", None, None),
-    ("HAVE_GETTIMEOFDAY", None, "sys/time.h", None, None),
-    ("HAVE_GETWD", None, "unistd.h", None, None),
-    ("HAVE_LSTAT", None, "sys/stat.h", None, None),
-    ("HAVE_NICE", None, "unistd.h", None, None),
-    ("HAVE_READLINK", None, "unistd.h", None, None),
-    ("HAVE_SETPGID", None, "unistd.h", None, None),
-    ("HAVE_SETPGRP", None, "unistd.h", None, None),
-    ("HAVE_SETSID", None, "unistd.h", None, None),
-    ("HAVE_SIGINTERRUPT", None, "signal.h", None, None),
-    ("HAVE_SYMLINK", None, "unistd.h", None, None),
-    ("HAVE_TCGETPGRP", None, "unistd.h", None, None),
-    ("HAVE_TCSETPGRP", None, "unistd.h", None, None),
-    ("HAVE_TIMES", None, "sys/times.h", None, None),
-    ("HAVE_UNAME", None, "sys/utsname.h", None, None),
-    ("HAVE_WAITPID", None, "sys/wait.h", None, None),
+    ("HAVE_GETPGRP", None, ["unistd.h"], None, None, None),
+    ("HAVE_GETTIMEOFDAY", None, ["sys/time.h"], None, None, None),
+    ("HAVE_GETWD", None, ["unistd.h"], None, None, None),
+    ("HAVE_LSTAT", None, ["sys/stat.h"], None, None, None),
+    ("HAVE_NICE", None, ["unistd.h"], None, None, None),
+    ("HAVE_READLINK", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETPGID", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETPGRP", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETSID", None, ["unistd.h"], None, None, None),
+    ("HAVE_SIGINTERRUPT", None, ["signal.h"], None, None, None),
+    ("HAVE_SYMLINK", None, ["unistd.h"], None, None, None),
+    ("HAVE_TCGETPGRP", None, ["unistd.h"], None, None, None),
+    ("HAVE_TCSETPGRP", None, ["unistd.h"], None, None, None),
+    ("HAVE_TIMES", None, ["sys/times.h"], None, None, None),
+    ("HAVE_UNAME", None, ["sys/utsname.h"], None, None, None),
+    ("HAVE_WAITPID", None, ["sys/wait.h"], None, None, None),
     # --- wide char ---
-    ("HAVE_WCSCOLL", None, "wchar.h", None, None),
-    ("HAVE_WCSXFRM", None, "wchar.h", None, None),
-    ("HAVE_WCSFTIME", None, "wchar.h", None, None),
+    ("HAVE_WCSCOLL", None, ["wchar.h"], None, None, None),
+    ("HAVE_WCSXFRM", None, ["wchar.h"], None, None, None),
+    ("HAVE_WCSFTIME", None, ["wchar.h"], None, None, None),
     # --- math ---
-    ("HAVE_ERF", None, "math.h", None, "m"),
-    ("HAVE_ERFC", None, "math.h", None, "m"),
+    ("HAVE_ERF", None, ["math.h"], None, ["m"], None),
+    ("HAVE_ERFC", None, ["math.h"], None, ["m"], None),
+]
+
+# Sizeof:
+#   (macro, type, win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
+#   `type` is the C type whose sizeof() is printed. The probe's own <stdio.h>
+#   (for printf) is added by size_entry(), so it is not listed here.
+SIZES = [
+    ("SIZEOF_WCHAR_T", "wchar_t", None, ["stddef.h"], None, None, None),
+    ("SIZEOF__BOOL", "_Bool", None, ["stddef.h"], None, None, None),
+]
+
+# Type fallbacks (invert: define only when the type is absent):
+#   (macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd, fallback_value)
+#   The comment is auto-generated from fallback_value + posix_headers[0].
+TYPE_FALLBACKS = [
+    ("pid_t", None, ["sys/types.h"], None, None, None, "int"),
+    ("mode_t", None, ["sys/types.h"], None, None, None, "int"),
+    ("off_t", None, ["sys/types.h"], None, None, None, "long"),
+    ("gid_t", None, ["sys/types.h"], None, None, None, "int"),
+    ("uid_t", None, ["sys/types.h"], None, None, None, "int"),
+    ("size_t", None, ["stddef.h"], None, None, None, "unsigned int"),
+]
+
+# Literals (not probeable): (macro, value, guard, comment)
+#   value is emitted verbatim into TOML (`false`, `true`, `""`, `32766`, ...).
+LITERALS = [
+    # dead autoconf boilerplate not referenced by CPython (kept for shape parity)
+    ("const", "false", "", "Define to empty if the keyword does not work. Always available."),
+    ("_POSIX_1_SOURCE", "false", "", "Define if you need POSIX.1 features. Never on Windows."),
+    ("_POSIX_SOURCE", "false", "", "Define if you need POSIX features. Never on Windows."),
+    ("_ALL_SOURCE", "false", "!defined(_ALL_SOURCE)", "Define on AIX 3. Never on Windows."),
+    ("DIRENT", "false", "", "Define if you have dirent.h. (legacy autoconf macro)"),
+    ("NDIR", "false", "", "Define if you have ndir.h. (legacy autoconf macro)"),
+    ("SYSDIR", "false", "", "Define if you have sys/dir.h. (legacy autoconf macro)"),
+    ("SYSNDIR", "false", "", "Define if you have sys/ndir.h. (legacy autoconf macro)"),
+    ("TIME_WITH_SYS_TIME", "false", "", "Define if both <time.h> and <sys/time.h> may be included. (unused)"),
+    ("TM_IN_SYS_TIME", "false", "", "Define if struct tm is in <sys/time.h>. (unused)"),
+    ("SYS_SELECT_WITH_SYS_TIME", "false", "", "Define if <sys/select.h> needs <sys/time.h>. (unused)"),
+    ("VOID_CLOSEDIR", "false", "", "Define if closedir returns void. (unused)"),
+    ("GETPGRP_HAVE_ARGS", "false", "", "Define if getpgrp takes an argument. (unused; code uses GETPGRP_HAVE_ARG)"),
+    # build-policy switches
+    ("WITH_DECIMAL_CONTEXTVAR", "true", "", "Define to 1 to build the _decimal module with contextvar support."),
+    ("WITH_DOC_STRINGS", "true", "", "Define to 1 to enable documentation strings."),
+    ("WITH_PYMALLOC", "true", "", "Define to 1 to compile in pymalloc, the Python memory allocator."),
+    ("WITH_MIMALLOC", "true", "", "Define to 1 to compile in mimalloc as the pymalloc backend."),
+    ("WITH_THREAD", "false", "", "Define to 1 if you want native threads. (Windows uses NT_THREADS in the static head)"),
+    ("WITH_READLINE", "false", "", "Define if you want to build the readline module. (external dep)"),
+    ("HAVE_CLOCK", "false", "", "Define to 1 if you have the `clock' function. (see static head)"),
+    # external library dependencies (not detected by a bare probe)
+    ("HAVE_LIBSOCKET", "true", "", "Define if you have the `socket' library. (Windows: winsock)"),
+    ("HAVE_LIBDL", "false", "", "Define if you have the `dl' library."),
+    ("HAVE_LIBMPC", "false", "", "Define if you have the `mpc' library."),
+    ("HAVE_LIBSEQ", "false", "", "Define if you have the `seq' library."),
+    ("HAVE_LIBSUN", "false", "", "Define if you have the `sun' library."),
+    ("HAVE_LIBTERMCAP", "false", "", "Define if you have the `termcap' library."),
+    ("HAVE_LIBTERMLIB", "false", "", "Define if you have the `termlib' library."),
+    ("HAVE_LIBTHREAD", "false", "", "Define if you have the `thread' library."),
+    # OpenSSL / zlib features (present because PC/pyconfig.h hardcodes them)
+    ("HAVE_ZLIB_COPY", "true", "", "Define if the zlib library has inflateCopy."),
+    ("HAVE_X509_VERIFY_PARAM_SET1_HOST", "true", "", "Define if OpenSSL has X509_VERIFY_PARAM_set1_host."),
+    # platform constants
+    ("_PYTHONFRAMEWORK", "'\"\"'", "", "Mac framework name; empty on Windows."),
+    ("_PYTHREAD_NAME_MAXLEN", "32766", "", "Max length of a thread name on Windows."),
+    ("Py_SOCKET_FD_CAN_BE_GE_FD_SETSIZE", "\"\"", "", "Define if socket fds can exceed FD_SETSIZE. (Windows: bare define)"),
 ]
 
 
-def func_entry(macro, win_header, posix_header, win_lib, unix_lib):
+# =============================================================================
+# Generator helpers — turn one inventory tuple into one [[analyse.*]] entry.
+# =============================================================================
+
+def _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd):
+    """Shared field block for [[analyse.bool]] probe entries.
+
+    `header` always carries the non-Windows headers; `win_header` is only
+    emitted when there are Windows-specific headers. Libraries are lists and
+    `None` means "none on this platform".
+    """
+    out = f'header = {_toml_list(posix_headers)}\n'
+    if win_headers is not None:
+        out += f'win_header = {_toml_list(win_headers)}\n'
+    if win_libs is not None:
+        out += f'libs = {_toml_list(win_libs)}\n'
+    if unix_libs is not None:
+        out += f'unix_libs = {_toml_list(unix_libs)}\n'
+    elif win_libs is not None:
+        # Windows-only link library: keep the POSIX side explicitly empty so
+        # configure.py links no extra library there (instead of reusing `libs`).
+        out += 'unix_libs = []\n'
+    if extra_cmd is not None:
+        out += f'extra_cmd = {_toml_list(extra_cmd)}\n'
+    return out
+
+
+def header_entry(macro, hdrs):
+    hdr_note = ", ".join(f"<{h}>" for h in hdrs)
+    return (
+        f"[[analyse.bool]]\n"
+        f'macro = "{macro}"\n'
+        f'comment = "Define to 1 if you have the {hdr_note} header file."\n'
+        f'header = {_toml_list(hdrs)}\n\n'
+    )
+
+
+def func_entry(macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd=None):
     sym = macro[len("HAVE_"):].lower()
     out = (
         f"[[analyse.bool]]\n"
         f'macro = "{macro}"\n'
         f'comment = "Define to 1 if you have the `{sym}\' function."\n'
     )
-    if win_header is None:
-        out += f'header = ["{posix_header}"]\n'
-    else:
-        out += (
-            f'pre = ["#ifdef _WIN32", "#include <{win_header}>", '
-            f'"#else", "#include <{posix_header}>", "#endif"]\n'
-        )
-    if win_lib is not None:
-        out += f'libs = ["{win_lib}"]\nunix_libs = []\n'
-    if unix_lib is not None:
-        out += f'unix_libs = ["{unix_lib}"]\n'
+    out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
     code = (
         "int main(void) {\n"
         f"    volatile void *p = (void *)&{sym};\n"
@@ -118,6 +253,61 @@ def func_entry(macro, win_header, posix_header, win_lib, unix_lib):
     )
     out += f"code = {lit(code)}\n\n"
     return out
+
+
+def size_entry(macro, typ, win_headers, posix_headers, win_libs, unix_libs, extra_cmd=None):
+    # printf() is needed on every platform, so <stdio.h> lives in the probe
+    # body itself; `header`/`win_header` carry only the type's own headers.
+    code = (
+        "#include <stdio.h>\n"
+        "int main(void) {\n"
+        f'    printf("%d\\n", (int)sizeof({typ}));\n'
+        "    return 0;\n"
+        "}\n"
+    )
+    out = (
+        f"[[analyse.number]]\n"
+        f'macro = "{macro}"\n'
+        f'comment = "The size of `{typ}\', as computed by sizeof."\n'
+    )
+    out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
+    out += f"code = {lit(code)}\n\n"
+    return out
+
+
+def type_fallback_entry(macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd, val):
+    hdr = posix_headers[0]
+    comment = f"Define to `{val}' if <{hdr}> doesn't define."
+    code = (
+        "int main(void) {\n"
+        f"    (void)sizeof({macro});\n"
+        "    return 0;\n"
+        "}\n"
+    )
+    out = (
+        f"[[analyse.bool]]\n"
+        f'macro = "{macro}"\n'
+        f'comment = "{comment}"\n'
+    )
+    out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
+    out += (
+        f"code = {lit(code)}\n"
+        f"invert = true\n"
+        f'value = "{val}"\n\n'
+    )
+    return out
+
+
+def literal_entry(macro, val, guard, comment):
+    out = (
+        f"[[analyse.literal]]\n"
+        f'macro = "{macro}"\n'
+        f'value = {val}\n'
+        f'comment = "{comment}"\n'
+    )
+    if guard:
+        out += f'guard = "{guard}"\n'
+    return out + "\n"
 
 
 def main():
@@ -141,31 +331,9 @@ def main():
     parts.append("[analyse]\n\n")
 
     # ---- headers ----
-    HEADERS = [
-        ("HAVE_CONIO_H", "conio.h"),
-        ("HAVE_DIRECT_H", "direct.h"),
-        ("HAVE_DLFCN_H", "dlfcn.h"),
-        ("HAVE_ERRNO_H", "errno.h"),
-        ("HAVE_FCNTL_H", "fcntl.h"),
-        ("HAVE_PROCESS_H", "process.h"),
-        ("HAVE_SIGNAL_H", "signal.h"),
-        ("HAVE_STDDEF_H", "stddef.h"),
-        ("HAVE_SYS_AUDIOIO_H", "sys/audioio.h"),
-        ("HAVE_SYS_PARAM_H", "sys/param.h"),
-        ("HAVE_SYS_SELECT_H", "sys/select.h"),
-        ("HAVE_SYS_STAT_H", "sys/stat.h"),
-        ("HAVE_SYS_TIME_H", "sys/time.h"),
-        ("HAVE_SYS_TIMES_H", "sys/times.h"),
-        ("HAVE_SYS_TYPES_H", "sys/types.h"),
-        ("HAVE_SYS_UN_H", "sys/un.h"),
-        ("HAVE_SYS_UTSNAME_H", "sys/utsname.h"),
-        ("HAVE_UNISTD_H", "unistd.h"),
-        ("HAVE_UTIME_H", "utime.h"),
-        ("HAVE_WCHAR_H", "wchar.h"),
-    ]
     parts.append("# ---------------- Header existence ----------------\n")
-    for macro, hdr in HEADERS:
-        parts.append(header_entry(macro, hdr))
+    for macro, hdrs in HEADERS:
+        parts.append(header_entry(macro, hdrs))
 
     # ---- functions ----
     parts.append("# ---------------- Function existence ----------------\n")
@@ -174,26 +342,8 @@ def main():
 
     # ---- sizes ----
     parts.append("# ---------------- Sizes ----------------\n")
-    sizes = [
-        ("SIZEOF_WCHAR_T", "wchar_t", "stddef.h"),
-        ("SIZEOF__BOOL", "_Bool", "stddef.h"),
-    ]
-    for macro, typ, hdr in sizes:
-        code = (
-            "#include <stdio.h>\n"
-            f"#include <{hdr}>\n"
-            "int main(void) {\n"
-            f'    printf("%d\\n", (int)sizeof({typ}));\n'
-            "    return 0;\n"
-            "}\n"
-        )
-        parts.append(
-            f"[[analyse.number]]\n"
-            f'macro = "{macro}"\n'
-            f'comment = "The size of `{typ}\', as computed by sizeof."\n'
-            f'header = ["stdio.h", "{hdr}"]\n'
-            f"code = {lit(code)}\n\n"
-        )
+    for args in SIZES:
+        parts.append(size_entry(*args))
 
     # pid_t needs a WIN32 fallback typedef so the probe can still measure it
     code_pid = (
@@ -218,27 +368,10 @@ def main():
 
     # ---- type fallbacks (invert: define only when the type is absent) ----
     parts.append("# ---------------- Type fallbacks (invert: define only when absent) ----------------\n")
-    type_fallbacks = [
-        ("pid_t", "sys/types.h", "int", "Define to `int' if <sys/types.h> doesn't define."),
-        ("mode_t", "sys/types.h", "int", "Define to `int' if <sys/types.h> doesn't define."),
-        ("off_t", "sys/types.h", "long", "Define to `long' if <sys/types.h> doesn't define."),
-        ("gid_t", "sys/types.h", "int", "Define to `int' if <sys/types.h> doesn't define."),
-        ("uid_t", "sys/types.h", "int", "Define to `int' if <sys/types.h> doesn't define."),
-        ("size_t", "stddef.h", "unsigned int", "Define to `unsigned int' if <stddef.h> doesn't define."),
-    ]
-    for name, hdr, val, comment in type_fallbacks:
-        code = f"#include <{hdr}>\nint main(void) {{\n    (void)sizeof({name});\n    return 0;\n}}\n"
-        parts.append(
-            f"[[analyse.bool]]\n"
-            f'macro = "{name}"\n'
-            f'comment = "{comment}"\n'
-            f'header = ["{hdr}"]\n'
-            f"code = {lit(code)}\n"
-            f"invert = true\n"
-            f'value = "{val}"\n\n'
-        )
+    for args in TYPE_FALLBACKS:
+        parts.append(type_fallback_entry(*args))
 
-    # GETGROUPS_T fallback
+    # GETGROUPS_T fallback (custom probe body, written inline)
     parts.append(
         "[[analyse.bool]]\n"
         'macro = "GETGROUPS_T"\n'
@@ -274,7 +407,6 @@ def main():
 
     # ---- timezone declarations ----
     parts.append("# ---------------- timezone declarations ----------------\n")
-    # ---- timezone declarations ----
     # NOTE: these are fixed literals on Windows. MSVC <time.h> declares only
     # _tzname/_timezone/_daylight (exposed via _CRT_NONSTDC_NO_DEPRECATE as
     # tzname/timezone/daylight by timemodule.c's own mapping), and never declares
@@ -324,7 +456,7 @@ def main():
         'comment = "Deprecated alias of HAVE_STRUCT_TM_TM_ZONE."\n\n'
     )
 
-    # ---- features ----
+    # ---- features (custom probe bodies, written inline) ----
     parts.append("# ---------------- Features ----------------\n")
     parts.append(
         "[[analyse.bool]]\n"
@@ -353,7 +485,8 @@ def main():
         "[[analyse.bool]]\n"
         'macro = "HAVE_DYNAMIC_LOADING"\n'
         'comment = "Define to 1 if you want support for dynamic loading of modules."\n'
-        'pre = ["#ifdef _WIN32", "#include <windows.h>", "#else", "#include <dlfcn.h>", "#endif"]\n'
+        'header = ["dlfcn.h"]\n'
+        'win_header = ["windows.h"]\n'
         "code = '''\n"
         "#ifdef _WIN32\n"
         "int main(void) {\n"
@@ -393,57 +526,8 @@ def main():
 
     # ---- literals: build policy / external deps / platform constants / dead boilerplate ----
     parts.append("# ---------------- Literals (not probeable) ----------------\n")
-
-    LITERALS = [
-        # dead autoconf boilerplate not referenced by CPython (kept for shape parity)
-        ("const", "false", "", "Define to empty if the keyword does not work. Always available."),
-        ("_POSIX_1_SOURCE", "false", "", "Define if you need POSIX.1 features. Never on Windows."),
-        ("_POSIX_SOURCE", "false", "", "Define if you need POSIX features. Never on Windows."),
-        ("_ALL_SOURCE", "false", "!defined(_ALL_SOURCE)", "Define on AIX 3. Never on Windows."),
-        ("DIRENT", "false", "", "Define if you have dirent.h. (legacy autoconf macro)"),
-        ("NDIR", "false", "", "Define if you have ndir.h. (legacy autoconf macro)"),
-        ("SYSDIR", "false", "", "Define if you have sys/dir.h. (legacy autoconf macro)"),
-        ("SYSNDIR", "false", "", "Define if you have sys/ndir.h. (legacy autoconf macro)"),
-        ("TIME_WITH_SYS_TIME", "false", "", "Define if both <time.h> and <sys/time.h> may be included. (unused)"),
-        ("TM_IN_SYS_TIME", "false", "", "Define if struct tm is in <sys/time.h>. (unused)"),
-        ("SYS_SELECT_WITH_SYS_TIME", "false", "", "Define if <sys/select.h> needs <sys/time.h>. (unused)"),
-        ("VOID_CLOSEDIR", "false", "", "Define if closedir returns void. (unused)"),
-        ("GETPGRP_HAVE_ARGS", "false", "", "Define if getpgrp takes an argument. (unused; code uses GETPGRP_HAVE_ARG)"),
-        # build-policy switches
-        ("WITH_DECIMAL_CONTEXTVAR", "true", "", "Define to 1 to build the _decimal module with contextvar support."),
-        ("WITH_DOC_STRINGS", "true", "", "Define to 1 to enable documentation strings."),
-        ("WITH_PYMALLOC", "true", "", "Define to 1 to compile in pymalloc, the Python memory allocator."),
-        ("WITH_MIMALLOC", "true", "", "Define to 1 to compile in mimalloc as the pymalloc backend."),
-        ("WITH_THREAD", "false", "", "Define to 1 if you want native threads. (Windows uses NT_THREADS in the static head)"),
-        ("WITH_READLINE", "false", "", "Define if you want to build the readline module. (external dep)"),
-        ("HAVE_CLOCK", "false", "", "Define to 1 if you have the `clock' function. (see static head)"),
-        # external library dependencies (not detected by a bare probe)
-        ("HAVE_LIBSOCKET", "true", "", "Define if you have the `socket' library. (Windows: winsock)"),
-        ("HAVE_LIBDL", "false", "", "Define if you have the `dl' library."),
-        ("HAVE_LIBMPC", "false", "", "Define if you have the `mpc' library."),
-        ("HAVE_LIBSEQ", "false", "", "Define if you have the `seq' library."),
-        ("HAVE_LIBSUN", "false", "", "Define if you have the `sun' library."),
-        ("HAVE_LIBTERMCAP", "false", "", "Define if you have the `termcap' library."),
-        ("HAVE_LIBTERMLIB", "false", "", "Define if you have the `termlib' library."),
-        ("HAVE_LIBTHREAD", "false", "", "Define if you have the `thread' library."),
-        # OpenSSL / zlib features (present because PC/pyconfig.h hardcodes them)
-        ("HAVE_ZLIB_COPY", "true", "", "Define if the zlib library has inflateCopy."),
-        ("HAVE_X509_VERIFY_PARAM_SET1_HOST", "true", "", "Define if OpenSSL has X509_VERIFY_PARAM_set1_host."),
-        # platform constants
-        ("_PYTHONFRAMEWORK", "'\"\"'", "", "Mac framework name; empty on Windows."),
-        ("_PYTHREAD_NAME_MAXLEN", "32766", "", "Max length of a thread name on Windows."),
-        ("Py_SOCKET_FD_CAN_BE_GE_FD_SETSIZE", "\"\"", "", "Define if socket fds can exceed FD_SETSIZE. (Windows: bare define)"),
-    ]
-    for macro, val, guard, comment in LITERALS:
-        parts.append(
-            f"[[analyse.literal]]\n"
-            f'macro = "{macro}"\n'
-            f'value = {val}\n'
-            f'comment = "{comment}"\n'
-        )
-        if guard:
-            parts.append(f'guard = "{guard}"\n')
-        parts.append("\n")
+    for args in LITERALS:
+        parts.append(literal_entry(*args))
 
     OUT.write_text("".join(parts), encoding="utf-8")
     print(f"wrote {OUT}")

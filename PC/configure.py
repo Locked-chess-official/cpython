@@ -34,12 +34,15 @@ a probe, so every macro in the configurable section is represented:
 Common fields for probe entries:
   macro     (str, required)
   comment   (str)             descriptive comment emitted above the macro
-  header    (list[str])       headers to #include into the probe
-  pre       (list[str])       raw lines emitted BEFORE the #include block, for
-                              platform-conditional includes (e.g. #ifdef _WIN32)
+  header    (list[str])       headers to #include into the probe (POSIX/non-Windows)
+  win_header (list[str])      Windows-specific headers; when present, the probe
+                              includes them under `#ifdef _WIN32` and `header`
+                              under `#else`, instead of a plain #include block
   code      (str)             body of `int main(void) { ... }`; if omitted for a
                               bool probe, it is a bare header/compile check
   libs      (list[str])       extra libraries to link against
+  extra_cmd (list[str])       extra compiler flags/commands appended to the
+                              compile invocation (both platforms)
   guard     (str)             wrap the emission in `#if <guard>` ... `#endif`
   run       (bool)            bool only: run the probe (success = exit code 0),
                               instead of just compile+link. Needed for run-time
@@ -93,9 +96,10 @@ class Entry:
     macro: str
     comment: str = ""
     header: list[str] = field(default_factory=list)
+    win_header: list[str] = field(default_factory=list)
     code: str = ""
-    pre: list[str] = field(default_factory=list)
     libs: list[str] = field(default_factory=list)
+    extra_cmd: list[str] = field(default_factory=list)
     unix_libs: list[str] | None = None
     value: object = None
     guard: str = ""
@@ -117,9 +121,10 @@ def load_entries(path: Path) -> list[Entry]:
                 macro=item["macro"],
                 comment=item.get("comment", ""),
                 header=item.get("header", []),
-                pre=item.get("pre", []),
+                win_header=item.get("win_header", []),
                 code=item.get("code", ""),
                 libs=item.get("libs", []),
+                extra_cmd=item.get("extra_cmd", []),
                 unix_libs=item.get("unix_libs"),
                 guard=item.get("guard", ""),
                 run=bool(item.get("run", False)),
@@ -183,11 +188,13 @@ class Toolchain:
             # /TC treats every following file as C source, so link libraries must
             # be passed through /link, otherwise cl tries to open them as source.
             cmd = [self.compiler, "/nologo", "/TC", src, f"/Fe:{exe}"]
+            cmd += list(entry.extra_cmd)
             libs = [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in entry.libs]
             if libs:
                 cmd += ["/link"] + libs
         else:
             cmd = [self.compiler, "-o", exe, src]
+            cmd += list(entry.extra_cmd)
             libs = entry.libs if entry.unix_libs is None else entry.unix_libs
             cmd += [f"-l{lib}" for lib in libs]
         return cmd
@@ -199,10 +206,22 @@ def run_probe(entry: Entry, tc: Toolchain, workdir: str) -> tuple[bool, str]:
 
     lines = [f"/* probe for {entry.macro} */"]
     lines.extend(PROBE_PRELUDE)
-    for p in entry.pre:
-        lines.append(p)
-    for h in entry.header:
-        lines.append(f"#include <{h}>")
+    if entry.win_header:
+        lines.append("#ifdef _WIN32")
+        for h in entry.win_header:
+            lines.append(f"#include <{h}>")
+        lines.append("#else")
+        if entry.header:
+            for h in entry.header:
+                lines.append(f"#include <{h}>")
+        else:
+            # Windows-only feature with no POSIX counterpart (e.g. conio.h):
+            # force the non-Windows probe to fail rather than silently pass.
+            lines.append("#error not available on this platform")
+        lines.append("#endif")
+    else:
+        for h in entry.header:
+            lines.append(f"#include <{h}>")
     if entry.code:
         body = entry.code.strip()
         if not re.search(r"\bmain\s*\(", body):

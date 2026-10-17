@@ -18,6 +18,7 @@
 @rem   configure.bat arm64            (ARM64 build)
 @rem   configure.bat x64 cl           (explicit compiler driver: cl)
 @rem   configure.bat x64 clang-cl     (explicit compiler driver: clang-cl)
+@rem   configure.bat x64 --python "C:\Python311\python.exe"
 @rem
 @rem The first argument is the target architecture (default: x64) and is passed
 @rem to vcvarsall.bat to select the matching toolset. The second (optional)
@@ -28,6 +29,7 @@ setlocal
 @set "_Py_PC=%_Py_Root%\PC"
 @set "_Py_Arch=x64"
 @set "_Py_Compiler="
+@set "_Py_Python="
 @set "_Py_ArchSet="
 
 @rem ---------------------------------------------------------------------------
@@ -38,6 +40,12 @@ setlocal
 @if /I "%~1"=="-h" goto :Usage
 @if /I "%~1"=="--help" goto :Usage
 @if /I "%~1"=="-?" goto :Usage
+@if /I "%~1"=="--python" (
+    @set "_Py_Python=%~2"
+    @shift
+    @shift
+    @goto :ParseArgs
+)
 @if not defined _Py_ArchSet (
     @set "_Py_Arch=%~1"
     @set "_Py_ArchSet=1"
@@ -93,10 +101,19 @@ setlocal
 
 @rem ---------------------------------------------------------------------------
 @rem Locate a Python 3.11+ interpreter (required for tomllib).
-@rem Reuse PCbuild\find_python.bat when available, then validate the version.
+@rem If build.bat passed one via --python, use it directly; otherwise reuse
+@rem PCbuild\find_python.bat, then fall back to the `py` launcher.
 @rem ---------------------------------------------------------------------------
 @set "PYTHON="
-@if exist "%_Py_Root%\PCbuild\find_python.bat" (
+@if not "%_Py_Python%"=="" (
+    @if exist "%_Py_Python%" (
+        @set PYTHON="%_Py_Python%"
+    ) else (
+        @set "PYTHON=%_Py_Python%"
+    )
+)
+
+@if "%PYTHON%"=="" if exist "%_Py_Root%\PCbuild\find_python.bat" (
     @call "%_Py_Root%\PCbuild\find_python.bat" -q > "%TEMP%\configure_find_python.tmp"
     @set /P PYTHON= < "%TEMP%\configure_find_python.tmp"
     @del "%TEMP%\configure_find_python.tmp" >nul 2>nul
@@ -133,7 +150,7 @@ setlocal
 @exit /b 0
 
 :Usage
-@echo.%~nx0 [arch] [compiler]
+@echo.%~nx0 [arch] [compiler] [--python PATH]
 @echo.
 @echo.Regenerate PC\pyconfig.h from PC\configure.toml.
 @echo.
@@ -141,6 +158,8 @@ setlocal
 @echo.            arm64, arm, amd64, Win32, ARM64, ARM.
 @echo.  compiler   Optional C compiler driver: cl (default, auto-detected) or
 @echo.            clang-cl.
+@echo.  --python   Use this Python interpreter (3.11+, for tomllib) instead of
+@echo.            auto-detecting one.
 @echo.
 @echo.Requires Python 3.11+ and the Visual Studio C++ toolset.
 @exit /b 127
