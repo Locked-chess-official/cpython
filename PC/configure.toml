@@ -121,7 +121,7 @@ header = ["wchar.h"]
 # ---------------- Function existence ----------------
 [[analyse.bool]]
 macro = "HAVE_SOCKET"
-comment = "Define to 1 if you have the `socket' function."
+comment = "Define to 1 if you have the 'socket' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -137,7 +137,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_ACCEPT"
-comment = "Define to 1 if you have the `accept' function."
+comment = "Define to 1 if you have the 'accept' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -153,7 +153,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_BIND"
-comment = "Define to 1 if you have the `bind' function."
+comment = "Define to 1 if you have the 'bind' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -169,7 +169,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_CONNECT"
-comment = "Define to 1 if you have the `connect' function."
+comment = "Define to 1 if you have the 'connect' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -185,7 +185,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETSOCKNAME"
-comment = "Define to 1 if you have the `getsockname' function."
+comment = "Define to 1 if you have the 'getsockname' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -201,7 +201,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_LISTEN"
-comment = "Define to 1 if you have the `listen' function."
+comment = "Define to 1 if you have the 'listen' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -217,7 +217,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_RECVFROM"
-comment = "Define to 1 if you have the `recvfrom' function."
+comment = "Define to 1 if you have the 'recvfrom' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -233,7 +233,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SENDTO"
-comment = "Define to 1 if you have the `sendto' function."
+comment = "Define to 1 if you have the 'sendto' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -249,7 +249,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SETSOCKOPT"
-comment = "Define to 1 if you have the `setsockopt' function."
+comment = "Define to 1 if you have the 'setsockopt' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -265,7 +265,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SHUTDOWN"
-comment = "Define to 1 if you have the `shutdown' function."
+comment = "Define to 1 if you have the 'shutdown' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -281,7 +281,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETPEERNAME"
-comment = "Define to 1 if you have the `getpeername' function."
+comment = "Define to 1 if you have the 'getpeername' function."
 header = ["sys/socket.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -297,7 +297,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETHOSTNAME"
-comment = "Define to 1 if you have the `gethostname' function."
+comment = "Define to 1 if you have the 'gethostname' function."
 header = ["unistd.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -313,7 +313,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETHOSTBYADDR"
-comment = "Define to 1 if you have the `gethostbyaddr' function."
+comment = "Define to 1 if you have the 'gethostbyaddr' function."
 header = ["netdb.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -329,7 +329,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETHOSTBYNAME"
-comment = "Define to 1 if you have the `gethostbyname' function."
+comment = "Define to 1 if you have the 'gethostbyname' function."
 header = ["netdb.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -345,7 +345,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETPROTOBYNAME"
-comment = "Define to 1 if you have the `getprotobyname' function."
+comment = "Define to 1 if you have the 'getprotobyname' function."
 header = ["netdb.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -361,7 +361,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETSERVBYNAME"
-comment = "Define to 1 if you have the `getservbyname' function."
+comment = "Define to 1 if you have the 'getservbyname' function."
 header = ["netdb.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -377,7 +377,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETSERVBYPORT"
-comment = "Define to 1 if you have the `getservbyport' function."
+comment = "Define to 1 if you have the 'getservbyport' function."
 header = ["netdb.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -393,7 +393,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_INET_PTON"
-comment = "Define to 1 if you have the `inet_pton' function."
+comment = "Define to 1 if you have the 'inet_pton' function."
 header = ["arpa/inet.h"]
 win_header = ["ws2tcpip.h"]
 libs = ["ws2_32"]
@@ -409,7 +409,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_INET_NTOA"
-comment = "Define to 1 if you have the `inet_ntoa' function."
+comment = "Define to 1 if you have the 'inet_ntoa' function."
 header = ["arpa/inet.h"]
 win_header = ["winsock2.h"]
 libs = ["ws2_32"]
@@ -425,7 +425,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETPID"
-comment = "Define to 1 if you have the `getpid' function."
+comment = "Define to 1 if you have the 'getpid' function."
 header = ["unistd.h"]
 win_header = ["process.h"]
 code = '''
@@ -439,7 +439,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_DUP"
-comment = "Define to 1 if you have the `dup' function."
+comment = "Define to 1 if you have the 'dup' function."
 header = ["unistd.h"]
 win_header = ["io.h"]
 code = '''
@@ -453,7 +453,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_PUTENV"
-comment = "Define to 1 if you have the `putenv' function."
+comment = "Define to 1 if you have the 'putenv' function."
 header = ["stdlib.h"]
 code = '''
 int main(void) {
@@ -466,7 +466,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_UMASK"
-comment = "Define to 1 if you have the `umask' function."
+comment = "Define to 1 if you have the 'umask' function."
 header = ["sys/stat.h"]
 win_header = ["io.h"]
 code = '''
@@ -480,7 +480,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_MKTIME"
-comment = "Define to 1 if you have the `mktime' function."
+comment = "Define to 1 if you have the 'mktime' function."
 header = ["time.h"]
 code = '''
 int main(void) {
@@ -493,7 +493,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SETVBUF"
-comment = "Define to 1 if you have the `setvbuf' function."
+comment = "Define to 1 if you have the 'setvbuf' function."
 header = ["stdio.h"]
 code = '''
 int main(void) {
@@ -506,7 +506,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_FTIME"
-comment = "Define to 1 if you have the `ftime' function."
+comment = "Define to 1 if you have the 'ftime' function."
 header = ["sys/timeb.h"]
 code = '''
 int main(void) {
@@ -519,7 +519,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETPGRP"
-comment = "Define to 1 if you have the `getpgrp' function."
+comment = "Define to 1 if you have the 'getpgrp' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -532,7 +532,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETTIMEOFDAY"
-comment = "Define to 1 if you have the `gettimeofday' function."
+comment = "Define to 1 if you have the 'gettimeofday' function."
 header = ["sys/time.h"]
 code = '''
 int main(void) {
@@ -545,7 +545,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_GETWD"
-comment = "Define to 1 if you have the `getwd' function."
+comment = "Define to 1 if you have the 'getwd' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -558,7 +558,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_LSTAT"
-comment = "Define to 1 if you have the `lstat' function."
+comment = "Define to 1 if you have the 'lstat' function."
 header = ["sys/stat.h"]
 code = '''
 int main(void) {
@@ -571,7 +571,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_NICE"
-comment = "Define to 1 if you have the `nice' function."
+comment = "Define to 1 if you have the 'nice' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -584,7 +584,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_READLINK"
-comment = "Define to 1 if you have the `readlink' function."
+comment = "Define to 1 if you have the 'readlink' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -597,7 +597,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SETPGID"
-comment = "Define to 1 if you have the `setpgid' function."
+comment = "Define to 1 if you have the 'setpgid' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -610,7 +610,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SETPGRP"
-comment = "Define to 1 if you have the `setpgrp' function."
+comment = "Define to 1 if you have the 'setpgrp' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -623,7 +623,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SETSID"
-comment = "Define to 1 if you have the `setsid' function."
+comment = "Define to 1 if you have the 'setsid' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -636,7 +636,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SIGINTERRUPT"
-comment = "Define to 1 if you have the `siginterrupt' function."
+comment = "Define to 1 if you have the 'siginterrupt' function."
 header = ["signal.h"]
 code = '''
 int main(void) {
@@ -649,7 +649,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_SYMLINK"
-comment = "Define to 1 if you have the `symlink' function."
+comment = "Define to 1 if you have the 'symlink' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -662,7 +662,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_TCGETPGRP"
-comment = "Define to 1 if you have the `tcgetpgrp' function."
+comment = "Define to 1 if you have the 'tcgetpgrp' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -675,7 +675,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_TCSETPGRP"
-comment = "Define to 1 if you have the `tcsetpgrp' function."
+comment = "Define to 1 if you have the 'tcsetpgrp' function."
 header = ["unistd.h"]
 code = '''
 int main(void) {
@@ -688,7 +688,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_TIMES"
-comment = "Define to 1 if you have the `times' function."
+comment = "Define to 1 if you have the 'times' function."
 header = ["sys/times.h"]
 code = '''
 int main(void) {
@@ -701,7 +701,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_UNAME"
-comment = "Define to 1 if you have the `uname' function."
+comment = "Define to 1 if you have the 'uname' function."
 header = ["sys/utsname.h"]
 code = '''
 int main(void) {
@@ -714,7 +714,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_WAITPID"
-comment = "Define to 1 if you have the `waitpid' function."
+comment = "Define to 1 if you have the 'waitpid' function."
 header = ["sys/wait.h"]
 code = '''
 int main(void) {
@@ -727,7 +727,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_WCSCOLL"
-comment = "Define to 1 if you have the `wcscoll' function."
+comment = "Define to 1 if you have the 'wcscoll' function."
 header = ["wchar.h"]
 code = '''
 int main(void) {
@@ -740,7 +740,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_WCSXFRM"
-comment = "Define to 1 if you have the `wcsxfrm' function."
+comment = "Define to 1 if you have the 'wcsxfrm' function."
 header = ["wchar.h"]
 code = '''
 int main(void) {
@@ -753,7 +753,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_WCSFTIME"
-comment = "Define to 1 if you have the `wcsftime' function."
+comment = "Define to 1 if you have the 'wcsftime' function."
 header = ["wchar.h"]
 code = '''
 int main(void) {
@@ -766,7 +766,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_ERF"
-comment = "Define to 1 if you have the `erf' function."
+comment = "Define to 1 if you have the 'erf' function."
 header = ["math.h"]
 unix_libs = ["m"]
 code = '''
@@ -780,7 +780,7 @@ int main(void) {
 
 [[analyse.bool]]
 macro = "HAVE_ERFC"
-comment = "Define to 1 if you have the `erfc' function."
+comment = "Define to 1 if you have the 'erfc' function."
 header = ["math.h"]
 unix_libs = ["m"]
 code = '''
@@ -795,7 +795,7 @@ int main(void) {
 # ---------------- Sizes ----------------
 [[analyse.number]]
 macro = "SIZEOF_WCHAR_T"
-comment = "The size of `wchar_t', as computed by sizeof."
+comment = "The size of 'wchar_t', as computed by sizeof."
 header = ["stddef.h"]
 code = '''
 #include <stdio.h>
@@ -808,7 +808,7 @@ int main(void) {
 
 [[analyse.number]]
 macro = "SIZEOF__BOOL"
-comment = "The size of `_Bool', as computed by sizeof."
+comment = "The size of '_Bool', as computed by sizeof."
 header = ["stddef.h"]
 code = '''
 #include <stdio.h>
@@ -821,7 +821,7 @@ int main(void) {
 
 [[analyse.number]]
 macro = "SIZEOF_PID_T"
-comment = "The size of `pid_t', as computed by sizeof."
+comment = "The size of 'pid_t', as computed by sizeof."
 header = ["stdio.h"]
 code = '''
 #include <stdio.h>
@@ -840,7 +840,7 @@ int main(void) {
 # ---------------- Type fallbacks (invert: define only when absent) ----------------
 [[analyse.bool]]
 macro = "pid_t"
-comment = "Define to `int' if <sys/types.h> doesn't define."
+comment = "Define to 'int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
 int main(void) {
@@ -854,7 +854,7 @@ value = "int"
 
 [[analyse.bool]]
 macro = "mode_t"
-comment = "Define to `int' if <sys/types.h> doesn't define."
+comment = "Define to 'int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
 int main(void) {
@@ -868,7 +868,7 @@ value = "int"
 
 [[analyse.bool]]
 macro = "off_t"
-comment = "Define to `long' if <sys/types.h> doesn't define."
+comment = "Define to 'long' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
 int main(void) {
@@ -882,7 +882,7 @@ value = "long"
 
 [[analyse.bool]]
 macro = "gid_t"
-comment = "Define to `int' if <sys/types.h> doesn't define."
+comment = "Define to 'int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
 int main(void) {
@@ -896,7 +896,7 @@ value = "int"
 
 [[analyse.bool]]
 macro = "uid_t"
-comment = "Define to `int' if <sys/types.h> doesn't define."
+comment = "Define to 'int' if <sys/types.h> doesn't define."
 header = ["sys/types.h"]
 code = '''
 int main(void) {
@@ -910,7 +910,7 @@ value = "int"
 
 [[analyse.bool]]
 macro = "size_t"
-comment = "Define to `unsigned int' if <stddef.h> doesn't define."
+comment = "Define to 'unsigned int' if <stddef.h> doesn't define."
 header = ["stddef.h"]
 code = '''
 int main(void) {
@@ -924,7 +924,7 @@ value = "unsigned int"
 
 [[analyse.bool]]
 macro = "GETGROUPS_T"
-comment = "Define to the type of elements in the array set by `getgroups'. Usually `int' or `gid_t'."
+comment = "Define to the type of elements in the array set by 'getgroups'. Usually 'int' or 'gid_t'."
 header = ["unistd.h", "sys/types.h"]
 code = '''
 int main(void) {
@@ -937,7 +937,7 @@ value = "int"
 
 [[analyse.bool]]
 macro = "RETSIGTYPE"
-comment = "Define as the return type of signal handlers (`int' or `void')."
+comment = "Define as the return type of signal handlers ('int' or 'void')."
 header = ["signal.h"]
 code = '''
 static void handler(int sig) { (void)sig; }
@@ -954,7 +954,7 @@ value = "void"
 [[analyse.literal]]
 macro = "HAVE_DECL_TZNAME"
 value = true
-comment = "Define to 1 if you have the declaration of `tzname'. (Windows: CRT provides _tzname)"
+comment = "Define to 1 if you have the declaration of 'tzname'. (Windows: CRT provides _tzname)"
 
 [[analyse.literal]]
 macro = "HAVE_TZNAME"
@@ -963,7 +963,7 @@ comment = "Define if you don't have tm_zone but do have the external array tznam
 
 [[analyse.bool]]
 macro = "HAVE_STRUCT_TM_TM_ZONE"
-comment = "Define to 1 if your `struct tm' has a `tm_zone' member."
+comment = "Define to 1 if your 'struct tm' has a 'tm_zone' member."
 header = ["time.h"]
 code = '''
 #include <time.h>
@@ -978,7 +978,7 @@ int main(void) {
 [[analyse.literal]]
 macro = "HAVE_ALTZONE"
 value = false
-comment = "Define to 1 if the `altzone' variable is declared. (not in MSVC <time.h>)"
+comment = "Define to 1 if the 'altzone' variable is declared. (not in MSVC <time.h>)"
 
 [[analyse.literal]]
 macro = "HAVE_TM_ZONE"
@@ -1145,47 +1145,47 @@ comment = "Define if you want to build the readline module. (external dep)"
 [[analyse.literal]]
 macro = "HAVE_CLOCK"
 value = false
-comment = "Define to 1 if you have the `clock' function. (see static head)"
+comment = "Define to 1 if you have the 'clock' function. (see static head)"
 
 [[analyse.literal]]
 macro = "HAVE_LIBSOCKET"
 value = true
-comment = "Define if you have the `socket' library. (Windows: winsock)"
+comment = "Define if you have the 'socket' library. (Windows: winsock)"
 
 [[analyse.literal]]
 macro = "HAVE_LIBDL"
 value = false
-comment = "Define if you have the `dl' library."
+comment = "Define if you have the 'dl' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBMPC"
 value = false
-comment = "Define if you have the `mpc' library."
+comment = "Define if you have the 'mpc' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBSEQ"
 value = false
-comment = "Define if you have the `seq' library."
+comment = "Define if you have the 'seq' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBSUN"
 value = false
-comment = "Define if you have the `sun' library."
+comment = "Define if you have the 'sun' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBTERMCAP"
 value = false
-comment = "Define if you have the `termcap' library."
+comment = "Define if you have the 'termcap' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBTERMLIB"
 value = false
-comment = "Define if you have the `termlib' library."
+comment = "Define if you have the 'termlib' library."
 
 [[analyse.literal]]
 macro = "HAVE_LIBTHREAD"
 value = false
-comment = "Define if you have the `thread' library."
+comment = "Define if you have the 'thread' library."
 
 [[analyse.literal]]
 macro = "HAVE_ZLIB_COPY"

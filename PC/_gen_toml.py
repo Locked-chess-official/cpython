@@ -16,7 +16,7 @@ import os
 
 SRC_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-OUT = SRC_DIR / "PC" / "pyconfig.h"
+OUT = SRC_DIR / "PC" / "configure.toml"
 
 
 def lit(s):
