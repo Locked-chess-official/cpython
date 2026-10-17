@@ -15,6 +15,7 @@ import glob
 import os.path
 import re
 import sys
+import tomllib
 
 EXCLUDE_HEADERS = {
     # Header files not included by Python.h and ignored by this script
@@ -41,6 +42,7 @@ IGNORED_FILENAME = os.path.join(TOOLS_BUILD_DIR, 'check_capi_macros_ignored.txt'
 DEFINE_REGEX = re.compile(r'\s*#\s*(?P<directive>define|undef)\s+(?P<macro>.*)')
 PYTHON_PREFIX = re.compile(r'(Py|PY|_Py|_PY)')
 NAME_REGEX = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)\b')
+TOML_REGEX = re.compile(r'^macro = "(?P<macro>.*)"$')
 
 CAUSES_BY_DIRECTIVE = {
     "define": "defined",
@@ -58,6 +60,26 @@ def parse_file(filename, names):
             macro = match['macro']
             directive = match['directive']
             cause = CAUSES_BY_DIRECTIVE.get(directive, directive)
+
+            if PYTHON_PREFIX.match(macro):
+                continue
+
+            match = NAME_REGEX.match(macro)
+            if not match:
+                print(f"ERROR: {filename}: Unable to parse {line!r}")
+                sys.exit(1)
+            name = match[1]
+            names.append((name, filename, lineno, cause))
+
+
+def parse_toml(filename, names):
+    with open(filename, encoding='utf8') as fp:
+        for lineno, line in enumerate(fp, start=1):
+            match = TOML_REGEX.match(line)
+            if not match:
+                continue
+            macro = match['macro']
+            cause = "toml configure"
 
             if PYTHON_PREFIX.match(macro):
                 continue
@@ -94,10 +116,14 @@ def main():
     files.extend(glob.glob(os.path.join(include_dir, 'cpython', '*.h')))
     files.append(os.path.join(SRC_DIR, 'pyconfig.h.in'))
     files.append(os.path.join(SRC_DIR, 'PC/pyconfig.h.copy'))
+    files.append(os.path.join(SRC_DIR, 'PC/pyconfig.h.in'))
     names = []  # list of (name: str, filename: str, lineno: int, cause: str)
     for filename in files:
         parse_file(filename, names)
 
+    # Parse toml file
+    toml_file = os.path.join(SRC_DIR, 'PC/configure.toml')
+    parse_toml(toml_file, names)
     # Parse ignore list
     ignored = get_ignored_names()
 
