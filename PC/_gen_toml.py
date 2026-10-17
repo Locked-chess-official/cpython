@@ -69,8 +69,12 @@ HEADERS = [
 ]
 
 # Function existence:
-#   (macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
+#   (macro, func, win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
 #     macro          "HAVE_..." macro name
+#     func           the C function the probe takes the address of, written
+#                    verbatim into the probe body. It is decoupled from the
+#                    macro name (no HAVE_ stripping) so macro renames or a
+#                    future Py_/_Py_ prefix requirement cannot corrupt it.
 #     win_headers    headers included under `#ifdef _WIN32` (None if none)
 #     posix_headers  headers included on other platforms; always emitted as
 #                    `header` (required)
@@ -80,58 +84,58 @@ HEADERS = [
 #   win_headers None => posix_headers are included unconditionally.
 FUNCS = [
     # --- socket family ---
-    ("HAVE_SOCKET", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_ACCEPT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_BIND", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_CONNECT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_GETSOCKNAME", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_LISTEN", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_RECVFROM", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_SENDTO", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_SETSOCKOPT", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_SHUTDOWN", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
-    ("HAVE_GETPEERNAME", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SOCKET", "socket", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_ACCEPT", "accept", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_BIND", "bind", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_CONNECT", "connect", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSOCKNAME", "getsockname", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_LISTEN", "listen", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_RECVFROM", "recvfrom", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SENDTO", "sendto", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SETSOCKOPT", "setsockopt", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_SHUTDOWN", "shutdown", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
+    ("HAVE_GETPEERNAME", "getpeername", ["winsock2.h"], ["sys/socket.h"], ["ws2_32"], None, None),
     # --- network info ---
-    ("HAVE_GETHOSTNAME", ["winsock2.h"], ["unistd.h"], ["ws2_32"], None, None),
-    ("HAVE_GETHOSTBYADDR", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
-    ("HAVE_GETHOSTBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
-    ("HAVE_GETPROTOBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
-    ("HAVE_GETSERVBYNAME", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
-    ("HAVE_GETSERVBYPORT", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
-    ("HAVE_INET_PTON", ["ws2tcpip.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
-    ("HAVE_INET_NTOA", ["winsock2.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
+    ("HAVE_GETHOSTNAME", "gethostname", ["winsock2.h"], ["unistd.h"], ["ws2_32"], None, None),
+    ("HAVE_GETHOSTBYADDR", "gethostbyaddr", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETHOSTBYNAME", "gethostbyname", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETPROTOBYNAME", "getprotobyname", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSERVBYNAME", "getservbyname", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_GETSERVBYPORT", "getservbyport", ["winsock2.h"], ["netdb.h"], ["ws2_32"], None, None),
+    ("HAVE_INET_PTON", "inet_pton", ["ws2tcpip.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
+    ("HAVE_INET_NTOA", "inet_ntoa", ["winsock2.h"], ["arpa/inet.h"], ["ws2_32"], None, None),
     # --- process / file (CRT: underscore names on MSVC) ---
-    ("HAVE_GETPID", ["process.h"], ["unistd.h"], None, None, None),
-    ("HAVE_DUP", ["io.h"], ["unistd.h"], None, None, None),
-    ("HAVE_PUTENV", None, ["stdlib.h"], None, None, None),
-    ("HAVE_UMASK", ["io.h"], ["sys/stat.h"], None, None, None),
-    ("HAVE_MKTIME", None, ["time.h"], None, None, None),
-    ("HAVE_SETVBUF", None, ["stdio.h"], None, None, None),
-    ("HAVE_FTIME", None, ["sys/timeb.h"], None, None, None),
+    ("HAVE_GETPID", "getpid", ["process.h"], ["unistd.h"], None, None, None),
+    ("HAVE_DUP", "dup", ["io.h"], ["unistd.h"], None, None, None),
+    ("HAVE_PUTENV", "putenv", None, ["stdlib.h"], None, None, None),
+    ("HAVE_UMASK", "umask", ["io.h"], ["sys/stat.h"], None, None, None),
+    ("HAVE_MKTIME", "mktime", None, ["time.h"], None, None, None),
+    ("HAVE_SETVBUF", "setvbuf", None, ["stdio.h"], None, None, None),
+    ("HAVE_FTIME", "ftime", None, ["sys/timeb.h"], None, None, None),
     # --- unix-only (probe fails on MSVC -> /* #undef */) ---
-    ("HAVE_GETPGRP", None, ["unistd.h"], None, None, None),
-    ("HAVE_GETTIMEOFDAY", None, ["sys/time.h"], None, None, None),
-    ("HAVE_GETWD", None, ["unistd.h"], None, None, None),
-    ("HAVE_LSTAT", None, ["sys/stat.h"], None, None, None),
-    ("HAVE_NICE", None, ["unistd.h"], None, None, None),
-    ("HAVE_READLINK", None, ["unistd.h"], None, None, None),
-    ("HAVE_SETPGID", None, ["unistd.h"], None, None, None),
-    ("HAVE_SETPGRP", None, ["unistd.h"], None, None, None),
-    ("HAVE_SETSID", None, ["unistd.h"], None, None, None),
-    ("HAVE_SIGINTERRUPT", None, ["signal.h"], None, None, None),
-    ("HAVE_SYMLINK", None, ["unistd.h"], None, None, None),
-    ("HAVE_TCGETPGRP", None, ["unistd.h"], None, None, None),
-    ("HAVE_TCSETPGRP", None, ["unistd.h"], None, None, None),
-    ("HAVE_TIMES", None, ["sys/times.h"], None, None, None),
-    ("HAVE_UNAME", None, ["sys/utsname.h"], None, None, None),
-    ("HAVE_WAITPID", None, ["sys/wait.h"], None, None, None),
+    ("HAVE_GETPGRP", "getpgrp", None, ["unistd.h"], None, None, None),
+    ("HAVE_GETTIMEOFDAY", "gettimeofday", None, ["sys/time.h"], None, None, None),
+    ("HAVE_GETWD", "getwd", None, ["unistd.h"], None, None, None),
+    ("HAVE_LSTAT", "lstat", None, ["sys/stat.h"], None, None, None),
+    ("HAVE_NICE", "nice", None, ["unistd.h"], None, None, None),
+    ("HAVE_READLINK", "readlink", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETPGID", "setpgid", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETPGRP", "setpgrp", None, ["unistd.h"], None, None, None),
+    ("HAVE_SETSID", "setsid", None, ["unistd.h"], None, None, None),
+    ("HAVE_SIGINTERRUPT", "siginterrupt", None, ["signal.h"], None, None, None),
+    ("HAVE_SYMLINK", "symlink", None, ["unistd.h"], None, None, None),
+    ("HAVE_TCGETPGRP", "tcgetpgrp", None, ["unistd.h"], None, None, None),
+    ("HAVE_TCSETPGRP", "tcsetpgrp", None, ["unistd.h"], None, None, None),
+    ("HAVE_TIMES", "times", None, ["sys/times.h"], None, None, None),
+    ("HAVE_UNAME", "uname", None, ["sys/utsname.h"], None, None, None),
+    ("HAVE_WAITPID", "waitpid", None, ["sys/wait.h"], None, None, None),
     # --- wide char ---
-    ("HAVE_WCSCOLL", None, ["wchar.h"], None, None, None),
-    ("HAVE_WCSXFRM", None, ["wchar.h"], None, None, None),
-    ("HAVE_WCSFTIME", None, ["wchar.h"], None, None, None),
+    ("HAVE_WCSCOLL", "wcscoll", None, ["wchar.h"], None, None, None),
+    ("HAVE_WCSXFRM", "wcsxfrm", None, ["wchar.h"], None, None, None),
+    ("HAVE_WCSFTIME", "wcsftime", None, ["wchar.h"], None, None, None),
     # --- math ---
-    ("HAVE_ERF", None, ["math.h"], None, ["m"], None),
-    ("HAVE_ERFC", None, ["math.h"], None, ["m"], None),
+    ("HAVE_ERF", "erf", None, ["math.h"], None, ["m"], None),
+    ("HAVE_ERFC", "erfc", None, ["math.h"], None, ["m"], None),
 ]
 
 # Sizeof:
@@ -236,17 +240,16 @@ def header_entry(macro, hdrs):
     )
 
 
-def func_entry(macro, win_headers, posix_headers, win_libs, unix_libs, extra_cmd=None):
-    sym = macro[len("HAVE_"):].lower()
+def func_entry(macro, func, win_headers, posix_headers, win_libs, unix_libs, extra_cmd=None):
     out = (
         f"[[analyse.bool]]\n"
         f'macro = "{macro}"\n'
-        f'comment = "Define to 1 if you have the `{sym}\' function."\n'
+        f'comment = "Define to 1 if you have the `{func}\' function."\n'
     )
     out += _probe_fields(win_headers, posix_headers, win_libs, unix_libs, extra_cmd)
     code = (
         "int main(void) {\n"
-        f"    volatile void *p = (void *)&{sym};\n"
+        f"    volatile void *p = (void *)&{func};\n"
         "    (void)p;\n"
         "    return 0;\n"
         "}\n"
